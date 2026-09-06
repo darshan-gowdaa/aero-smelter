@@ -467,7 +467,10 @@ export function AiCopilotTab() {
               <div>
                 <div className="flex items-center justify-between text-[10px] font-bold text-[var(--color-on-surface-variant)] mb-1">
                   <span>OUTLIERS</span>
-                  <span className="text-emerald-600 dark:text-emerald-400 font-bold">● Active</span>
+                  <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-bold">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                    Active
+                  </span>
                 </div>
                 <div className="font-extrabold text-xs text-[var(--color-on-surface)]">
                   Isolation Forest
@@ -489,7 +492,10 @@ export function AiCopilotTab() {
               <div>
                 <div className="flex items-center justify-between text-[10px] font-bold text-[var(--color-on-surface-variant)] mb-1">
                   <span>CANCELLATION</span>
-                  <span className="text-emerald-600 dark:text-emerald-400 font-bold">● Active</span>
+                  <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-bold">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                    Active
+                  </span>
                 </div>
                 <div className="font-extrabold text-xs text-[var(--color-on-surface)]">
                   Random Forest
@@ -511,7 +517,10 @@ export function AiCopilotTab() {
               <div>
                 <div className="flex items-center justify-between text-[10px] font-bold text-[var(--color-on-surface-variant)] mb-1">
                   <span>FARE ESTIMATE</span>
-                  <span className="text-emerald-600 dark:text-emerald-400 font-bold">● Active</span>
+                  <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-bold">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                    Active
+                  </span>
                 </div>
                 <div className="font-extrabold text-xs text-[var(--color-on-surface)]">
                   Gradient Boosting

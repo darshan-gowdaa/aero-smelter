@@ -17,7 +17,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "ASG Airlines | Executive Operations Suite",
+  title: "Aero Smelter | Executive Operations Suite",
   description:
     "Executive Flight Operations Analytics Suite - Medallion Architecture with MD3 Expressive Claymorphism & Star Schema Gold Layer",
 };

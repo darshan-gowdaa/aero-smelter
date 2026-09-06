@@ -1,6 +1,6 @@
 import React from "react";
 import { Badge } from "@/components/atoms/Badge";
-import { RiAlertLine, RiMoonLine } from "@remixicon/react";
+import { RiAlertLine, RiMoonLine, RiArrowRightLine } from "@remixicon/react";
 
 export function OvernightAuditCard() {
   return (
@@ -84,12 +84,12 @@ export function OvernightAuditCard() {
             <span className="block font-bold">Corrupt Duration</span>
             <span className="font-mono text-[11px]">-1,370 min</span>
           </div>
-          <span className="text-[var(--color-primary)] font-bold text-sm">➔</span>
+          <RiArrowRightLine className="w-4 h-4 text-[var(--color-primary)] shrink-0" />
           <div className="flex-1 bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 p-2 rounded-[var(--radius-sm)] border border-amber-300 dark:border-amber-900 text-center">
             <span className="block font-bold">+24h Adjustment</span>
             <span className="font-mono text-[11px]">+1,440 min</span>
           </div>
-          <span className="text-[var(--color-primary)] font-bold text-sm">➔</span>
+          <RiArrowRightLine className="w-4 h-4 text-[var(--color-primary)] shrink-0" />
           <div className="flex-1 bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 p-2 rounded-[var(--radius-sm)] border border-emerald-300 dark:border-emerald-900 text-center">
             <span className="block font-bold">Repaired Flight Time</span>
             <span className="font-mono text-[11px]">+300 min (5.0h)</span>

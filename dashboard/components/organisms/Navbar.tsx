@@ -8,6 +8,7 @@ import {
   RiDatabase2Line,
   RiTimeLine,
   RiCloudLine,
+  RiFlightTakeoffLine,
 } from "@remixicon/react";
 
 export function Navbar() {
@@ -34,12 +35,12 @@ export function Navbar() {
         {/* Brand identity */}
         <div className="flex items-center gap-2.5 group shrink-0">
           <div className="w-8 h-8 rounded-[var(--radius-sm)] bg-[var(--color-primary)] flex items-center justify-center text-[var(--color-on-primary)] font-bold text-lg leading-none select-none group-hover:scale-105 transition-transform shadow-sm">
-            ✈
+            <RiFlightTakeoffLine className="w-4 h-4 text-[var(--color-on-primary)]" />
           </div>
           <div>
             <div className="flex items-center gap-2">
               <span className="font-bold text-[var(--color-on-surface)] text-lg tracking-tight">
-                ASG<span className="text-[var(--color-primary)]">Airlines</span>
+                Aero <span className="text-[var(--color-primary)]">Smelter</span>
               </span>
               <span className="text-[10px] px-2 py-0.5 rounded-[var(--radius-full)] bg-[var(--color-primary-container)] text-[var(--color-on-primary-container)] font-mono font-bold tracking-wider uppercase">
                 Ops Lakehouse

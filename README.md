@@ -382,7 +382,7 @@ graph LR
 
 AeroSmelter provides two production consumption interfaces: an official 4-chapter Power BI Report and a Next.js 15 claymorphism web application live on Vercel:
 
-> 🌐 **Live Web App**: [https://aero-smelter.vercel.app](https://aero-smelter.vercel.app)
+> **Live Web App**: [https://aero-smelter.vercel.app](https://aero-smelter.vercel.app)
 
 ### Chapter 1: Duration Analysis
 *Fleet duration distributions, airline min/avg/max duration profiles, hourly schedule traffic, and full route duration catalog.*

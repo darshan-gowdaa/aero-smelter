@@ -18,6 +18,7 @@ import {
   RiShieldCheckLine,
   RiSparkling2Fill,
   RiRefreshLine,
+  RiFlightTakeoffLine,
 } from "@remixicon/react";
 
 type TabId = "duration" | "copilot" | "routes" | "airlines" | "anomalies" | "quality";
@@ -73,7 +74,8 @@ export function DashboardShell() {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h1 className="text-3xl sm:text-4xl font-black text-[var(--color-on-surface)] flex items-center gap-3 tracking-tight">
-              ✈️ Flight Operations Analytics
+              <RiFlightTakeoffLine className="w-8 h-8 text-[var(--color-primary)] shrink-0" />
+              <span>Flight Operations Analytics</span>
             </h1>
             <p className="text-sm sm:text-base text-[var(--color-on-surface-variant)] mt-1.5 max-w-3xl">
               Medallion Star Schema Lakehouse with Azure Databricks, Synapse Serverless SQL views, and Grounded Gemini Copilot.
