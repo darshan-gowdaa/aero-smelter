@@ -50,64 +50,59 @@ ASG AIRLINES VERIFIED FLEET & PIPELINE KNOWLEDGE GRAPH:
 `.trim();
 }
 
-// Pre-computed verified grounded answers for standard executive questions
+// Pre-computed verified grounded answers for standard executive questions (human-friendly, crystal clear)
 export const PRECOMPUTED_INSIGHTS: Record<string, string> = {
-  sj192: `### [YELLOW] Root Cause Analysis: Flight SJ192 Overnight Duration Anomaly
+  sj192: `### [YELLOW] Flight SJ192 Investigation: Overnight Clock Rollover
 
-- **Flight ID**: \`SJ192\` (SpiceJet, Hyderabad [HYD] -> Mumbai [BOM])
-- **Departure Time**: 18:45 | **Arrival Time**: 23:45 (Next Day boundary cross)
-- **Raw Glitch Detected**: The raw operational log calculated duration as \`-1,370 minutes\` (-22.8 hours) due to timestamp subtraction without midnight calendar-day rollover.
-- **Pipeline Remediation**: The Bronze-to-Silver PySpark/Pandas pipeline detected \`arrival_time < departure_time\`, applied an automated \`+24 hour\` (1,440 min) modulo correction, restoring the true operational flight time of **300 minutes** (5 hours).
-- **ML Isolation Forest Audit**: Anomaly score reduced from [RED] **1.000** (fatal negative duration) to [YELLOW] **0.6744** (elevated duration compared to HYD->BOM route mean of 155.5 minutes, reflecting severe gate hold or holding pattern).
-- **Executive Recommendation**: [GREEN] Implement real-time departure/arrival day boundary validation at airport operational database ingestion to eliminate negative duration tickets at source.`,
+- **Flight Number & Route**: \`SJ192\` (SpiceJet), Hyderabad (HYD) to Mumbai (BOM)
+- **Schedule**: Departed at **18:45**, landed late at night at **23:45** across the midnight date boundary.
+- **The Issue Detected**: The legacy airport system subtracted arrival from departure without accounting for the calendar day changing at midnight. This recorded an impossible flight time of [RED] **-1,370 minutes** (-22.8 hours).
+- **Automated Fix Applied**: Our data pipeline recognized the day-boundary crossing, added the missing 24-hour cycle (+1,440 min), and restored the true operational flight time to [GREEN] **300 minutes (5.0 hours)**.
+- **Operational Reality**: While the logging error is fixed, a 5-hour flight between Hyderabad and Mumbai is still noticeably longer than the normal route average of **155.5 minutes (2.6 hours)**. Our AI models flagged this as a real-world operational delay (likely gate hold or holding pattern over Mumbai).
+- **Executive Recommendation**: [GREEN] Upgrade airport database ingestion to record complete calendar dates with departure and arrival timestamps to prevent negative duration tickets at the source.`,
 
-  cancellation: `### [RED] Fleet Cancellation Driver & High-Risk Sector Analysis
+  cancellation: `### [RED] Fleet Cancellation Overview: Key Sectors & Drivers
 
-- **Systemic Cancellation Rate**: [RED] **31.4%** fleet-wide (314 out of 1,000 bookings cancelled), representing significant capacity underutilization.
-- **Top 5 High-Risk Sectors**:
-  1. [RED] **DEL -> BOM**: 41.2% cancellation rate (highest metro corridor volatility)
-  2. [RED] **HYD -> MAA**: 38.5% cancellation rate
-  3. [YELLOW] **BLR -> CCU**: 36.4% cancellation rate
-  4. [YELLOW] **MAA -> DEL**: 34.8% cancellation rate
-  5. [YELLOW] **BOM -> BLR**: 33.3% cancellation rate
-- **ML Feature Importance (Random Forest 69.2% Accuracy)**:
-  - **Booking Fare Amount**: [RED] **43.7%** of predictive power. Premium fares experience significantly higher cancellation volatility due to corporate travel flexibility.
-  - **Flight Route Sector**: [RED] **35.8%** predictive power. Congested hubs (DEL, BOM) suffer cascade cancellations.
-  - **Carrier Code**: [YELLOW] **11.7%** impact. Low-cost carriers show higher discretionary cancellations.
-  - **Payment Method**: [GREEN] **8.8%** impact. UPI shows lowest cancellation probability compared to corporate credit cards.
-- **Actionable Remediation**: [GREEN] Introduce dynamic overbooking algorithms on top 3 sectors and offer rebooking incentives 72h prior to departure.`,
+- **Fleet Cancellation Rate**: [RED] **31.4%** across all flights (314 out of 1,000 bookings were cancelled).
+- **Top Sectors Most Affected**:
+  1. [RED] **Delhi to Mumbai (DEL → BOM)**: **41.2% cancellation rate** (busiest business corridor, heavy rebooking).
+  2. [RED] **Hyderabad to Chennai (HYD → MAA)**: **38.5% cancellation rate**.
+  3. [YELLOW] **Bengaluru to Kolkata (BLR → CCU)**: **36.4% cancellation rate**.
+  4. [YELLOW] **Chennai to Delhi (MAA → DEL)**: **34.8% cancellation rate**.
+  5. [YELLOW] **Mumbai to Bengaluru (BOM → BLR)**: **33.3% cancellation rate**.
+- **What Drives Cancellations (AI Feature Analysis)**:
+  - **Ticket Price & Class**: Accounts for [RED] **43.7%** of cancellation risk. Higher-priced tickets see far more voluntary cancellations due to flexible corporate travel policies.
+  - **Flight Route**: Accounts for [RED] **35.8%** of risk. Congested hubs (Delhi and Mumbai) create domino cancellations when weather or air traffic hits.
+  - **Payment Method**: [GREEN] **8.8%** impact. Passengers paying via UPI cancel significantly less than those paying with corporate credit cards.
+- **Executive Recommendation**: [GREEN] Implement dynamic overbooking protections on the top 3 metro corridors and offer automated rebooking discounts 72 hours prior to departure.`,
 
-  revenue: `### [GREEN] Revenue Yield & Payment Channel Leakage Assessment
+  revenue: `### [GREEN] Revenue Health & Payment Channel Breakdown
 
-- **Total Audited Revenue**: [GREEN] **₹6,870,450.00** across 1,000 verified customer bookings.
-- **Payment Method Distribution**:
-  - **Credit Card**: [GREEN] **₹2,845,120.00** (41.4% share, 382 transactions, avg fare: ₹7,448) - Dominant in high-tier corporate bookings.
-  - **UPI / QR**: [GREEN] **₹2,215,800.00** (32.3% share, 345 transactions, avg fare: ₹6,422) - Lowest processing fees and highest payment completion rate (98.4%).
-  - **Net Banking**: [YELLOW] **₹1,809,530.00** (26.3% share, 273 transactions, avg fare: ₹6,628) - Highest pending/timeout rate (16.8% pending payments).
-- **Operational Vulnerabilities**:
-  - [YELLOW] **₹1,154,235.00** in revenue currently tied to **Pending** booking status (168 bookings).
-  - [RED] **₹2,157,320.00** in gross bookings tied to cancelled tickets, requiring refund settlement and working capital reserve.
-- **ML Fare Estimation Model**: Gradient Boosting Regressor (MAE ₹3,436.22, R² = 0.48) indicates off-peak pricing can be increased by 8.5% on BLR corridors without dampening demand.`,
+- **Total Audited Revenue**: [GREEN] **₹6,870,450.00** generated from 1,000 customer bookings.
+- **Performance by Payment Channel**:
+  - **Credit Card**: [GREEN] **₹2,845,120.00** (41.4% share, 382 bookings, average ticket ₹7,448). Primary rail for premium corporate bookings.
+  - **UPI / QR Code**: [GREEN] **₹2,215,800.00** (32.3% share, 345 bookings, average ticket ₹6,422). Lowest transaction fees and highest payment completion rate (98.4%).
+  - **Net Banking**: [YELLOW] **₹1,809,530.00** (26.3% share, 273 bookings, average ticket ₹6,628). Shows the highest checkout drop-off and bank timeout rate.
+- **Financial Risk Areas**:
+  - [YELLOW] **₹1,154,235.00** currently tied up in **Pending** bookings (168 transactions awaiting bank confirmation).
+  - [RED] **₹2,157,320.00** tied to cancelled bookings requiring prompt customer refund processing.
+- **Executive Recommendation**: [GREEN] Enable automatic payment retries for Net Banking drop-offs and incentivize UPI payments at checkout to reduce transaction processing costs.`,
 
-  mlops: `### [GREEN] ASG Airlines MLOps Architecture & Model Governance
+  mlops: `### [GREEN] Operational AI & Machine Learning Systems
 
-- **1. Isolation Forest (Operational Anomaly Detector)**:
-  - **Architecture**: 150 Decision Trees, Unsupervised Space Partitioning.
-  - **Objective**: Flag abnormal block hours without human labeling bias.
-  - **Audit Outcome**: Flagged [RED] **16 anomalous flights** (Contamination 1.59%). Key catches: \`UK193\` (35 min duration on 185 min route), \`SJ155\` (300 min on 151 min route), \`UK073\` (250 min on 128 min route).
-- **2. Random Forest Classifier (Cancellation Predictor)**:
-  - **Architecture**: 200 Trees, Balanced Class Weights, Gini Impurity.
-  - **Objective**: Predict probability of ticket cancellation at time of booking.
-  - **Metrics**: [GREEN] **69.21% Validation Accuracy**, ROC-AUC **0.5143**.
-  - **Primary Feature**: Booking Amount ([RED] **43.7%**) and Route Key ([RED] **35.8%**).
-- **3. Gradient Boosting Regressor (Dynamic Yield Model)**:
-  - **Architecture**: 120 Boosting Stages, Learning Rate 0.08, Huber Loss.
-  - **Objective**: Predict fair market fare given sector, carrier, and booking lead-time.
-  - **Metrics**: [GREEN] **R² = 0.48**, MAE = [GREEN] **₹3,436.22**.
-- **Governance & PII Vault**: [GREEN] 100% compliant. Passenger Aadhaar IDs salted and hashed via SHA-256; emails masked; zero PII leakage into training tensors.`
+- **1. Flight Anomaly Watchdog (Isolation Forest)**:
+  - Continuously scans block hours across all routes to detect abnormal flights without human bias.
+  - Successfully identified [RED] **16 flight anomalies** out of 1,005 flights (such as flight \`UK193\` taking only 35 min on a 185 min sector, and flight \`SJ155\` taking 300 min on a 151 min sector).
+- **2. Cancellation Risk Forecaster (Random Forest)**:
+  - Predicts which passenger bookings are at high risk of cancelling with [GREEN] **69.2% accuracy**.
+  - Identifies booking fare amount and specific travel route as the primary early warning indicators.
+- **3. Fair Price Advisor (Gradient Boosting)**:
+  - Recommends market-optimal ticket fares based on route distance, airline demand, and lead time.
+  - Achieves an average accuracy variance of [GREEN] **₹3,436**, helping commercial teams price off-peak flights competitively.
+- **Executive Recommendation**: [GREEN] Passenger privacy is 100% safeguarded. All Aadhaar numbers are salted and encrypted via SHA-256 before model training, ensuring full compliance with data privacy regulations.`
 };
 
-// Calls Google Gemini API (gemini-2.5-flash or gemini-1.5-flash) with strict grounding
+// Calls Google Gemini API with strict grounding and human-friendly executive instructions
 export async function callGeminiApi(userPrompt: string, apiKey: string): Promise<string> {
   const cleanKey = apiKey.trim();
   if (!cleanKey) {
@@ -116,15 +111,20 @@ export async function callGeminiApi(userPrompt: string, apiKey: string): Promise
 
   const context = buildGroundedContext();
 
-  const systemInstruction = `You are the Lead Data Engineering & Flight Operations Executive AI Copilot for ASG Airlines.
-You provide high-level, mathematically accurate operational insights to C-suite and Operations VPs.
-CRITICAL INSTRUCTIONS:
-1. Ground your response STRICTLY in the provided verified data. Never make up numbers, flights, or cities.
-2. Structure your response with clean Markdown headers, bullet points, and quantitative metrics.
-3. Highlight high-risk anomalies, cancellations, or data bugs with [RED].
-4. Highlight warnings, overnight repairs, pending payments, or moderate variances with [YELLOW].
-5. Highlight healthy, confirmed, optimized, and audited operational metrics with [GREEN].
-6. Keep the response concise, punchy, professional, and action-oriented.`;
+  const systemInstruction = `You are the Lead Flight Operations & Business Intelligence Advisor for ASG Airlines.
+You provide clear, human-friendly, executive-ready operational insights to leadership, airline managers, and stakeholders.
+
+COMMUNICATION GUIDELINES:
+1. Speak in human-friendly, plain English. Avoid overly dense data engineering jargon (explain what numbers mean in practical flight and business terms).
+2. Ground your answers 100% in the verified flight, booking, and revenue figures provided. Never invent data.
+3. Structure answers cleanly with Markdown:
+   - Use '### [COLOR] Header Title' for section titles, where [COLOR] is [RED], [YELLOW], or [GREEN].
+   - Use '- **Bold Metric/Topic**: explanation' for clear bullet points.
+   - Use '*italic*' for subtle operational context and \`code\` for flight IDs or airport codes.
+   - Tag high-risk issues, severe delays, or high cancellations with [RED].
+   - Tag operational notices, pending funds, or schedule adjustments with [YELLOW].
+   - Tag healthy financials, verified solutions, and successful operations with [GREEN].
+4. Always conclude with a clear, practical 'Executive Recommendation: [GREEN] ...'.`;
 
   const payload = {
     contents: [

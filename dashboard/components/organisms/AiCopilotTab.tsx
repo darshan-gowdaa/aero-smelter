@@ -5,6 +5,7 @@ import { Card, CardHeader, CardTitle, CardDescription } from "@/components/atoms
 import { asgData } from "@/lib/data";
 import { useTheme } from "@/lib/theme";
 import { callGeminiApi, PRECOMPUTED_INSIGHTS } from "@/lib/gemini";
+import { FormattedAiInsight } from "@/components/molecules/FormattedAiInsight";
 import {
   ResponsiveContainer,
   BarChart,
@@ -193,79 +194,7 @@ export function AiCopilotTab() {
     },
   };
 
-  // Helper to format response text with colored badges
-  const renderFormattedResponse = (text: string) => {
-    const lines = text.split("\n");
-    return (
-      <div className="space-y-3 text-sm leading-relaxed text-[var(--color-on-surface)]">
-        {lines.map((line, idx) => {
-          if (line.startsWith("### ")) {
-            return (
-              <h4 key={idx} className="text-base font-bold text-[var(--color-on-surface)] pt-2 flex items-center gap-2">
-                {line.includes("[RED]") && (
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-[var(--radius-full)] text-xs font-bold bg-[var(--color-error-container)] text-[var(--color-on-error-container)] border border-[var(--color-error)]/20 shadow-2xs">
-                    High Risk
-                  </span>
-                )}
-                {line.includes("[YELLOW]") && (
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-[var(--radius-full)] text-xs font-bold bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800 shadow-2xs">
-                    Attention Required
-                  </span>
-                )}
-                {line.includes("[GREEN]") && (
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-[var(--radius-full)] text-xs font-bold bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 shadow-2xs">
-                    Verified Healthy
-                  </span>
-                )}
-                <span>{line.replace(/###\s*(\[(RED|YELLOW|GREEN)\])?\s*/g, "")}</span>
-              </h4>
-            );
-          }
 
-          if (line.startsWith("- ")) {
-            const content = line.substring(2);
-            return (
-              <div key={idx} className="flex items-start gap-2.5 pl-2 transition-colors duration-150 hover:bg-[var(--color-surface-variant)]/30 p-1.5 rounded-[var(--radius-sm)]">
-                <span className="text-[var(--color-primary)] mt-0.5 font-bold">›</span>
-                <span className="flex-1">
-                  {content.split(/(\[(?:RED|YELLOW|GREEN)\]\s*\*\*?[^*]+\*\*?|\[(?:RED|YELLOW|GREEN)\])/g).map((part, pIdx) => {
-                    if (part.includes("[RED]")) {
-                      return (
-                        <span key={pIdx} className="font-bold font-mono text-[var(--color-error)] bg-[var(--color-error-container)] px-2 py-0.5 rounded-[var(--radius-xs)] border border-[var(--color-error)]/20 mx-0.5 shadow-2xs">
-                          {part.replace(/\[RED\]\s*/, "")}
-                        </span>
-                      );
-                    }
-                    if (part.includes("[YELLOW]")) {
-                      return (
-                        <span key={pIdx} className="font-bold font-mono text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-950/60 px-2 py-0.5 rounded-[var(--radius-xs)] border border-amber-300 mx-0.5 shadow-2xs">
-                          {part.replace(/\[YELLOW\]\s*/, "")}
-                        </span>
-                      );
-                    }
-                    if (part.includes("[GREEN]")) {
-                      return (
-                        <span key={pIdx} className="font-bold font-mono text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950/60 px-2 py-0.5 rounded-[var(--radius-xs)] border border-emerald-300 mx-0.5 shadow-2xs">
-                          {part.replace(/\[GREEN\]\s*/, "")}
-                        </span>
-                      );
-                    }
-                    return <span key={pIdx}>{part}</span>;
-                  })}
-                </span>
-              </div>
-            );
-          }
-
-          if (!line.trim()) {
-            return <div key={idx} className="h-1.5" />;
-          }
-
-          return <p key={idx} className="text-[var(--color-on-surface-variant)]">{line}</p>;
-        })}
-      </div>
-    );
-  };
 
   return (
     <div className="space-y-8 animate-fade-in-up">
@@ -631,7 +560,7 @@ export function AiCopilotTab() {
                   </p>
                 </div>
               ) : (
-                renderFormattedResponse(response)
+                <FormattedAiInsight content={response} />
               )}
             </div>
           </Card>

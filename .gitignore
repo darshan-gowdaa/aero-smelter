@@ -9,3 +9,4 @@ node_modules/
 dashboard/.next/
 dashboard/node_modules/
 ~$*
+scripts/
