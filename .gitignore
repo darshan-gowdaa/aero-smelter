@@ -74,3 +74,7 @@ htmlcov/
 .env.*
 !.env.example
 secrets/
+
+# Agent Skills & Workspace Cache
+.agents/
+
