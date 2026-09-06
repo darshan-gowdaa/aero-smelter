@@ -1,0 +1,314 @@
+{
+  "id": 0,
+  "resourcePackages": [],
+  "sections": [
+    {
+      "displayName": "1. Duration Analysis",
+      "ordinal": 0,
+      "visualContainers": [
+        {
+          "x": 10,
+          "y": 10,
+          "z": 0,
+          "width": 1260,
+          "height": 60,
+          "config": "{\"title\": \"ASG Airlines - Executive Duration Analysis & Flight Profile Suite\"}"
+        },
+        {
+          "x": 10,
+          "y": 80,
+          "z": 1,
+          "width": 620,
+          "height": 330,
+          "config": "{\"title\": \"Airline Duration Profile (Min / Avg / Max)\", \"type\": \"barChart\"}"
+        },
+        {
+          "x": 645,
+          "y": 80,
+          "z": 2,
+          "width": 625,
+          "height": 330,
+          "config": "{\"title\": \"Top 10 Routes by Average Flight Duration\", \"type\": \"barChart\"}"
+        },
+        {
+          "x": 10,
+          "y": 425,
+          "z": 3,
+          "width": 800,
+          "height": 270,
+          "config": "{\"title\": \"24-Hour Departure Traffic Intensity (Hourly Flights)\", \"type\": \"columnChart\"}"
+        },
+        {
+          "x": 825,
+          "y": 425,
+          "z": 4,
+          "width": 445,
+          "height": 270,
+          "config": "{\"title\": \"Flight Duration Frequency (Histogram Distribution)\", \"type\": \"columnChart\"}"
+        }
+      ]
+    },
+    {
+      "displayName": "2. AI Copilot & MLOps Suite",
+      "ordinal": 1,
+      "visualContainers": [
+        {
+          "x": 10,
+          "y": 10,
+          "z": 0,
+          "width": 1260,
+          "height": 60,
+          "config": "{\"title\": \"AI Copilot Grounded Terminal & Production Scikit-Learn Model Governance\"}"
+        },
+        {
+          "x": 10,
+          "y": 80,
+          "z": 1,
+          "width": 300,
+          "height": 100,
+          "config": "{\"title\": \"Audited Revenue [GREEN]\", \"type\": \"card\"}"
+        },
+        {
+          "x": 325,
+          "y": 80,
+          "z": 2,
+          "width": 300,
+          "height": 100,
+          "config": "{\"title\": \"Overnight SJ192 [YELLOW]\", \"type\": \"card\"}"
+        },
+        {
+          "x": 640,
+          "y": 80,
+          "z": 3,
+          "width": 300,
+          "height": 100,
+          "config": "{\"title\": \"Cancellation Rate [RED]\", \"type\": \"card\"}"
+        },
+        {
+          "x": 955,
+          "y": 80,
+          "z": 4,
+          "width": 315,
+          "height": 100,
+          "config": "{\"title\": \"Isolation Forest Outliers [RED]\", \"type\": \"card\"}"
+        },
+        {
+          "x": 10,
+          "y": 195,
+          "z": 5,
+          "width": 620,
+          "height": 260,
+          "config": "{\"title\": \"Random Forest Cancellation Feature Drivers\", \"type\": \"barChart\"}"
+        },
+        {
+          "x": 645,
+          "y": 195,
+          "z": 6,
+          "width": 625,
+          "height": 260,
+          "config": "{\"title\": \"3 MLOps Model Performance & ROC-AUC Metrics\", \"type\": \"table\"}"
+        },
+        {
+          "x": 10,
+          "y": 470,
+          "z": 7,
+          "width": 1260,
+          "height": 225,
+          "config": "{\"title\": \"ML Scored Flight Anomaly Ledger (Isolation Forest Scores 0.00-1.00)\", \"type\": \"table\"}"
+        }
+      ]
+    },
+    {
+      "displayName": "3. Route Performance",
+      "ordinal": 2,
+      "visualContainers": [
+        {
+          "x": 10,
+          "y": 10,
+          "z": 0,
+          "width": 1260,
+          "height": 60,
+          "config": "{\"title\": \"Commercial Route Performance, Revenue Yield & Demographic Segments\"}"
+        },
+        {
+          "x": 10,
+          "y": 80,
+          "z": 1,
+          "width": 700,
+          "height": 330,
+          "config": "{\"title\": \"Top 10 Routes by Total Commercial Revenue (INR)\", \"type\": \"barChart\"}"
+        },
+        {
+          "x": 725,
+          "y": 80,
+          "z": 2,
+          "width": 545,
+          "height": 330,
+          "config": "{\"title\": \"Route Traffic Share Distribution\", \"type\": \"pieChart\"}"
+        },
+        {
+          "x": 10,
+          "y": 425,
+          "z": 3,
+          "width": 700,
+          "height": 270,
+          "config": "{\"title\": \"Booking Status Breakdown by Route (Confirmed / Cancelled / Pending)\", \"type\": \"stackedBarChart\"}"
+        },
+        {
+          "x": 725,
+          "y": 425,
+          "z": 4,
+          "width": 545,
+          "height": 270,
+          "config": "{\"title\": \"Passenger Age Band Demographics by Top Route\", \"type\": \"stackedColumnChart\"}"
+        }
+      ]
+    },
+    {
+      "displayName": "4. Airline Trends",
+      "ordinal": 3,
+      "visualContainers": [
+        {
+          "x": 10,
+          "y": 10,
+          "z": 0,
+          "width": 1260,
+          "height": 60,
+          "config": "{\"title\": \"Carrier Operational Performance, Market Share & Yield Efficiency\"}"
+        },
+        {
+          "x": 10,
+          "y": 80,
+          "z": 1,
+          "width": 300,
+          "height": 150,
+          "config": "{\"title\": \"IndiGo (6E) Fleet Scorecard\", \"type\": \"card\"}"
+        },
+        {
+          "x": 325,
+          "y": 80,
+          "z": 2,
+          "width": 300,
+          "height": 150,
+          "config": "{\"title\": \"Air India (AI) Fleet Scorecard\", \"type\": \"card\"}"
+        },
+        {
+          "x": 640,
+          "y": 80,
+          "z": 3,
+          "width": 300,
+          "height": 150,
+          "config": "{\"title\": \"SpiceJet (SJ) Fleet Scorecard\", \"type\": \"card\"}"
+        },
+        {
+          "x": 955,
+          "y": 80,
+          "z": 4,
+          "width": 315,
+          "height": 150,
+          "config": "{\"title\": \"Vistara (UK) Fleet Scorecard\", \"type\": \"card\"}"
+        },
+        {
+          "x": 10,
+          "y": 245,
+          "z": 5,
+          "width": 450,
+          "height": 450,
+          "config": "{\"title\": \"Carrier Market Share (Flight Departures)\", \"type\": \"pieChart\"}"
+        },
+        {
+          "x": 475,
+          "y": 245,
+          "z": 6,
+          "width": 795,
+          "height": 450,
+          "config": "{\"title\": \"Revenue & Average Fare by Airline (Composed Bar & Line)\", \"type\": \"lineClusteredColumnComboChart\"}"
+        }
+      ]
+    },
+    {
+      "displayName": "5. Delay & Anomaly Insights",
+      "ordinal": 4,
+      "visualContainers": [
+        {
+          "x": 10,
+          "y": 10,
+          "z": 0,
+          "width": 1260,
+          "height": 60,
+          "config": "{\"title\": \"Statistical Delay Envelope & Flight SJ192 Overnight Remediation\"}"
+        },
+        {
+          "x": 10,
+          "y": 80,
+          "z": 1,
+          "width": 620,
+          "height": 330,
+          "config": "{\"title\": \"Actual Duration vs Route Mean Duration (Outlier Scatter Plot)\", \"type\": \"scatterChart\"}"
+        },
+        {
+          "x": 645,
+          "y": 80,
+          "z": 2,
+          "width": 625,
+          "height": 330,
+          "config": "{\"title\": \"Route Duration Standard Deviation Variability Ranking\", \"type\": \"barChart\"}"
+        },
+        {
+          "x": 10,
+          "y": 425,
+          "z": 3,
+          "width": 1260,
+          "height": 270,
+          "config": "{\"title\": \"Case Study: Flight SJ192 (-1,370m to +300m) & Duration Outlier Table\", \"type\": \"table\"}"
+        }
+      ]
+    },
+    {
+      "displayName": "6. Data Quality, PII & Azure Cloud",
+      "ordinal": 5,
+      "visualContainers": [
+        {
+          "x": 10,
+          "y": 10,
+          "z": 0,
+          "width": 1260,
+          "height": 60,
+          "config": "{\"title\": \"Enterprise Data Quality Contracts, PII Cryptographic Vault & Azure Lake\"}"
+        },
+        {
+          "x": 10,
+          "y": 80,
+          "z": 1,
+          "width": 410,
+          "height": 310,
+          "config": "{\"title\": \"Zero-Trust PII Masking Vault Status (SHA-256)\", \"type\": \"card\"}"
+        },
+        {
+          "x": 435,
+          "y": 80,
+          "z": 2,
+          "width": 410,
+          "height": 310,
+          "config": "{\"title\": \"Data Imputation Audit (Bookings Status & Payments)\", \"type\": \"card\"}"
+        },
+        {
+          "x": 860,
+          "y": 80,
+          "z": 3,
+          "width": 410,
+          "height": 310,
+          "config": "{\"title\": \"Azure Cloud Architecture (ADF / Databricks / Synapse / ADLS Gen2)\", \"type\": \"card\"}"
+        },
+        {
+          "x": 10,
+          "y": 405,
+          "z": 4,
+          "width": 1260,
+          "height": 290,
+          "config": "{\"title\": \"Data Cleansing & Reconciliation Audit Ledger\", \"type\": \"table\"}"
+        }
+      ]
+    }
+  ]
+}

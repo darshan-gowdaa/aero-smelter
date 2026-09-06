@@ -5,9 +5,11 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 OUTPUT_PBIT = BASE_DIR / "dashboard" / "ASG_Airlines_Report.pbit"
 OUTPUT_PBIX = BASE_DIR / "dashboard" / "ASG_Airlines_Report.pbix"
+EXPORT_DIR = BASE_DIR / "data" / "powerbi"
 
 def generate_powerbi_assets():
-    print(f"Generating Comprehensive 6-Page Power BI Suite matching web application...")
+    print("Generating Comprehensive 6-Page Power BI Suite matching web application...")
+    EXPORT_DIR.mkdir(parents=True, exist_ok=True)
 
     # 1. Content types XML
     content_types_xml = """<?xml version="1.0" encoding="utf-8"?>
@@ -17,10 +19,12 @@ def generate_powerbi_assets():
   <Override PartName="/Version" ContentType="" />
   <Override PartName="/DataModelSchema" ContentType="" />
   <Override PartName="/Report/Layout" ContentType="" />
+  <Override PartName="/Settings" ContentType="" />
+  <Override PartName="/Metadata" ContentType="" />
 </Types>"""
 
-    # 2. Version file
-    version_text = "1.30"
+    # 2. Version: Must be UTF-16LE 1.28 for Power BI Packager compatibility
+    version_text = "1.28"
 
     # 3. DataModelSchema JSON
     datamodel_schema = {
@@ -203,63 +207,39 @@ def generate_powerbi_assets():
                         {"name": "importance", "dataType": "double"},
                         {"name": "percentage", "dataType": "double"}
                     ]
-                },
-                {
-                    "name": "ml_model_metrics",
-                    "columns": [
-                        {"name": "model", "dataType": "string"},
-                        {"name": "task", "dataType": "string"},
-                        {"name": "primary_metric", "dataType": "string"},
-                        {"name": "score", "dataType": "double"},
-                        {"name": "status", "dataType": "string"}
-                    ]
                 }
             ],
             "relationships": [
                 {
-                    "name": "rel_flights_airline",
+                    "name": "flights_airline",
                     "fromTable": "fact_flights",
                     "fromColumn": "airline_key",
                     "toTable": "dim_airline",
                     "toColumn": "airline_key"
                 },
                 {
-                    "name": "rel_flights_route",
+                    "name": "flights_route",
                     "fromTable": "fact_flights",
                     "fromColumn": "route_key",
                     "toTable": "dim_route",
                     "toColumn": "route_key"
                 },
                 {
-                    "name": "rel_flights_date",
+                    "name": "flights_date",
                     "fromTable": "fact_flights",
                     "fromColumn": "departure_date_key",
                     "toTable": "dim_date",
                     "toColumn": "date_key"
                 },
                 {
-                    "name": "rel_bookings_passenger",
+                    "name": "bookings_passenger",
                     "fromTable": "fact_bookings",
                     "fromColumn": "passenger_key",
                     "toTable": "dim_passenger",
                     "toColumn": "passenger_key"
                 },
                 {
-                    "name": "rel_bookings_route",
-                    "fromTable": "fact_bookings",
-                    "fromColumn": "route_key",
-                    "toTable": "dim_route",
-                    "toColumn": "route_key"
-                },
-                {
-                    "name": "rel_bookings_airline",
-                    "fromTable": "fact_bookings",
-                    "fromColumn": "airline_key",
-                    "toTable": "dim_airline",
-                    "toColumn": "airline_key"
-                },
-                {
-                    "name": "rel_payments_booking",
+                    "name": "payments_booking",
                     "fromTable": "fact_payments",
                     "fromColumn": "booking_id",
                     "toTable": "fact_bookings",
@@ -269,54 +249,58 @@ def generate_powerbi_assets():
         }
     }
 
-    # 4. 6-Page Interactive Storytelling Visual Layout JSON (1-to-1 match with Web App)
+    # 4. Report Layout JSON (6 full pages matching web app)
     report_layout = {
         "id": 0,
-        "reportId": "a1b2c3d4-e5f6-7a8b-9c0d-e1f2a3b4c5d6",
+        "resourcePackages": [],
         "sections": [
             {
                 "displayName": "1. Duration Analysis",
                 "ordinal": 0,
                 "visualContainers": [
-                    {"x": 10, "y": 10, "z": 0, "width": 1260, "height": 60, "config": json.dumps({"title": "ASG Airlines Duration Analysis & Block Hours Performance"})},
-                    {"x": 10, "y": 80, "z": 1, "width": 240, "height": 110, "config": json.dumps({"title": "Total Flights", "measure": "[Total Flights]"})},
-                    {"x": 260, "y": 80, "z": 2, "width": 240, "height": 110, "config": json.dumps({"title": "Avg Duration", "measure": "[Fleet Average Duration]"})},
-                    {"x": 510, "y": 80, "z": 3, "width": 240, "height": 110, "config": json.dumps({"title": "Min Duration", "measure": "[Min Flight Duration]"})},
-                    {"x": 760, "y": 80, "z": 4, "width": 240, "height": 110, "config": json.dumps({"title": "Max Duration", "measure": "[Max Flight Duration]"})},
-                    {"x": 1010, "y": 80, "z": 5, "width": 260, "height": 110, "config": json.dumps({"title": "Overnight Flights", "measure": "[Overnight Flight Count]"})},
-                    {"x": 10, "y": 205, "z": 6, "width": 750, "height": 480, "config": json.dumps({"title": "Route Average Duration Ranking (Minutes)", "type": "horizontalBarChart"})},
-                    {"x": 775, "y": 205, "z": 7, "width": 495, "height": 480, "config": json.dumps({"title": "Average Duration by Carrier (IndiGo, Air India, SpiceJet, Vistara)", "type": "columnChart"})}
+                    {"x": 10, "y": 10, "z": 0, "width": 1260, "height": 60, "config": json.dumps({"title": "ASG Airlines - Executive Duration Analysis & Flight Profile Suite"})},
+                    {"x": 10, "y": 80, "z": 1, "width": 620, "height": 330, "config": json.dumps({"title": "Airline Duration Profile (Min / Avg / Max)", "type": "barChart"})},
+                    {"x": 645, "y": 80, "z": 2, "width": 625, "height": 330, "config": json.dumps({"title": "Top 10 Routes by Average Flight Duration", "type": "barChart"})},
+                    {"x": 10, "y": 425, "z": 3, "width": 800, "height": 270, "config": json.dumps({"title": "24-Hour Departure Traffic Intensity (Hourly Flights)", "type": "columnChart"})},
+                    {"x": 825, "y": 425, "z": 4, "width": 445, "height": 270, "config": json.dumps({"title": "Flight Duration Frequency (Histogram Distribution)", "type": "columnChart"})}
                 ]
             },
             {
-                "displayName": "2. AI & MLOps Predictive Copilot",
+                "displayName": "2. AI Copilot & MLOps Suite",
                 "ordinal": 1,
                 "visualContainers": [
-                    {"x": 10, "y": 10, "z": 0, "width": 1260, "height": 60, "config": json.dumps({"title": "Executive AI Copilot & MLOps Predictive Intelligence (Google Gemini & Scikit-Learn)"})},
-                    {"x": 10, "y": 80, "z": 1, "width": 620, "height": 310, "config": json.dumps({"title": "Random Forest: Top Cancellation Drivers (Gini Feature Weights)", "type": "horizontalBarChart"})},
-                    {"x": 645, "y": 80, "z": 2, "width": 625, "height": 310, "config": json.dumps({"title": "Isolation Forest Anomaly Score Distribution (1,005 Flights)", "type": "histogramChart"})},
-                    {"x": 10, "y": 405, "z": 3, "width": 1260, "height": 290, "config": json.dumps({"title": "Machine Learning Flight Anomaly & Risk Ledger (Searchable Scored Flights)", "type": "table"})},
-                    {"x": 10, "y": 705, "z": 4, "width": 1260, "height": 120, "config": json.dumps({"title": "Production Model Governance Scorecard", "type": "cardGroup"})}
+                    {"x": 10, "y": 10, "z": 0, "width": 1260, "height": 60, "config": json.dumps({"title": "AI Copilot Grounded Terminal & Production Scikit-Learn Model Governance"})},
+                    {"x": 10, "y": 80, "z": 1, "width": 300, "height": 100, "config": json.dumps({"title": "Audited Revenue [GREEN]", "type": "card"})},
+                    {"x": 325, "y": 80, "z": 2, "width": 300, "height": 100, "config": json.dumps({"title": "Overnight SJ192 [YELLOW]", "type": "card"})},
+                    {"x": 640, "y": 80, "z": 3, "width": 300, "height": 100, "config": json.dumps({"title": "Cancellation Rate [RED]", "type": "card"})},
+                    {"x": 955, "y": 80, "z": 4, "width": 315, "height": 100, "config": json.dumps({"title": "Isolation Forest Outliers [RED]", "type": "card"})},
+                    {"x": 10, "y": 195, "z": 5, "width": 620, "height": 260, "config": json.dumps({"title": "Random Forest Cancellation Feature Drivers", "type": "barChart"})},
+                    {"x": 645, "y": 195, "z": 6, "width": 625, "height": 260, "config": json.dumps({"title": "3 MLOps Model Performance & ROC-AUC Metrics", "type": "table"})},
+                    {"x": 10, "y": 470, "z": 7, "width": 1260, "height": 225, "config": json.dumps({"title": "ML Scored Flight Anomaly Ledger (Isolation Forest Scores 0.00-1.00)", "type": "table"})}
                 ]
             },
             {
                 "displayName": "3. Route Performance",
                 "ordinal": 2,
                 "visualContainers": [
-                    {"x": 10, "y": 10, "z": 0, "width": 1260, "height": 60, "config": json.dumps({"title": "Route Network Performance, Traffic Density & Commercial Revenue"})},
-                    {"x": 10, "y": 80, "z": 1, "width": 620, "height": 340, "config": json.dumps({"title": "Top 10 High-Volume Route Sectors (Flight Instances)", "type": "horizontalBarChart"})},
-                    {"x": 645, "y": 80, "z": 2, "width": 625, "height": 340, "config": json.dumps({"title": "Top 10 Route Cancellation Rate Watchlist (%)", "type": "horizontalBarChart"})},
-                    {"x": 10, "y": 435, "z": 3, "width": 1260, "height": 260, "config": json.dumps({"title": "Route Matrix: Revenue, Bookings & Cancellation KPIs", "type": "matrix"})}
+                    {"x": 10, "y": 10, "z": 0, "width": 1260, "height": 60, "config": json.dumps({"title": "Commercial Route Performance, Revenue Yield & Demographic Segments"})},
+                    {"x": 10, "y": 80, "z": 1, "width": 700, "height": 330, "config": json.dumps({"title": "Top 10 Routes by Total Commercial Revenue (INR)", "type": "barChart"})},
+                    {"x": 725, "y": 80, "z": 2, "width": 545, "height": 330, "config": json.dumps({"title": "Route Traffic Share Distribution", "type": "pieChart"})},
+                    {"x": 10, "y": 425, "z": 3, "width": 700, "height": 270, "config": json.dumps({"title": "Booking Status Breakdown by Route (Confirmed / Cancelled / Pending)", "type": "stackedBarChart"})},
+                    {"x": 725, "y": 425, "z": 4, "width": 545, "height": 270, "config": json.dumps({"title": "Passenger Age Band Demographics by Top Route", "type": "stackedColumnChart"})}
                 ]
             },
             {
-                "displayName": "4. Airline Trends & Fleet Share",
+                "displayName": "4. Airline Trends",
                 "ordinal": 3,
                 "visualContainers": [
-                    {"x": 10, "y": 10, "z": 0, "width": 1260, "height": 60, "config": json.dumps({"title": "Carrier Fleet Distribution, Market Share & Yield Efficiency"})},
-                    {"x": 10, "y": 80, "z": 1, "width": 620, "height": 340, "config": json.dumps({"title": "Carrier Market Share % (IndiGo 26.8%, AI 25.5%, SJ 24.6%, UK 23.2%)", "type": "donutChart"})},
-                    {"x": 645, "y": 80, "z": 2, "width": 625, "height": 340, "config": json.dumps({"title": "Revenue Yield per Carrier (INR)", "type": "columnChart"})},
-                    {"x": 10, "y": 435, "z": 3, "width": 1260, "height": 260, "config": json.dumps({"title": "Carrier Scorecard: Operational Punctuality & Volume", "type": "table"})}
+                    {"x": 10, "y": 10, "z": 0, "width": 1260, "height": 60, "config": json.dumps({"title": "Carrier Operational Performance, Market Share & Yield Efficiency"})},
+                    {"x": 10, "y": 80, "z": 1, "width": 300, "height": 150, "config": json.dumps({"title": "IndiGo (6E) Fleet Scorecard", "type": "card"})},
+                    {"x": 325, "y": 80, "z": 2, "width": 300, "height": 150, "config": json.dumps({"title": "Air India (AI) Fleet Scorecard", "type": "card"})},
+                    {"x": 640, "y": 80, "z": 3, "width": 300, "height": 150, "config": json.dumps({"title": "SpiceJet (SJ) Fleet Scorecard", "type": "card"})},
+                    {"x": 955, "y": 80, "z": 4, "width": 315, "height": 150, "config": json.dumps({"title": "Vistara (UK) Fleet Scorecard", "type": "card"})},
+                    {"x": 10, "y": 245, "z": 5, "width": 450, "height": 450, "config": json.dumps({"title": "Carrier Market Share (Flight Departures)", "type": "pieChart"})},
+                    {"x": 475, "y": 245, "z": 6, "width": 795, "height": 450, "config": json.dumps({"title": "Revenue & Average Fare by Airline (Composed Bar & Line)", "type": "lineClusteredColumnComboChart"})}
                 ]
             },
             {
@@ -343,15 +327,23 @@ def generate_powerbi_assets():
         ]
     }
 
-    # Pack into .pbit and .pbix
+    # Save JSON files for transparency / Tabular Editor / external tools
+    (EXPORT_DIR / "datamodel_schema.json").write_text(json.dumps(datamodel_schema, indent=2), encoding="utf-8")
+    (EXPORT_DIR / "report_layout.json").write_text(json.dumps(report_layout, indent=2), encoding="utf-8")
+
+    # Pack into .pbit and .pbix using proper UTF-16LE encoding required by Power BI Desktop
     for out_path in [OUTPUT_PBIT, OUTPUT_PBIX]:
         out_path.parent.mkdir(parents=True, exist_ok=True)
         with zipfile.ZipFile(out_path, "w", compression=zipfile.ZIP_DEFLATED) as z:
-            z.writestr("[Content_Types].xml", content_types_xml)
-            z.writestr("Version", version_text)
-            z.writestr("DataModelSchema", json.dumps(datamodel_schema, indent=2))
-            z.writestr("Report/Layout", json.dumps(report_layout, indent=2))
-        print(f"[OK] Generated {out_path.name} ({out_path.stat().st_size:,} bytes)")
+            # [Content_Types].xml is standard UTF-8 XML
+            z.writestr("[Content_Types].xml", content_types_xml.encode("utf-8"))
+            # Version, Settings, Metadata, DataModelSchema, and Report/Layout MUST be UTF-16LE
+            z.writestr("Version", version_text.encode("utf-16le"))
+            z.writestr("Settings", json.dumps({"version": "1.0"}).encode("utf-16le"))
+            z.writestr("Metadata", json.dumps({"version": "1.0"}).encode("utf-16le"))
+            z.writestr("DataModelSchema", json.dumps(datamodel_schema, indent=2).encode("utf-16le"))
+            z.writestr("Report/Layout", json.dumps(report_layout, indent=2).encode("utf-16le"))
+        print(f"[OK] Generated {out_path.name} ({out_path.stat().st_size:,} bytes) with UTF-16LE encoding")
 
 if __name__ == "__main__":
     generate_powerbi_assets()
