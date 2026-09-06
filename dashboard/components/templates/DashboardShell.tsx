@@ -33,12 +33,6 @@ export function DashboardShell() {
       icon: <RiTimerLine className="w-4 h-4" />,
     },
     {
-      id: "copilot" as TabId,
-      label: "AI Copilot & ML",
-      icon: <RiSparkling2Fill className="w-4 h-4 text-amber-500" />,
-      badgeCount: 3,
-    },
-    {
       id: "routes" as TabId,
       label: "Route Performance",
       icon: <RiRouteLine className="w-4 h-4" />,
@@ -52,7 +46,11 @@ export function DashboardShell() {
       id: "anomalies" as TabId,
       label: "Delay & Anomaly",
       icon: <RiAlertLine className="w-4 h-4 text-rose-500" />,
-      badgeCount: 1,
+    },
+    {
+      id: "copilot" as TabId,
+      label: "AI Copilot & ML",
+      icon: <RiSparkling2Fill className="w-4 h-4 text-amber-500" />,
     },
     {
       id: "quality" as TabId,
@@ -101,7 +99,6 @@ export function DashboardShell() {
               key={tab.id}
               active={activeTab === tab.id}
               icon={tab.icon}
-              badgeCount={tab.badgeCount}
               onClick={() => setActiveTab(tab.id)}
             >
               {tab.label}
