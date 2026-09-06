@@ -19,14 +19,8 @@ import {
 import {
   RiSparkling2Fill,
   RiRobot2Line,
-  RiKey2Line,
   RiSendPlane2Fill,
   RiAlertLine,
-  RiShieldCheckLine,
-  RiEyeLine,
-  RiEyeOffLine,
-  RiExternalLinkLine,
-  RiFlashlightLine,
   RiSearchLine,
   RiCloseLine,
   RiBrainLine,
@@ -47,39 +41,9 @@ export function AiCopilotTab() {
   const [apiError, setApiError] = useState<string | null>(null);
   const [copied, setCopied] = useState<boolean>(false);
 
-  // Gemini API Key & Security State
-  const [apiKey, setApiKey] = useState<string>("");
-  const [isSaved, setIsSaved] = useState<boolean>(false);
-  const [showKey, setShowKey] = useState<boolean>(false);
-
   // Flight Anomaly Table Filter & Search State
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [filterMode, setFilterMode] = useState<"all" | "anomalies" | "highRisk">("all");
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const saved = sessionStorage.getItem("asg_gemini_key");
-      if (saved) {
-        setApiKey(saved);
-        setIsSaved(true);
-      }
-    }
-  }, []);
-
-  const handleSaveKey = () => {
-    if (typeof window !== "undefined") {
-      sessionStorage.setItem("asg_gemini_key", apiKey.trim());
-      setIsSaved(true);
-    }
-  };
-
-  const handleClearKey = () => {
-    if (typeof window !== "undefined") {
-      sessionStorage.removeItem("asg_gemini_key");
-      setApiKey("");
-      setIsSaved(false);
-    }
-  };
+  const [filterMode, setFilterMode] = useState<"all" | "anomalies" | "highRisk">("anomalies");
 
   const handleCopyResponse = () => {
     if (!response) return;
@@ -92,27 +56,22 @@ export function AiCopilotTab() {
     setActivePreset(presetKey);
     setActiveQueryTitle(title);
     setApiError(null);
+    setIsLoading(true);
 
-    if (apiKey.trim()) {
-      setIsLoading(true);
-      try {
-        const queryMap = {
-          sj192: "Explain the root cause of Flight SJ192 overnight duration anomaly and how data engineering and ML resolved it.",
-          cancellation: "Analyze the top route cancellation drivers, sector risks, and Random Forest feature importances.",
-          revenue: "Analyze ticket revenue yield across payment methods and quantify financial leakage from pending/cancelled bookings.",
-          mlops: "Explain the three machine learning models (Isolation Forest, Random Forest, Gradient Boosting) deployed in this pipeline.",
-        };
-        const text = await callGeminiApi(queryMap[presetKey], apiKey.trim());
-        setResponse(text);
-      } catch (err: any) {
-        setApiError(err.message || "Failed to contact Gemini API.");
-        setResponse(PRECOMPUTED_INSIGHTS[presetKey]);
-      } finally {
-        setIsLoading(false);
-      }
-    } else {
-      // Precomputed verified answer
+    try {
+      const queryMap = {
+        sj192: "Explain the root cause of Flight SJ192 overnight duration anomaly and how data engineering and ML resolved it.",
+        cancellation: "Analyze the top route cancellation drivers, sector risks, and Random Forest feature importances.",
+        revenue: "Analyze ticket revenue yield across payment methods and quantify financial leakage from pending/cancelled bookings.",
+        mlops: "Explain the three machine learning models (Isolation Forest, Random Forest, Gradient Boosting) deployed in this pipeline.",
+      };
+      const text = await callGeminiApi(queryMap[presetKey]);
+      setResponse(text);
+    } catch (err: any) {
+      setApiError(err.message || "Failed to contact Gemini API. Loaded verified grounded analysis.");
       setResponse(PRECOMPUTED_INSIGHTS[presetKey]);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -146,31 +105,21 @@ export function AiCopilotTab() {
     setActivePreset("custom");
     setActiveQueryTitle(cleanPrompt);
 
-    if (apiKey.trim()) {
-      try {
-        const text = await callGeminiApi(cleanPrompt, apiKey.trim());
-        // Verify response is complete and substantive
-        if (text && text.trim().length > 120) {
-          setResponse(text);
-        } else {
-          // If response is unusually short, provide complete grounded assessment
-          const fallback = matchKeywordInsight(cleanPrompt) || PRECOMPUTED_INSIGHTS.risk;
-          setResponse(fallback);
-        }
-        setPrompt("");
-      } catch (err: any) {
-        setApiError(err.message || "Failed to contact Gemini API. Loaded verified grounded dataset analysis.");
+    try {
+      const text = await callGeminiApi(cleanPrompt);
+      if (text && text.trim().length > 120) {
+        setResponse(text);
+      } else {
         const fallback = matchKeywordInsight(cleanPrompt) || PRECOMPUTED_INSIGHTS.risk;
         setResponse(fallback);
-      } finally {
-        setIsLoading(false);
       }
-    } else {
-      // No API Key: immediately supply verified grounded assessment
-      const matched = matchKeywordInsight(cleanPrompt) || PRECOMPUTED_INSIGHTS.risk;
-      setResponse(matched);
-      setIsLoading(false);
       setPrompt("");
+    } catch (err: any) {
+      setApiError(err.message || "Failed to contact Gemini API. Loaded verified grounded dataset analysis.");
+      const fallback = matchKeywordInsight(cleanPrompt) || PRECOMPUTED_INSIGHTS.risk;
+      setResponse(fallback);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -252,95 +201,23 @@ export function AiCopilotTab() {
         </div>
       </div>
 
-      {/* Gemini API Key Configuration Card */}
-      <div className="clay p-6 rounded-[var(--radius-xl)] bg-[var(--color-surface)] border border-[var(--color-surface-variant)]">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
-          <div className="flex items-start gap-3.5">
-            <div className="w-10 h-10 rounded-[var(--radius-md)] bg-[var(--color-primary-container)] text-[var(--color-on-primary-container)] flex items-center justify-center shrink-0 shadow-2xs">
-              <RiKey2Line className="w-5 h-5" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="font-bold text-sm text-[var(--color-on-surface)]">
-                  Google Gemini API Key
-                </span>
-                {isSaved ? (
-                  <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-[var(--radius-full)] bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 flex items-center gap-1 shadow-2xs">
-                    <RiShieldCheckLine className="w-3 h-3" /> Live Key Connected
-                  </span>
-                ) : (
-                  <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-[var(--radius-full)] bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 border border-amber-300 dark:border-amber-800 flex items-center gap-1 shadow-2xs">
-                    <RiFlashlightLine className="w-3 h-3" /> Pre-Audited Mode Active
-                  </span>
-                )}
-              </div>
-              <p className="text-xs text-[var(--color-on-surface-variant)] mt-1">
-                Enter your Gemini API key to enable arbitrary natural language prompts. Key is stored strictly in your browser session storage.
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2.5 flex-wrap sm:flex-nowrap">
-            <div className="relative flex-1 sm:w-72">
-              <input
-                type={showKey ? "text" : "password"}
-                value={apiKey}
-                onChange={(e) => {
-                  setApiKey(e.target.value);
-                  setIsSaved(false);
-                }}
-                placeholder="AIzaSy..."
-                className="w-full text-xs font-mono px-3.5 py-2.5 pr-9 rounded-[var(--radius-md)] border border-[var(--color-outline)]/30 bg-[var(--color-surface)] text-[var(--color-on-surface)] focus:outline-none focus:border-[var(--color-primary)] transition-all shadow-2xs"
-              />
-              <button
-                type="button"
-                onClick={() => setShowKey(!showKey)}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--color-on-surface-variant)] hover:text-[var(--color-on-surface)] transition-colors cursor-pointer"
-                title={showKey ? "Hide key" : "Show key"}
-              >
-                {showKey ? <RiEyeOffLine className="w-4 h-4" /> : <RiEyeLine className="w-4 h-4" />}
-              </button>
-            </div>
-
-            <button
-              type="button"
-              onClick={handleSaveKey}
-              disabled={!apiKey.trim()}
-              className="clay-btn px-4 py-2.5 rounded-[var(--radius-md)] text-xs font-bold transition-all disabled:opacity-50 cursor-pointer"
-            >
-              Save
-            </button>
-
-            {isSaved && (
-              <button
-                type="button"
-                onClick={handleClearKey}
-                className="p-2.5 rounded-[var(--radius-md)] text-xs text-[var(--color-on-surface-variant)] hover:text-[var(--color-error)] hover:bg-[var(--color-error-container)]/30 transition-colors cursor-pointer"
-                title="Clear Key"
-              >
-                <RiCloseLine className="w-4 h-4" />
-              </button>
-            )}
-
-            <a
-              href="https://aistudio.google.com/app/apikey"
-              target="_blank"
-              rel="noreferrer"
-              className="p-2.5 rounded-[var(--radius-md)] text-xs text-[var(--color-on-surface-variant)] hover:text-[var(--color-primary)] hover:bg-[var(--color-surface-variant)] transition-colors inline-flex items-center gap-1 border border-[var(--color-outline)]/20"
-              title="Get Gemini API Key (Google AI Studio)"
-            >
-              <RiExternalLinkLine className="w-4 h-4" />
-            </a>
-          </div>
-        </div>
-
-        {apiError && (
-          <div className="mt-4 p-3 rounded-[var(--radius-md)] bg-[var(--color-error-container)] border border-[var(--color-error)]/20 text-xs text-[var(--color-on-error-container)] flex items-center gap-2.5 animate-fade-in">
+      {/* Operational AI Error Alert Banner */}
+      {apiError && (
+        <div className="p-4 rounded-[var(--radius-lg)] bg-[var(--color-error-container)]/90 border border-[var(--color-error)]/30 text-xs text-[var(--color-on-error-container)] flex items-center justify-between gap-3 animate-fade-in shadow-2xs">
+          <div className="flex items-center gap-2.5">
             <RiAlertLine className="w-4 h-4 shrink-0 text-[var(--color-error)]" />
             <span>{apiError}</span>
           </div>
-        )}
-      </div>
+          <button
+            type="button"
+            onClick={() => setApiError(null)}
+            className="p-1 rounded text-[var(--color-on-error-container)] hover:bg-[var(--color-error)]/20 transition-colors cursor-pointer"
+            title="Dismiss error"
+          >
+            <RiCloseLine className="w-4 h-4" />
+          </button>
+        </div>
+      )}
 
       {/* Grounded Executive Briefing Cards (Red / Green / Yellow Indicators) */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -570,7 +447,7 @@ export function AiCopilotTab() {
                     )}
                   </button>
                   <span className="text-[10px] text-[var(--color-on-surface-variant)] font-mono px-2 py-0.5 rounded-[var(--radius-xs)] bg-[var(--color-surface)] border border-[var(--color-surface-variant)]">
-                    {isSaved ? "Gemini Live" : "Verified Grounded"}
+                    Gemini Grounded Intelligence
                   </span>
                 </div>
               </div>

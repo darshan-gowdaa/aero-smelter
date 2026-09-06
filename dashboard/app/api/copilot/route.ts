@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
     if (!apiKey) {
       return NextResponse.json(
         {
-          error: "GEMINI_API_KEY is not configured. Please supply an API key in the UI input or configure GEMINI_API_KEY in Vercel environment variables.",
+          error: "GEMINI_API_KEY is not configured in environment variables (.env.local or Vercel project settings). Using pre-audited grounded intelligence.",
           code: "MISSING_API_KEY",
         },
         { status: 503 }
