@@ -142,9 +142,16 @@ NeoStats/
 │   ├── gold/                                 # Star schema facts, dimensions & KPI datasets
 │   ├── secure/                               # Access-restricted PII mapping vault
 │   └── powerbi/                              # Parquet & CSV files ready for Power BI + DAX
-├── dashboard/                                # Power BI Assets & Interactive Web Suite
+├── dashboard/                                # Next.js 16 TSX Dashboard & Power BI Assets
+│   ├── app/                                  # App Router (layout.tsx, page.tsx, globals.css)
+│   ├── components/                           # Atomic Design Component Architecture
+│   │   ├── atoms/                            # Badge, Card, MetricItem, SearchInput, TabButton
+│   │   ├── molecules/                        # KpiStrip, SectionHeader, Scorecard, OvernightAudit
+│   │   ├── organisms/                        # DurationTab, RoutePerformanceTab, AirlineTrends, etc.
+│   │   └── templates/                        # DashboardShell (unifying layout and tab switching)
+│   ├── lib/                                  # Data layer, TypeScript interfaces, and utils
 │   ├── ASG_Airlines_Report.pbit              # Power BI Template file
-│   ├── index.html                            # Responsive 4-page dashboard web app
+│   ├── index.html                            # Standalone fallback dashboard app
 │   ├── data.js                               # Precompiled Gold layer data payload
 │   └── screenshots/                          # High-res 300 DPI Power BI page screenshots
 │       ├── page1_duration_analysis.png
@@ -152,7 +159,7 @@ NeoStats/
 │       ├── page3_airline_trends.png
 │       └── page4_delay_anomaly_insights.png
 ├── reports/
-│   ├── ASG_Airlines_Pipeline_Documentation.docx  # Comprehensive technical Word document (2.03 MB)
+│   ├── ASG_Airlines_Pipeline_Documentation.docx  # Comprehensive technical Word document (4.07 MB)
 │   └── assets/                               # High-res 300 DPI architecture and ERD diagrams
 │       ├── architecture_diagram.png
 │       ├── star_schema_model.png
@@ -180,14 +187,16 @@ python pipeline/run_pipeline.py
 python -m unittest discover tests
 ```
 
-### Generate Documentation & Templates
+### Launch Next.js TypeScript Interactive Dashboard (Recommended)
 ```bash
-python scripts/generate_diagrams.py
-python scripts/generate_dashboard_screenshots.py
-python scripts/generate_pbit.py
-python scripts/generate_docs.py
-python scripts/generate_notebook.py
-```
+# Start Next.js development server
+npm run dev
 
-### Launch Interactive Power BI Dashboard
-Open `dashboard/index.html` in any browser (Chrome, Edge, Firefox) to explore all 4 live pages with interactive slicers and charts.
+# Or build for production
+npm run build
+npm start
+```
+The dashboard will run at `http://localhost:3000`.
+
+### Open Standalone HTML Dashboard
+Open `dashboard/index.html` directly in any web browser for offline access.
