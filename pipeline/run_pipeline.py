@@ -6,7 +6,7 @@ import pandas as pd
 # Add project root to Python path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from pipeline.config import BASE_DIR
+from pipeline.config import BASE_DIR, LOGS_DIR
 from pipeline.logger import PipelineLogger
 from pipeline.ingestion import IngestionLayer
 from pipeline.cleaning import CleaningLayer
@@ -16,7 +16,8 @@ from pipeline.export_powerbi import PowerBIExporter
 
 def run_full_pipeline():
     start_time = time.time()
-    log_file = BASE_DIR / "pipeline_execution.log"
+    # Write execution log to dedicated logs folder
+    log_file = LOGS_DIR / "pipeline_execution.log"
     logger = PipelineLogger(log_file=log_file)
 
     logger.info("Starting ASG Airlines Data Engineering Pipeline...")

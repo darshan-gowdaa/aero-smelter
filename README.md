@@ -1,8 +1,8 @@
-# ASG Airlines: End-to-End Data Engineering Pipeline
+# AeroSmelter: Aviation Medallion Lakehouse & Predictive Analytics Platform
 
-A production-grade, portfolio-ready data engineering pipeline and business intelligence suite built for ASG Airlines flight operations.
+A production-grade, portfolio-ready data engineering lakehouse, MLOps pipeline, and business intelligence platform built for airline flight operations.
 
-The pipeline ingests raw operational data across 4 disparate systems, enforces strict data quality contracts, repairs corrupted flight identifiers, resolves overnight cross-day flight duration anomalies, hashes sensitive passenger PII using salted SHA-256 cryptography, establishes a dimensional star schema model, computes business KPIs, and exports datasets for a 4-page Power BI Dashboard.
+The pipeline ingests raw operational data across 4 disparate systems, enforces strict data quality contracts, repairs corrupted flight identifiers, resolves overnight cross-day flight duration anomalies, hashes sensitive passenger PII using salted SHA-256 cryptography, establishes a dimensional star schema model, computes business KPIs, and exports datasets for a 4-page Power BI Dashboard and Next.js web application.
 
 ---
 
@@ -142,10 +142,10 @@ Integrated in Next.js frontend (`dashboard/components/organisms/AiCopilotTab.tsx
 
 ---
 
-## 8. Publication Walkthrough Notebook (`ASG_Airlines_Pipeline_Walkthrough.ipynb`)
+## 8. Publication Walkthrough Notebook (`notebooks/AeroSmelter_Pipeline_Walkthrough.ipynb`)
 
-A 20-cell executed Jupyter Notebook blending senior data engineer rigor with crisp, high-signal student interpretations:
-- Pre-rendered with 5 high-resolution Matplotlib/Seaborn visualization figures.
+A 22-cell executed Jupyter Notebook blending senior data engineer rigor with crisp, high-signal operational interpretations:
+- Pre-rendered with publication-quality Matplotlib/Seaborn visualization figures.
 - Structured with *What We Observe*, *Engineering Decision*, and *Actionable Takeaway* across every transformation stage.
 
 ---
@@ -153,73 +153,95 @@ A 20-cell executed Jupyter Notebook blending senior data engineer rigor with cri
 ## 9. Deliverables & Repository Structure
 
 ```
-NeoStats/
-├── ASG_Airlines_Pipeline_Walkthrough.ipynb   # Executed Jupyter Notebook walkthrough
-├── pipeline/                                 # Modular data engineering pipeline package
-│   ├── __init__.py
-│   ├── config.py                             # Centralized paths, regexes, and constants
-│   ├── logger.py                             # Structured pipeline logger with audit counts
-│   ├── ingestion.py                          # Bronze raw ingestion and schema validation
-│   ├── cleaning.py                           # Silver cleaning, overnight fix, PII masking
-│   ├── modeling.py                           # Gold dimensional modeling (star schema)
-│   ├── kpis.py                               # Business KPI aggregations and anomaly metrics
-│   ├── export_powerbi.py                     # Export to Parquet, CSV, and DAX definitions
-│   └── run_pipeline.py                       # Master end-to-end pipeline execution script
-├── tests/                                    # Automated unit test suite
-│   ├── __init__.py
-│   └── test_pipeline.py                      # 6 automated assertions covering quality & integrity
-├── data/
-│   ├── bronze/                               # Raw immutable snapshots & quarantine logs
-│   ├── silver/                               # Cleaned silver tables
-│   ├── gold/                                 # Star schema facts, dimensions & KPI datasets
-│   ├── secure/                               # Access-restricted PII mapping vault
-│   └── powerbi/                              # Parquet & CSV files ready for Power BI + DAX
-├── dashboard/                                # Next.js 16 TSX Dashboard & Power BI Assets
+aero-smelter/
+├── azure/                                    # Cloud IaC & pipeline templates (ADF, Databricks, Synapse)
+│   ├── adf/                                  # Azure Data Factory pipeline & linked service definitions
+│   ├── databricks/                           # PySpark Medallion Lakehouse ETL notebook
+│   └── synapse/                              # Azure Synapse Serverless SQL view definitions
+├── dashboard/                                # Next.js 15 TSX Claymorphism Dashboard & Power BI Assets
 │   ├── app/                                  # App Router (layout.tsx, page.tsx, globals.css)
-│   ├── components/                           # Atomic Design Component Architecture
-│   │   ├── atoms/                            # Badge, Card, MetricItem, SearchInput, TabButton
-│   │   ├── molecules/                        # KpiStrip, SectionHeader, Scorecard, OvernightAudit
-│   │   ├── organisms/                        # DurationTab, RoutePerformanceTab, AirlineTrends, etc.
-│   │   └── templates/                        # DashboardShell (unifying layout and tab switching)
-│   ├── lib/                                  # Data layer, TypeScript interfaces, and utils
-│   ├── ASG_Airlines_Report.pbit              # Power BI Template file
-│   ├── index.html                            # Standalone fallback dashboard app
-│   ├── data.js                               # Precompiled Gold layer data payload
-│   └── screenshots/                          # High-res 300 DPI Power BI page screenshots
-│       ├── page1_duration_analysis.png
-│       ├── page2_route_performance.png
-│       ├── page3_airline_trends.png
-│       └── page4_delay_anomaly_insights.png
-├── reports/
+│   ├── components/                           # Atomic Design Component Architecture (Atoms, Molecules, Organisms)
+│   ├── lib/                                  # Data layer, TypeScript interfaces, Gemini AI copilot client
+│   ├── ASG_Airlines_Report.pbix / .pbit      # Production Power BI desktop and template files
+│   ├── index.html                            # Standalone offline web dashboard
+│   └── screenshots/                          # 300 DPI high-resolution Power BI dashboard captures
+├── data/                                     # Medallion Lakehouse Storage Architecture
+│   ├── source/                               # Immutable raw source files (UseCase - Airlines.xlsx)
+│   ├── bronze/                               # Raw immutable Parquet snapshots & schema audit logs
+│   ├── silver/                               # Cleaned, standardized, and PII-masked Parquet tables
+│   ├── gold/                                 # Star schema facts, dimensions & precomputed analytical marts
+│   ├── secure/                               # Air-gapped salted SHA-256 PII cryptographic mapping vault
+│   └── powerbi/                              # Parquet & CSV exports, schema definitions & DAX measures
+├── docs/                                     # Project documentation, specifications & architecture
+│   └── specifications/                       # Case study requirements & client problem statements
+├── logs/                                     # Execution logs & run traces (gitignored)
+│   └── pipeline_execution.log                # End-to-end pipeline execution audit log
+├── notebooks/                                # Jupyter exploration & publication walkthroughs
+│   └── AeroSmelter_Pipeline_Walkthrough.ipynb # Executed 22-cell engineering & MLOps walkthrough
+├── pipeline/                                 # Core Python Lakehouse & Data Engineering Package
+│   ├── __init__.py
+│   ├── azure_integration.py                  # Azure Blob/ADLS Gen2 sync & cloud deployment generator
+│   ├── cleaning.py                           # Silver cleaning, overnight duration fix, PII masking
+│   ├── config.py                             # Centralized paths, regex rules, schemas & business thresholds
+│   ├── export_powerbi.py                     # Gold layer dual Parquet/CSV exporter & DAX generator
+│   ├── ingestion.py                          # Bronze raw ingestion and schema contract validator
+│   ├── kpis.py                               # Business KPI aggregations and duration anomaly metrics
+│   ├── logger.py                             # Structured pipeline logger with audit counts
+│   ├── ml_models.py                          # Isolation Forest anomaly detection & Random Forest classifier
+│   ├── modeling.py                           # Gold dimensional modeling (Kimball Star Schema)
+│   └── run_pipeline.py                       # Master pipeline execution orchestrator
+├── reports/                                  # Technical reports & publication figures
 │   ├── ASG_Airlines_Pipeline_Documentation.docx  # Comprehensive technical Word document (4.07 MB)
-│   └── assets/                               # High-res 300 DPI architecture and ERD diagrams
-│       ├── architecture_diagram.png
-│       ├── star_schema_model.png
-│       └── data_flow_diagram.png
-├── scripts/
-│   ├── generate_diagrams.py                  # Script generating publication-quality diagrams
-│   ├── generate_docs.py                      # Script compiling Word documentation
-│   ├── generate_dashboard_screenshots.py     # Script rendering Power BI page screenshots
-│   ├── generate_pbit.py                      # Script generating .pbit Power BI template
-│   └── generate_notebook.py                  # Script assembling executed Jupyter Notebook
-└── README.md                                 # Project documentation and portfolio walkthrough
+│   └── assets/                               # Architecture diagrams, data flows, and ERD models
+├── scripts/                                  # Developer automation & compilation utilities
+│   ├── generate_dashboard_screenshots.py     # Power BI report screenshot generator
+│   ├── generate_diagrams.py                  # Publication diagram rendering script
+│   ├── generate_docs.py                      # Technical Word documentation compiler
+│   ├── generate_notebook.py                  # Standard Jupyter notebook generator
+│   ├── generate_pbit.py                      # Power BI template binary packager
+│   └── generate_rich_notebook.py             # Senior-level executed walkthrough notebook generator
+├── tests/                                    # CI/CD Quality Gates & Automated Unit Tests
+│   ├── __init__.py
+│   └── test_pipeline.py                      # Automated assertions covering Bronze, Silver, Gold, PII & Azure
+├── .gitignore                                # Production enterprise Data Engineering gitignore
+├── package.json                              # Task orchestration scripts & project metadata
+├── pyproject.toml                            # Modern Python project configuration & tool specifications
+├── README.md                                 # Project documentation and portfolio showcase
+└── requirements.txt                          # Locked production dependencies
 ```
 
 ---
 
 ## 10. Quickstart & Verification
 
-### Run End-to-End Pipeline
+### 1. Run End-to-End Pipeline
 ```bash
+# Using Python
 python pipeline/run_pipeline.py
+
+# Or via npm script
+npm run pipeline
 ```
 
-### Run Automated Quality Test Suite
+### 2. Run Automated Quality Test Suite
 ```bash
+# Using Python unittest
 python -m unittest discover tests
+
+# Or via npm script
+npm test
 ```
 
-### Launch Next.js TypeScript Interactive Dashboard (Recommended)
+### 3. Regenerate Executed Walkthrough Notebook
+```bash
+# Using Python
+python scripts/generate_rich_notebook.py
+
+# Or via npm script
+npm run notebook
+```
+
+### 4. Launch Interactive Web Dashboard
 ```bash
 # Start Next.js development server
 npm run dev
@@ -230,5 +252,5 @@ npm start
 ```
 The dashboard will run at `http://localhost:3000`.
 
-### Open Standalone HTML Dashboard
+### 5. Open Standalone HTML Dashboard
 Open `dashboard/index.html` directly in any web browser for offline access.

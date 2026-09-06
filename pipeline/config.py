@@ -4,8 +4,11 @@ from pathlib import Path
 # Base project directory
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Input data file
-EXCEL_PATH = BASE_DIR / "UseCase - Airlines.xlsx"
+# Input data file location (checks data/source first, falls back to root)
+SOURCE_DIR = BASE_DIR / "data" / "source"
+EXCEL_PATH = SOURCE_DIR / "UseCase - Airlines.xlsx"
+if not EXCEL_PATH.exists():
+    EXCEL_PATH = BASE_DIR / "UseCase - Airlines.xlsx"
 
 # Data lake storage paths for medallion layers
 BRONZE_DIR = BASE_DIR / "data" / "bronze"
@@ -13,9 +16,12 @@ SILVER_DIR = BASE_DIR / "data" / "silver"
 GOLD_DIR = BASE_DIR / "data" / "gold"
 SECURE_DIR = BASE_DIR / "data" / "secure"
 POWERBI_DIR = BASE_DIR / "data" / "powerbi"
+DOCS_DIR = BASE_DIR / "docs"
 REPORTS_DIR = BASE_DIR / "reports"
 ASSETS_DIR = REPORTS_DIR / "assets"
 DASHBOARD_DIR = BASE_DIR / "dashboard"
+LOGS_DIR = BASE_DIR / "logs"
+NOTEBOOKS_DIR = BASE_DIR / "notebooks"
 
 # Expected schema for each sheet before ingestion
 EXPECTED_SCHEMAS = {

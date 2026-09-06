@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from pipeline.config import BRONZE_DIR, SILVER_DIR, GOLD_DIR, SECURE_DIR, PII_SALT
 
-OUTPUT_NOTEBOOK = BASE_DIR / "ASG_Airlines_Pipeline_Walkthrough.ipynb"
+OUTPUT_NOTEBOOK = BASE_DIR / "notebooks" / "AeroSmelter_Pipeline_Walkthrough.ipynb"
 
 # Styling defaults for publication-quality charts
 plt.style.use("seaborn-v0_8-whitegrid" if "seaborn-v0_8-whitegrid" in plt.style.available else "default")
@@ -106,6 +106,8 @@ from pathlib import Path
 
 # Add project root to Python search path
 PROJECT_ROOT = Path(".").resolve()
+if not (PROJECT_ROOT / "pipeline").exists():
+    PROJECT_ROOT = PROJECT_ROOT.parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 

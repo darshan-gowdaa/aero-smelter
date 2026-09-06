@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-OUTPUT_NOTEBOOK = BASE_DIR / "ASG_Airlines_Pipeline_Walkthrough.ipynb"
+OUTPUT_NOTEBOOK = BASE_DIR / "notebooks" / "AeroSmelter_Pipeline_Walkthrough.ipynb"
 
 def generate_notebook():
     print(f"Generating Jupyter Notebook at {OUTPUT_NOTEBOOK}...")

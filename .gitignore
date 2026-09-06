@@ -1,12 +1,76 @@
+# Byte-compiled / optimized / DLL files
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Distribution / packaging
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environments
+.venv/
+venv/
+ENV/
+env/
+env.bak/
+venv.bak/
+
+# Jupyter Notebook checkpoints & cache
 .ipynb_checkpoints/
-.DS_Store
-*.tmp
-node_modules/
-.next/
+*/.ipynb_checkpoints/*
+
+# Execution logs & runtime state
 *.log
-dashboard/.next/
-dashboard/node_modules/
+logs/
+pipeline_execution.log
+
+# Operating System & Temporary Files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+desktop.ini
+*.tmp
+*~
+
+# Microsoft Office temporary lock files & legacy root working files
 ~$*
-scripts/
+.~*
+Use_Case_Airlines Intructions.docx
+
+# Node / Dashboard dependencies & build output
+node_modules/
+dashboard/node_modules/
+.next/
+dashboard/.next/
+out/
+dashboard/out/
+
+# Testing & code coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+
+# IDE & Editor configs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Secrets & Environment variables
+.env
+.env.*
+!.env.example
+secrets/
