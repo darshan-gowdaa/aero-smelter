@@ -1,0 +1,12 @@
+{
+  "name": "AzureDatabricks_Cluster",
+  "type": "Microsoft.DataFactory/factories/linkedservices",
+  "properties": {
+    "type": "AzureDatabricks",
+    "typeProperties": {
+      "domain": "https://adb-123456789.azuredatabricks.net",
+      "authentication": "MSI",
+      "existingClusterId": "0906-asg-cluster"
+    }
+  }
+}

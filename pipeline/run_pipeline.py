@@ -98,13 +98,23 @@ def run_full_pipeline():
     }
     exporter.export_tables(ml_tables)
 
+    # ==========================================
+    # STAGE 7: AZURE CLOUD INTEGRATION (ADF/SYNAPSE/DATABRICKS/ADLS)
+    # ==========================================
+    logger.info("--- Azure Cloud Integration (ADF, Databricks, Synapse, ADLS Gen2) ---")
+    from pipeline.azure_integration import AzureCloudIntegrator
+    azure_integrator = AzureCloudIntegrator()
+    azure_sync_result = azure_integrator.sync_to_azure_storage()
+    logger.info(f"Azure Cloud status: {azure_sync_result.get('status')} ({azure_sync_result.get('mode')})")
+
     elapsed = round(time.time() - start_time, 2)
-    logger.info(f"ASG Airlines Pipeline with ML completed successfully in {elapsed} seconds.")
+    logger.info(f"ASG Airlines Pipeline with ML and Azure completed successfully in {elapsed} seconds.")
     logger.print_audit_summary()
 
     return {
         "gold_tables": gold_tables,
         "kpi_results": kpi_results,
+        "azure_sync": azure_sync_result,
         "elapsed_seconds": elapsed
     }
 

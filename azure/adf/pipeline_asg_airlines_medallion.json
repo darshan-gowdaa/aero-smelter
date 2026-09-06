@@ -1,0 +1,83 @@
+{
+  "$schema": "http://dev.bootstrapping.azure.com/schemas/pipeline.json",
+  "name": "Pipeline_ASG_Airlines_Medallion",
+  "properties": {
+    "description": "Enterprise end-to-end flight operations ETL & MLOps pipeline for ASG Airlines.",
+    "activities": [
+      {
+        "name": "Ingest_Excel_To_Bronze_ADLS",
+        "type": "Copy",
+        "typeProperties": {
+          "source": {
+            "type": "ExcelSource",
+            "storeSettings": {
+              "type": "FileServerReadSettings",
+              "recursive": true
+            }
+          },
+          "sink": {
+            "type": "ParquetSink",
+            "storeSettings": {
+              "type": "AzureBlobFSWriteSettings",
+              "copyBehavior": "PreserveHierarchy"
+            }
+          }
+        },
+        "inputs": [
+          {
+            "referenceName": "Source_Excel_UseCase",
+            "type": "DatasetReference"
+          }
+        ],
+        "outputs": [
+          {
+            "referenceName": "ADLS_Bronze_Parquet",
+            "type": "DatasetReference"
+          }
+        ]
+      },
+      {
+        "name": "Databricks_Medallion_Transformations",
+        "type": "DatabricksNotebook",
+        "dependsOn": [
+          {
+            "activity": "Ingest_Excel_To_Bronze_ADLS",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ],
+        "typeProperties": {
+          "notebookPath": "/Shared/ASG_Airlines/asg_airlines_databricks_medallion",
+          "baseParameters": {
+            "source_container": "abfss://bronze@asgairlinesstorage.dfs.core.windows.net/",
+            "sink_container": "abfss://gold@asgairlinesstorage.dfs.core.windows.net/"
+          }
+        },
+        "linkedServiceName": {
+          "referenceName": "AzureDatabricks_Cluster",
+          "type": "LinkedServiceReference"
+        }
+      },
+      {
+        "name": "Refresh_Synapse_Serverless_Views",
+        "type": "SqlServerStoredProcedure",
+        "dependsOn": [
+          {
+            "activity": "Databricks_Medallion_Transformations",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ],
+        "typeProperties": {
+          "storedProcedureName": "[dbo].[sp_refresh_gold_views]"
+        },
+        "linkedServiceName": {
+          "referenceName": "AzureSynapse_Serverless",
+          "type": "LinkedServiceReference"
+        }
+      }
+    ]
+  }
+}

@@ -118,6 +118,22 @@ class TestASGAirlinesPipeline(unittest.TestCase):
         metrics = pd.read_parquet(self.gold_dir / "ml_model_metrics.parquet")
         self.assertGreater(len(metrics), 0)
 
+    def test_08_azure_cloud_orchestration(self):
+        # Test Azure Data Factory, Databricks, and Synapse templates exist
+        from pipeline.azure_integration import AzureCloudIntegrator
+        integrator = AzureCloudIntegrator()
+        result = integrator.sync_to_azure_storage()
+        self.assertIn(result.get("status"), ["Simulated/Ready", "Connected & Synced"])
+
+        base_dir = self.gold_dir.parent.parent
+        adf_file = base_dir / "azure" / "adf" / "pipeline_asg_airlines_medallion.json"
+        databricks_file = base_dir / "azure" / "databricks" / "asg_airlines_databricks_medallion.py"
+        synapse_file = base_dir / "azure" / "synapse" / "create_serverless_views.sql"
+
+        self.assertTrue(adf_file.exists(), "ADF pipeline JSON must exist")
+        self.assertTrue(databricks_file.exists(), "Databricks PySpark script must exist")
+        self.assertTrue(synapse_file.exists(), "Synapse SQL views script must exist")
+
 if __name__ == "__main__":
     unittest.main()
 
