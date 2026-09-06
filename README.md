@@ -98,27 +98,59 @@ The pipeline implements the enterprise Medallion Architecture across Bronze, Sil
 | **Total Cleaned Flights** | 1,005 flights | 15 duplicate rows removed |
 | **Overall Average Duration** | 164.62 minutes | 2 hours 45 minutes average stage length |
 | **Active Domestic Routes** | 30 routes | Full bidirectional coverage across 6 major metros |
-| **Busiest Route** | CCU -> DEL (43 flights) | Followed by DEL -> CCU (41) and BLR -> BOM (38) |
-| **Airline Market Share** | IndiGo: 26.77%, Air India: 25.47%, SpiceJet: 24.58%, Vistara: 23.18% | Balanced competitive landscape |
-| **Total Operational Revenue** | ₹8,054,166.50 (~₹8.05 Cr) | ₹8,054.17 average fare across 1,000 transactions |
-| **Top Payment Method** | UPI (35.8%) | Card (32.9%), NetBanking (31.3%) |
-| **Duration Outliers** | 1 flight (> 2 std dev) | Flight SJ192 (300 min vs 161.4 min route average) |
-| **Negative Durations** | 0 (Zero) | 100% resolved via automated overnight correction |
+| **Fleet Cancellation Rate** | 31.4% | 314 cancelled bookings; peak on DEL->BOM (41.2%) |
+| **Total Audited Revenue** | ₹6,870,450 | ₹3.56M confirmed, ₹2.16M cancelled lost, ₹1.15M pending |
+| **Overnight Rollover Repaired** | 1 flight (SJ192) | Corrected from -1,370 min to +300 min |
+| **ML Flagged Duration Anomalies**| 16 flights | Isolation Forest unsupervised detection (1.59% contamination) |
+| **ML Cancellation Prediction** | 69.21% Accuracy | Random Forest (Booking Amount 43.7%, Route 35.8% Gini weight) |
+| **ML Dynamic Fare Estimator** | ₹3,436.22 MAE | Gradient Boosting Yield model (R² = 0.48) |
+| **Referential Integrity** | 100.0% | 0 orphan foreign keys across all facts |
+| **PII Data Protection** | 100.0% Masked | Zero plaintext Aadhaar/passports in analytical store |
 
 ---
 
-## 5. Power BI 4-Page Dashboard Suite
+## 5. Machine Learning Operations (MLOps) Suite
 
-The Power BI report is organized into 4 focused operational sections. High-resolution captures are located in `dashboard/screenshots/` and embedded in the Word documentation:
+The pipeline trains and evaluates 3 production Scikit-Learn models persisted to `data/gold/` and `data/powerbi/`:
 
-1. **Page 1: Duration Analysis**: KPI Cards (Avg, Min, Max Duration, Overnight Count), Route duration horizontal rankings, and airline comparison.
-2. **Page 2: Route Performance**: Active route metrics, top traffic volume corridors, gross revenue by route, and booking cancellation rates.
-3. **Page 3: Airline Trends**: Market share donut chart, flight volume by operator, and payment channel distribution.
-4. **Page 4: Delay & Anomaly Insights**: Diurnal hourly departure distribution, statistical outlier audit table for Flight SJ192, and imputation tracking.
+1. **Isolation Forest (`contamination=0.0159`)**: Unsupervised anomaly detection on 1,005 flight instances. Flags 16 operational block-hour anomalies (e.g., flight `UK193` 35 min on 185 min baseline). Audit proved flight `SJ192` anomaly score dropped from fatal 1.000 to 0.674 post-pipeline repair.
+2. **Random Forest Classifier (`n_estimators=200`)**: Cancellation risk predictor. Validation Accuracy: **69.21%**, ROC-AUC: **0.5143**. Top features: Booking Amount (**43.7%**), Flight Route (**35.8%**), Carrier (**11.7%**), Payment Method (**8.8%**).
+3. **Gradient Boosting Regressor (`n_estimators=120`)**: Dynamic fare and yield estimator. MAE: **₹3,436.22**, R² = 0.48.
 
 ---
 
-## 6. Deliverables & Repository Structure
+## 6. Grounded GenAI Executive Copilot (Google Gemini)
+
+Integrated in Next.js frontend (`dashboard/components/organisms/AiCopilotTab.tsx`):
+- **Live Gemini Reasoning**: Google Generative AI REST endpoint (`gemini-2.5-flash` / `gemini-1.5-flash`) with local browser session API key management.
+- **Strict Grounding Contract**: System prompt injects verified ASG KPIs, route cancellation rates, and ML tensors—eliminating hallucinations.
+- **Pre-Audited Mode**: 4 one-click verified deep-dives (SJ192 Overnight Root Cause, Route Cancellation Risk, Revenue Yield Leakage, MLOps Governance) render instantly without requiring an API key.
+- **Color-Coded Status Numbers**: High-contrast Emerald Green (confirmed/audited), Amber Yellow (overnight/pending), and Rose Red (cancellations/anomalies).
+
+---
+
+## 7. Enterprise Power BI & Storytelling Suite
+
+- **Interactive Files**: [`ASG_Airlines_Report.pbix`](file:///Z:/Github%20Projects/NeoStats/dashboard/ASG_Airlines_Report.pbix) and [`ASG_Airlines_Report.pbit`](file:///Z:/Github%20Projects/NeoStats/dashboard/ASG_Airlines_Report.pbit).
+- **DAX Measures Library**: 40+ production DAX formulas in [`powerbi_dax_measures.dax`](file:///Z:/Github%20Projects/NeoStats/data/powerbi/powerbi_dax_measures.dax) (Executive KPIs, Dynamic Slicers, Conditional Formatting Hex Codes).
+- **4-Chapter Storytelling**:
+  - *Chapter 1*: Executive Operations & Fleet Reliability (Hero KPIs, Market Share, Departure Waves).
+  - *Chapter 2*: Route Economics & Operational Anomalies (SJ192 Case Study, 2-Sigma Duration Scatter).
+  - *Chapter 3*: Cancellation Risk & MLOps Predictive Scoring (Feature Importances, High-Risk Ledger).
+  - *Chapter 4*: Commercial Yield & Governance Compliance (UPI vs Net Banking, PII Vault Audit).
+- **Interactive Guide**: Detailed walkthrough in [`POWERBI_INTERACTIVE_GUIDE.md`](file:///Z:/Github%20Projects/NeoStats/data/powerbi/POWERBI_INTERACTIVE_GUIDE.md).
+
+---
+
+## 8. Publication Walkthrough Notebook (`ASG_Airlines_Pipeline_Walkthrough.ipynb`)
+
+A 20-cell executed Jupyter Notebook blending senior data engineer rigor with crisp, high-signal student interpretations:
+- Pre-rendered with 5 high-resolution Matplotlib/Seaborn visualization figures.
+- Structured with *What We Observe*, *Engineering Decision*, and *Actionable Takeaway* across every transformation stage.
+
+---
+
+## 9. Deliverables & Repository Structure
 
 ```
 NeoStats/
@@ -175,7 +207,7 @@ NeoStats/
 
 ---
 
-## 7. Quickstart & Verification
+## 10. Quickstart & Verification
 
 ### Run End-to-End Pipeline
 ```bash
