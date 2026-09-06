@@ -1,0 +1,2 @@
+total_flights_analyzed,overnight_flights_repaired,duration_outliers_count,duration_outliers_pct,negative_duration_count,anomalous_duration_count
+1005,1,1,0.1,0,0
