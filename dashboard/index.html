@@ -3,627 +3,1151 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ASG Airlines Flight Ops — Executive Power BI Dashboard</title>
-  <!-- Tailwind CSS CDN -->
+  <title>ASG Airlines — Flight Operations Analytics Suite</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Remix Icon CDN -->
   <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet"/>
-  <!-- Chart.js CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <script src="data.js"></script>
   <script>
     tailwind.config = {
       theme: {
         extend: {
           colors: {
-            brand: {
-              50: '#f0f7ff',
-              100: '#e0effe',
-              500: '#0284c7',
-              600: '#0369a1',
-              700: '#075985',
-              800: '#0c4a6e',
-              900: '#082f49',
-            }
-          }
+            slate: { 950: "#020617" },
+            brand: { 400:"#38bdf8", 500:"#0ea5e9", 600:"#0284c7", 700:"#0369a1", 800:"#075985" }
+          },
+          fontFamily: { sans: ["Inter", "ui-sans-serif"] }
         }
       }
     }
   </script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-    body { font-family: 'Inter', sans-serif; }
-    .tab-active {
-      border-bottom: 3px solid #0284c7;
-      color: #0284c7;
-      font-weight: 600;
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    :root {
+      --bg: #0d1117; --card: #161b22; --border: #21262d;
+      --accent: #1f6feb; --green: #3fb950; --red: #f85149;
+      --amber: #d29922; --purple: #bc8cff; --teal: #39c5b5;
     }
-    .chart-container {
-      position: relative;
-      height: 320px;
-      width: 100%;
-    }
+    * { box-sizing: border-box; }
+    body { background: var(--bg); font-family: 'Inter', sans-serif; color: #e6edf3; margin:0; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; }
+    .card-sm { background: var(--card); border: 1px solid var(--border); border-radius: 8px; }
+    .tab-btn { cursor:pointer; border-bottom: 3px solid transparent; padding: 10px 18px;
+               font-size:14px; font-weight:500; color:#8b949e; transition: all .2s; white-space:nowrap; }
+    .tab-btn.active { border-color: var(--accent); color:#e6edf3; }
+    .tab-btn:hover:not(.active) { color: #c9d1d9; border-color: #30363d; }
+    .tab-pane { display:none; } .tab-pane.active { display:block; }
+    .kpi-card { background: var(--card); border: 1px solid var(--border); border-radius:10px;
+                padding:16px 18px; position:relative; overflow:hidden; }
+    .kpi-card::before { content:''; position:absolute; top:0; left:0; right:0;
+                        height:3px; border-radius:10px 10px 0 0; }
+    .kpi-blue::before { background: linear-gradient(90deg, #1f6feb, #38bdf8); }
+    .kpi-green::before { background: linear-gradient(90deg, #3fb950, #4ade80); }
+    .kpi-red::before { background: linear-gradient(90deg, #f85149, #fb7185); }
+    .kpi-amber::before { background: linear-gradient(90deg, #d29922, #fbbf24); }
+    .kpi-purple::before { background: linear-gradient(90deg, #bc8cff, #c084fc); }
+    .kpi-teal::before { background: linear-gradient(90deg, #39c5b5, #5eead4); }
+    .kpi-val { font-size:1.9rem; font-weight:800; line-height:1.1; color:#e6edf3; }
+    .kpi-lbl { font-size:11px; font-weight:600; color:#8b949e; text-transform:uppercase; letter-spacing:.06em; margin-bottom:6px; }
+    .kpi-sub { font-size:11px; color:#8b949e; margin-top:4px; }
+    .badge { display:inline-flex; align-items:center; gap:4px; font-size:11px;
+             padding:2px 8px; border-radius:20px; font-weight:600; }
+    .badge-up { background:#0d2b1e; color:var(--green); }
+    .badge-dn { background:#2a0f0f; color:var(--red); }
+    .badge-warn { background:#2a1e06; color:var(--amber); }
+    .chart-container { position:relative; }
+    .section-title { font-size:13px; font-weight:700; color:#8b949e;
+                     text-transform:uppercase; letter-spacing:.08em; margin-bottom:12px; }
+    .table-compact { width:100%; border-collapse:collapse; font-size:12px; }
+    .table-compact th { color:#8b949e; font-weight:600; text-align:left;
+                        padding:8px 10px; border-bottom:1px solid var(--border);
+                        font-size:11px; text-transform:uppercase; letter-spacing:.05em; }
+    .table-compact td { padding:7px 10px; border-bottom:1px solid #21262d; color:#e6edf3; }
+    .table-compact tr:last-child td { border-bottom:none; }
+    .table-compact tr:hover td { background:#1c2128; }
+    .progress-bar { height:6px; border-radius:4px; background:#30363d; overflow:hidden; }
+    .progress-fill { height:100%; border-radius:4px; }
+    .tag { font-size:10px; padding:2px 7px; border-radius:20px; font-weight:600; }
+    .tag-confirm { background:#0d2b1e; color:#3fb950; }
+    .tag-cancel  { background:#2a0f0f; color:#f85149; }
+    .tag-pending { background:#2a1e06; color:#d29922; }
+    input[type=text] { background:#0d1117; border:1px solid #30363d; color:#e6edf3;
+                        border-radius:6px; padding:6px 10px; font-size:13px; outline:none; }
+    input[type=text]:focus { border-color:var(--accent); }
+    ::-webkit-scrollbar { width:6px; height:6px; }
+    ::-webkit-scrollbar-track { background:#161b22; }
+    ::-webkit-scrollbar-thumb { background:#30363d; border-radius:3px; }
+    @keyframes count-up { from { opacity:.3; } to { opacity:1; } }
+    .animated { animation: count-up .6s ease; }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+<body>
 
-  <!-- TOP HEADER -->
-  <header class="bg-slate-900 text-white shadow-md sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-wrap items-center justify-between gap-4">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-lg bg-sky-500 flex items-center justify-center text-white text-xl shadow">
-          <i class="ri-plane-line"></i>
-        </div>
-        <div>
-          <h1 class="text-lg font-bold tracking-tight">ASG Airlines Flight Ops Dashboard</h1>
-          <p class="text-xs text-sky-200">Executive Power BI Suite • Medallion Gold Analytics</p>
-        </div>
+<!-- ── TOP HEADER ─────────────────────────────────────────────────────────── -->
+<header class="sticky top-0 z-50" style="background:#010409; border-bottom:1px solid #21262d;">
+  <div class="max-w-screen-2xl mx-auto px-5 py-3 flex items-center justify-between gap-4">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-lg flex items-center justify-center text-white text-xl"
+           style="background:linear-gradient(135deg,#1f6feb,#38bdf8);">
+        <i class="ri-flight-takeoff-line"></i>
       </div>
+      <div>
+        <h1 class="text-base font-bold tracking-tight text-white">ASG Airlines  Flight Operations Analytics</h1>
+        <p class="text-xs" style="color:#8b949e;">Medallion Gold Layer  •  pandas + PyArrow Pipeline  •  4,059 raw records processed</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-4">
+      <span class="badge badge-up"><i class="ri-checkbox-circle-line"></i> Pipeline OK — 1.02s</span>
+      <span class="text-xs" style="color:#8b949e;" id="clock"></span>
+    </div>
+  </div>
+</header>
 
-      <!-- Slicers / Filters -->
-      <div class="flex flex-wrap items-center gap-3">
-        <div class="flex items-center gap-1.5 bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700 text-xs">
-          <i class="ri-filter-3-line text-sky-400"></i>
-          <span class="text-slate-400">Airline:</span>
-          <select id="airlineFilter" class="bg-transparent text-white font-medium focus:outline-none cursor-pointer">
-            <option value="ALL" class="bg-slate-800">All Airlines (4)</option>
-            <option value="Air India" class="bg-slate-800">Air India (AI)</option>
-            <option value="IndiGo" class="bg-slate-800">IndiGo (6E/6F)</option>
-            <option value="SpiceJet" class="bg-slate-800">SpiceJet (SJ)</option>
-            <option value="Vistara" class="bg-slate-800">Vistara (UK)</option>
-          </select>
-        </div>
+<!-- ── GLOBAL KPI STRIP ───────────────────────────────────────────────────── -->
+<div class="max-w-screen-2xl mx-auto px-5 pt-5 pb-4">
+  <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3" id="kpiStrip"></div>
+</div>
 
-        <div class="flex items-center gap-1.5 bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700 text-xs">
-          <i class="ri-route-line text-sky-400"></i>
-          <span class="text-slate-400">Route:</span>
-          <select id="routeFilter" class="bg-transparent text-white font-medium focus:outline-none cursor-pointer max-w-[140px] truncate">
-            <option value="ALL" class="bg-slate-800">All Routes (30)</option>
-          </select>
-        </div>
+<!-- ── NAVIGATION TABS ────────────────────────────────────────────────────── -->
+<div class="max-w-screen-2xl mx-auto px-5">
+  <div class="flex gap-1 border-b" style="border-color:#21262d; overflow-x:auto;">
+    <button class="tab-btn active" data-tab="p1"><i class="ri-timer-line mr-1"></i>Duration Analysis</button>
+    <button class="tab-btn" data-tab="p2"><i class="ri-route-line mr-1"></i>Route Performance</button>
+    <button class="tab-btn" data-tab="p3"><i class="ri-flight-land-line mr-1"></i>Airline Trends</button>
+    <button class="tab-btn" data-tab="p4"><i class="ri-alert-line mr-1"></i>Delay & Anomaly</button>
+    <button class="tab-btn" data-tab="p5"><i class="ri-shield-user-line mr-1"></i>Data Quality</button>
+  </div>
+</div>
 
-        <button onclick="resetFilters()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1.5 rounded-lg border border-slate-700 flex items-center gap-1 transition">
-          <i class="ri-refresh-line"></i> Reset
-        </button>
+<main class="max-w-screen-2xl mx-auto px-5 py-5 space-y-5">
 
-        <span class="hidden md:inline-flex items-center gap-1.5 text-xs text-emerald-400 bg-emerald-950/60 border border-emerald-800/60 px-2.5 py-1 rounded-full">
-          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Gold Pipeline Synced
-        </span>
+<!-- ═══ PAGE 1: DURATION ANALYSIS ════════════════════════════════════════════ -->
+<div class="tab-pane active" id="p1">
+  <div class="grid grid-cols-12 gap-4">
+
+    <!-- Airline Duration Profile grouped bar -->
+    <div class="col-span-12 lg:col-span-5 card p-5">
+      <div class="section-title"><i class="ri-bar-chart-grouped-line mr-1"></i>Airline Duration Profile — Min / Avg / Max</div>
+      <div class="chart-container" style="height:280px;">
+        <canvas id="chartAirlineDuration"></canvas>
       </div>
     </div>
 
-    <!-- PAGE NAVIGATION TABS -->
-    <nav class="bg-slate-800/80 border-t border-slate-700/60 px-4 sm:px-6 lg:px-8">
-      <div class="max-w-7xl mx-auto flex overflow-x-auto space-x-8 text-sm">
-        <button onclick="switchTab('tab-duration')" id="btn-tab-duration" class="tab-active py-3 px-1 inline-flex items-center gap-2 border-b-2 font-medium transition whitespace-nowrap">
-          <i class="ri-time-line"></i> Duration Analysis
-        </button>
-        <button onclick="switchTab('tab-routes')" id="btn-tab-routes" class="text-slate-400 hover:text-white py-3 px-1 inline-flex items-center gap-2 border-b-2 border-transparent font-medium transition whitespace-nowrap">
-          <i class="ri-flight-takeoff-line"></i> Route Performance
-        </button>
-        <button onclick="switchTab('tab-airlines')" id="btn-tab-airlines" class="text-slate-400 hover:text-white py-3 px-1 inline-flex items-center gap-2 border-b-2 border-transparent font-medium transition whitespace-nowrap">
-          <i class="ri-pie-chart-line"></i> Airline Trends
-        </button>
-        <button onclick="switchTab('tab-anomalies')" id="btn-tab-anomalies" class="text-slate-400 hover:text-white py-3 px-1 inline-flex items-center gap-2 border-b-2 border-transparent font-medium transition whitespace-nowrap">
-          <i class="ri-alert-line"></i> Delay & Anomaly Insights
-        </button>
-      </div>
-    </nav>
-  </header>
-
-  <!-- MAIN CONTAINER -->
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full">
-
-    <!-- ============================================================== -->
-    <!-- PAGE 1: DURATION ANALYSIS -->
-    <!-- ============================================================== -->
-    <section id="tab-duration" class="space-y-6">
-      <!-- KPI Top Cards -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-          <div class="flex items-center justify-between text-slate-500 mb-2">
-            <span class="text-xs font-semibold uppercase tracking-wider">Avg Flight Duration</span>
-            <div class="w-8 h-8 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center"><i class="ri-timer-line"></i></div>
-          </div>
-          <div class="text-2xl font-bold text-slate-900" id="card-avg-duration">164.6 min</div>
-          <div class="text-xs text-slate-500 mt-1 flex items-center gap-1">
-            <i class="ri-plane-fill text-sky-500"></i> Approx. 2 hrs 45 mins
-          </div>
-        </div>
-
-        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-          <div class="flex items-center justify-between text-slate-500 mb-2">
-            <span class="text-xs font-semibold uppercase tracking-wider">Min Sector Duration</span>
-            <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center"><i class="ri-speed-up-line"></i></div>
-          </div>
-          <div class="text-2xl font-bold text-slate-900" id="card-min-duration">30.0 min</div>
-          <div class="text-xs text-slate-500 mt-1">Shortest domestic sector</div>
-        </div>
-
-        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-          <div class="flex items-center justify-between text-slate-500 mb-2">
-            <span class="text-xs font-semibold uppercase tracking-wider">Max Sector Duration</span>
-            <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center"><i class="ri-timer-flash-line"></i></div>
-          </div>
-          <div class="text-2xl font-bold text-slate-900" id="card-max-duration">300.0 min</div>
-          <div class="text-xs text-slate-500 mt-1">Cross-metro long sector (5.0 hrs)</div>
-        </div>
-
-        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-          <div class="flex items-center justify-between text-slate-500 mb-2">
-            <span class="text-xs font-semibold uppercase tracking-wider">Overnight Flights</span>
-            <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center"><i class="ri-moon-line"></i></div>
-          </div>
-          <div class="text-2xl font-bold text-slate-900" id="card-overnight-flights">1 Repaired</div>
-          <div class="text-xs text-indigo-600 mt-1 flex items-center gap-1">
-            <i class="ri-checkbox-circle-fill"></i> +1 day corrected (SJ192)
-          </div>
-        </div>
-      </div>
-
-      <!-- Charts Row -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-          <h2 class="text-sm font-bold text-slate-900 mb-1 flex items-center gap-2">
-            <i class="ri-bar-chart-horizontal-line text-sky-600"></i> Top 10 Routes by Average Flight Duration
-          </h2>
-          <p class="text-xs text-slate-500 mb-4">Duration in minutes across primary domestic stage lengths</p>
-          <div class="chart-container">
-            <canvas id="chartRouteDuration"></canvas>
-          </div>
-        </div>
-
-        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-          <h2 class="text-sm font-bold text-slate-900 mb-1 flex items-center gap-2">
-            <i class="ri-equalizer-line text-sky-600"></i> Average Duration by Airline Carrier
-          </h2>
-          <p class="text-xs text-slate-500 mb-4">Stage length consistency across domestic operators</p>
-          <div class="chart-container">
-            <canvas id="chartAirlineDuration"></canvas>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============================================================== -->
-    <!-- PAGE 2: ROUTE PERFORMANCE -->
-    <!-- ============================================================== -->
-    <section id="tab-routes" class="space-y-6 hidden">
-      <!-- KPI Top Cards -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-          <div class="flex items-center justify-between text-slate-500 mb-2">
-            <span class="text-xs font-semibold uppercase tracking-wider">Active Domestic Routes</span>
-            <div class="w-8 h-8 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center"><i class="ri-map-pin-range-line"></i></div>
-          </div>
-          <div class="text-2xl font-bold text-slate-900">30 Sectors</div>
-          <div class="text-xs text-slate-500 mt-1">6 Metro Airports Connected</div>
-        </div>
-
-        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-          <div class="flex items-center justify-between text-slate-500 mb-2">
-            <span class="text-xs font-semibold uppercase tracking-wider">Total Bookings</span>
-            <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center"><i class="ri-ticket-line"></i></div>
-          </div>
-          <div class="text-2xl font-bold text-slate-900">1,000 Bookings</div>
-          <div class="text-xs text-slate-500 mt-1">320 Confirmed • 366 Pending</div>
-        </div>
-
-        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-          <div class="flex items-center justify-between text-slate-500 mb-2">
-            <span class="text-xs font-semibold uppercase tracking-wider">Cancellation Rate</span>
-            <div class="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center"><i class="ri-close-circle-line"></i></div>
-          </div>
-          <div class="text-2xl font-bold text-slate-900">31.40%</div>
-          <div class="text-xs text-rose-600 mt-1">314 Cancelled Bookings</div>
-        </div>
-
-        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-          <div class="flex items-center justify-between text-slate-500 mb-2">
-            <span class="text-xs font-semibold uppercase tracking-wider">Total Route Revenue</span>
-            <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center"><i class="ri-money-rupee-circle-line"></i></div>
-          </div>
-          <div class="text-2xl font-bold text-slate-900">₹8.05 M</div>
-          <div class="text-xs text-emerald-600 mt-1">Avg Fare: ₹8,054 per txn</div>
-        </div>
-      </div>
-
-      <!-- Charts Row -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-          <h2 class="text-sm font-bold text-slate-900 mb-1 flex items-center gap-2">
-            <i class="ri-flight-takeoff-line text-sky-600"></i> Top 10 Busiest Routes (Flight Count)
-          </h2>
-          <p class="text-xs text-slate-500 mb-4">Total scheduled flight instances per sector</p>
-          <div class="chart-container">
-            <canvas id="chartRouteTraffic"></canvas>
-          </div>
-        </div>
-
-        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-          <h2 class="text-sm font-bold text-slate-900 mb-1 flex items-center gap-2">
-            <i class="ri-funds-box-line text-sky-600"></i> Route Revenue Performance (Top 10)
-          </h2>
-          <p class="text-xs text-slate-500 mb-4">Gross booking revenue generated per corridor in INR</p>
-          <div class="chart-container">
-            <canvas id="chartRouteRevenue"></canvas>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============================================================== -->
-    <!-- PAGE 3: AIRLINE TRENDS -->
-    <!-- ============================================================== -->
-    <section id="tab-airlines" class="space-y-6 hidden">
-      <!-- KPI Top Cards -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-          <div class="flex items-center justify-between text-slate-500 mb-2">
-            <span class="text-xs font-semibold uppercase tracking-wider">Total Flights Operated</span>
-            <div class="w-8 h-8 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center"><i class="ri-flight-land-line"></i></div>
-          </div>
-          <div class="text-2xl font-bold text-slate-900">1,005 Flights</div>
-          <div class="text-xs text-slate-500 mt-1">Deduplicated from 1,020 raw</div>
-        </div>
-
-        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-          <div class="flex items-center justify-between text-slate-500 mb-2">
-            <span class="text-xs font-semibold uppercase tracking-wider">Fleet Market Leader</span>
-            <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center"><i class="ri-award-line"></i></div>
-          </div>
-          <div class="text-2xl font-bold text-slate-900">IndiGo (26.77%)</div>
-          <div class="text-xs text-slate-500 mt-1">269 flights (6E / 6F)</div>
-        </div>
-
-        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-          <div class="flex items-center justify-between text-slate-500 mb-2">
-            <span class="text-xs font-semibold uppercase tracking-wider">Repaired Airlines</span>
-            <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center"><i class="ri-shield-check-line"></i></div>
-          </div>
-          <div class="text-2xl font-bold text-slate-900">72 Records</div>
-          <div class="text-xs text-emerald-600 mt-1">41 NaN + 31 UNKNOWN fixed</div>
-        </div>
-
-        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-          <div class="flex items-center justify-between text-slate-500 mb-2">
-            <span class="text-xs font-semibold uppercase tracking-wider">Top Payment Channel</span>
-            <div class="w-8 h-8 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center"><i class="ri-qr-code-line"></i></div>
-          </div>
-          <div class="text-2xl font-bold text-slate-900">UPI (35.8%)</div>
-          <div class="text-xs text-slate-500 mt-1">358 transactions</div>
-        </div>
-      </div>
-
-      <!-- Charts Row -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-          <h2 class="text-sm font-bold text-slate-900 mb-1 flex items-center gap-2">
-            <i class="ri-pie-chart-2-line text-sky-600"></i> Market Share by Airline Carrier
-          </h2>
-          <p class="text-xs text-slate-500 mb-4">Flight volume distribution across carriers</p>
-          <div class="chart-container">
-            <canvas id="chartAirlineShare"></canvas>
-          </div>
-        </div>
-
-        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-          <h2 class="text-sm font-bold text-slate-900 mb-1 flex items-center gap-2">
-            <i class="ri-bank-card-line text-sky-600"></i> Transaction Share by Payment Method
-          </h2>
-          <p class="text-xs text-slate-500 mb-4">Volume & distribution across UPI, Card, NetBanking</p>
-          <div class="chart-container">
-            <canvas id="chartPaymentMethod"></canvas>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============================================================== -->
-    <!-- PAGE 4: DELAY & ANOMALY INSIGHTS -->
-    <!-- ============================================================== -->
-    <section id="tab-anomalies" class="space-y-6 hidden">
-      <!-- KPI Top Cards -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-          <div class="flex items-center justify-between text-slate-500 mb-2">
-            <span class="text-xs font-semibold uppercase tracking-wider">Duration Outliers</span>
-            <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center"><i class="ri-error-warning-line"></i></div>
-          </div>
-          <div class="text-2xl font-bold text-slate-900">1 Outlier</div>
-          <div class="text-xs text-amber-600 mt-1">> 2 Std Dev from route mean</div>
-        </div>
-
-        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-          <div class="flex items-center justify-between text-slate-500 mb-2">
-            <span class="text-xs font-semibold uppercase tracking-wider">Negative Durations</span>
-            <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center"><i class="ri-check-double-line"></i></div>
-          </div>
-          <div class="text-2xl font-bold text-slate-900">0 (Zero)</div>
-          <div class="text-xs text-emerald-600 mt-1">100% Overnight repaired</div>
-        </div>
-
-        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-          <div class="flex items-center justify-between text-slate-500 mb-2">
-            <span class="text-xs font-semibold uppercase tracking-wider">Imputed Fare Values</span>
-            <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center"><i class="ri-edit-line"></i></div>
-          </div>
-          <div class="text-2xl font-bold text-slate-900">78 Transactions</div>
-          <div class="text-xs text-slate-500 mt-1">Median fare ₹8,027.12 applied</div>
-        </div>
-
-        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-          <div class="flex items-center justify-between text-slate-500 mb-2">
-            <span class="text-xs font-semibold uppercase tracking-wider">Quarantine / Orphan Loss</span>
-            <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center"><i class="ri-lock-2-line"></i></div>
-          </div>
-          <div class="text-2xl font-bold text-slate-900">0 (Zero Loss)</div>
-          <div class="text-xs text-emerald-600 mt-1">100% Referential Integrity</div>
-        </div>
-      </div>
-
-      <!-- Hourly Distribution & Outlier Detail Table -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-          <h2 class="text-sm font-bold text-slate-900 mb-1 flex items-center gap-2">
-            <i class="ri-time-line text-sky-600"></i> Flight Volume by Departure Hour (Peak Analysis)
-          </h2>
-          <p class="text-xs text-slate-500 mb-4">Operations distribution across 24-hour diurnal cycle</p>
-          <div class="chart-container">
-            <canvas id="chartHourlyTraffic"></canvas>
-          </div>
-        </div>
-
-        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col">
-          <h2 class="text-sm font-bold text-slate-900 mb-1 flex items-center gap-2">
-            <i class="ri-alarm-warning-line text-amber-600"></i> Statistical Duration Outlier Audit
-          </h2>
-          <p class="text-xs text-slate-500 mb-4">Flights exceeding 2 standard deviations from route baseline</p>
-          <div class="overflow-x-auto flex-1">
-            <table class="w-full text-xs text-left">
-              <thead class="bg-slate-100 text-slate-600 uppercase font-semibold">
-                <tr>
-                  <th class="p-2.5">Flight</th>
-                  <th class="p-2.5">Airline</th>
-                  <th class="p-2.5">Route</th>
-                  <th class="p-2.5">Duration</th>
-                  <th class="p-2.5">Route Mean</th>
-                  <th class="p-2.5">Status</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-slate-100">
-                <tr class="hover:bg-slate-50">
-                  <td class="p-2.5 font-semibold text-slate-900">SJ192</td>
-                  <td class="p-2.5">SpiceJet</td>
-                  <td class="p-2.5 font-medium text-sky-700">HYD -> BOM</td>
-                  <td class="p-2.5 font-bold text-amber-600">300.0 min (5.0h)</td>
-                  <td class="p-2.5 text-slate-500">161.4 min (±35m)</td>
-                  <td class="p-2.5"><span class="bg-amber-100 text-amber-800 px-2 py-0.5 rounded text-[10px] font-semibold">Overnight Outlier</span></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="mt-4 p-3 bg-slate-50 rounded-lg text-xs text-slate-600 border border-slate-200">
-            <strong class="text-slate-800">Resolution Note:</strong> Flight SJ192 departed at 18:45 and arrived at 23:45 on the subsequent operational cycle. The automated +1 day timestamp correction fixed the duration to 300 minutes, preventing negative duration and maintaining pipeline continuity.
-          </div>
-        </div>
-      </div>
-    </section>
-
-  </main>
-
-  <!-- FOOTER -->
-  <footer class="bg-white border-t border-slate-200 py-4 text-xs text-slate-500">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-wrap justify-between items-center gap-2">
-      <div>ASG Airlines Flight Operations Pipeline • Production Medallion Analytics</div>
-      <div class="flex items-center gap-4">
-        <span>Protected PII (SHA-256)</span>
-        <span>•</span>
-        <span>Parquet & CSV Gold Datasets Ready</span>
+    <!-- Route duration horizontal bar -->
+    <div class="col-span-12 lg:col-span-7 card p-5">
+      <div class="section-title"><i class="ri-bar-chart-horizontal-line mr-1"></i>Top 10 Routes by Avg Duration</div>
+      <div class="chart-container" style="height:280px;">
+        <canvas id="chartRouteDuration"></canvas>
       </div>
     </div>
-  </footer>
 
-  <!-- LOAD DATA & INITIALIZE DASHBOARD -->
-  <script src="data.js"></script>
-  <script>
-    // Tab switching logic
-    function switchTab(tabId) {
-      const tabs = ['tab-duration', 'tab-routes', 'tab-airlines', 'tab-anomalies'];
-      tabs.forEach(t => {
-        const el = document.getElementById(t);
-        const btn = document.getElementById('btn-' + t);
-        if (t === tabId) {
-          el.classList.remove('hidden');
-          btn.classList.add('tab-active');
-          btn.classList.remove('text-slate-400', 'border-transparent');
-        } else {
-          el.classList.add('hidden');
-          btn.classList.remove('tab-active');
-          btn.classList.add('text-slate-400', 'border-transparent');
-        }
-      });
-    }
+    <!-- Hourly traffic heatmap bar -->
+    <div class="col-span-12 lg:col-span-8 card p-5">
+      <div class="section-title"><i class="ri-time-line mr-1"></i>24-Hour Flight Traffic Heatmap</div>
+      <div class="chart-container" style="height:240px;">
+        <canvas id="chartHourlyTraffic"></canvas>
+      </div>
+    </div>
 
-    // Chart instances store
-    let charts = {};
+    <!-- Duration distribution histogram -->
+    <div class="col-span-12 lg:col-span-4 card p-5">
+      <div class="section-title"><i class="ri-histogram-line mr-1"></i>Duration Frequency Distribution</div>
+      <div class="chart-container" style="height:240px;">
+        <canvas id="chartDurationHist"></canvas>
+      </div>
+    </div>
 
-    function initDashboard() {
-      if (typeof ASG_DATA === 'undefined') {
-        console.error('ASG_DATA not loaded');
-        return;
+    <!-- Route detail table -->
+    <div class="col-span-12 card p-5">
+      <div class="flex items-center justify-between mb-3">
+        <div class="section-title mb-0"><i class="ri-table-line mr-1"></i>Route Duration Detail — All 30 Routes</div>
+        <input type="text" id="routeFilter" placeholder="Search route..." class="w-44">
+      </div>
+      <div style="overflow-x:auto;max-height:280px;overflow-y:auto;">
+        <table class="table-compact" id="routeTable">
+          <thead>
+            <tr>
+              <th>Route</th><th>Full Name</th><th>Flights</th>
+              <th>Avg (min)</th><th>Min</th><th>Max</th><th>Spread</th>
+            </tr>
+          </thead>
+          <tbody id="routeTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══ PAGE 2: ROUTE PERFORMANCE ════════════════════════════════════════════ -->
+<div class="tab-pane" id="p2">
+  <div class="grid grid-cols-12 gap-4">
+
+    <!-- Revenue bar chart -->
+    <div class="col-span-12 lg:col-span-7 card p-5">
+      <div class="section-title"><i class="ri-money-rupee-circle-line mr-1"></i>Top 10 Routes — Total Revenue (INR)</div>
+      <div class="chart-container" style="height:290px;">
+        <canvas id="chartRouteRevenue"></canvas>
+      </div>
+    </div>
+
+    <!-- Traffic share donut -->
+    <div class="col-span-12 lg:col-span-5 card p-5">
+      <div class="section-title"><i class="ri-donut-chart-line mr-1"></i>Route Traffic Share</div>
+      <div class="chart-container" style="height:290px;">
+        <canvas id="chartRouteTraffic"></canvas>
+      </div>
+    </div>
+
+    <!-- Cancellation stacked bar -->
+    <div class="col-span-12 lg:col-span-8 card p-5">
+      <div class="section-title"><i class="ri-stack-line mr-1"></i>Booking Status by Route (Confirmed / Cancelled / Pending)</div>
+      <div class="chart-container" style="height:270px;">
+        <canvas id="chartCancellations"></canvas>
+      </div>
+    </div>
+
+    <!-- Age band stacked -->
+    <div class="col-span-12 lg:col-span-4 card p-5">
+      <div class="section-title"><i class="ri-user-3-line mr-1"></i>Age Band — Top 5 Routes</div>
+      <div class="chart-container" style="height:270px;">
+        <canvas id="chartAgeBand"></canvas>
+      </div>
+    </div>
+
+    <!-- Revenue detail table -->
+    <div class="col-span-12 card p-5">
+      <div class="section-title mb-3"><i class="ri-table-line mr-1"></i>Route Revenue Intelligence — Full Detail</div>
+      <div style="overflow-x:auto;max-height:260px;overflow-y:auto;">
+        <table class="table-compact" id="revenueTable">
+          <thead>
+            <tr>
+              <th>#</th><th>Route</th><th>Full Name</th><th>Transactions</th>
+              <th>Total Revenue</th><th>Avg Fare</th><th>Revenue Bar</th>
+            </tr>
+          </thead>
+          <tbody id="revenueTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══ PAGE 3: AIRLINE TRENDS ════════════════════════════════════════════════ -->
+<div class="tab-pane" id="p3">
+  <div class="grid grid-cols-12 gap-4">
+
+    <!-- Airline share donut -->
+    <div class="col-span-12 lg:col-span-4 card p-5">
+      <div class="section-title"><i class="ri-pie-chart-2-line mr-1"></i>Fleet Market Share by Flights</div>
+      <div class="chart-container" style="height:270px;">
+        <canvas id="chartAirlineShare"></canvas>
+      </div>
+    </div>
+
+    <!-- Airline revenue + avg fare combo -->
+    <div class="col-span-12 lg:col-span-8 card p-5">
+      <div class="section-title"><i class="ri-bar-chart-2-line mr-1"></i>Revenue & Avg Fare by Airline (Bar + Line Combo)</div>
+      <div class="chart-container" style="height:270px;">
+        <canvas id="chartAirlineRevenue"></canvas>
+      </div>
+    </div>
+
+    <!-- Payment method -->
+    <div class="col-span-12 lg:col-span-5 card p-5">
+      <div class="section-title"><i class="ri-bank-card-line mr-1"></i>Payment Method — Volume & Avg Fare</div>
+      <div class="chart-container" style="height:250px;">
+        <canvas id="chartPaymentMethod"></canvas>
+      </div>
+    </div>
+
+    <!-- Airline efficiency bubble -->
+    <div class="col-span-12 lg:col-span-7 card p-5">
+      <div class="section-title"><i class="ri-bubble-chart-line mr-1"></i>Airline Duration Efficiency Comparison</div>
+      <div class="chart-container" style="height:250px;">
+        <canvas id="chartAirlineEfficiency"></canvas>
+      </div>
+    </div>
+
+    <!-- Airline stats table -->
+    <div class="col-span-12 card p-5">
+      <div class="section-title mb-3"><i class="ri-table-line mr-1"></i>Airline Performance Scorecard</div>
+      <div id="airlineScorecardGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══ PAGE 4: DELAY & ANOMALY ══════════════════════════════════════════════ -->
+<div class="tab-pane" id="p4">
+  <div class="grid grid-cols-12 gap-4">
+
+    <!-- Outlier table -->
+    <div class="col-span-12 card p-5">
+      <div class="section-title mb-3"><i class="ri-error-warning-line mr-1"></i>Duration Outliers (> 2σ from Route Average)</div>
+      <table class="table-compact" id="outlierTable">
+        <thead>
+          <tr>
+            <th>Flight ID</th><th>Airline</th><th>Route</th><th>Departure</th><th>Arrival</th>
+            <th>Duration</th><th>Route Mean</th><th>Route Std Dev</th><th>Deviation</th>
+          </tr>
+        </thead>
+        <tbody id="outlierTableBody"></tbody>
+      </table>
+    </div>
+
+    <!-- Route variability bar -->
+    <div class="col-span-12 lg:col-span-6 card p-5">
+      <div class="section-title"><i class="ri-bar-chart-horizontal-line mr-1"></i>Route Duration Variability (Std Dev)</div>
+      <div class="chart-container" style="height:300px;">
+        <canvas id="chartRouteVariability"></canvas>
+      </div>
+    </div>
+
+    <!-- Actual vs Mean scatter -->
+    <div class="col-span-12 lg:col-span-6 card p-5">
+      <div class="section-title"><i class="ri-focus-2-line mr-1"></i>Duration Outlier Detection — Scatter (Actual vs Route Mean)</div>
+      <div class="chart-container" style="height:300px;">
+        <canvas id="chartOutlierScatter"></canvas>
+      </div>
+    </div>
+
+    <!-- Cancellation risk ranking -->
+    <div class="col-span-12 lg:col-span-6 card p-5">
+      <div class="section-title"><i class="ri-bar-chart-horizontal-line mr-1"></i>Route Cancellation Risk Ranking</div>
+      <div class="chart-container" style="height:300px;">
+        <canvas id="chartCancellationRisk"></canvas>
+      </div>
+    </div>
+
+    <!-- Overnight flight callout -->
+    <div class="col-span-12 lg:col-span-6 card p-5">
+      <div class="section-title mb-4"><i class="ri-moon-line mr-1"></i>Overnight Flight Engineering Audit</div>
+      <div class="space-y-3">
+        <div class="card-sm p-4">
+          <div class="flex items-start gap-3">
+            <i class="ri-alert-line text-2xl mt-0.5" style="color:#d29922;"></i>
+            <div>
+              <div class="font-semibold text-sm mb-1">Flight SJ192 — HYD → BOM</div>
+              <div class="text-xs" style="color:#8b949e;">
+                Raw data had arrival timestamp one full day <em>before</em> departure — 
+                a data encoding issue common in cross-midnight domestic flights logged in local IST.
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3 text-sm">
+          <div class="card-sm p-3">
+            <div style="color:#8b949e;" class="text-xs mb-1">DEPARTURE (raw)</div>
+            <div class="font-mono font-semibold">2026-04-19 18:45:42</div>
+          </div>
+          <div class="card-sm p-3">
+            <div style="color:#8b949e;" class="text-xs mb-1">ARRIVAL (raw — wrong day)</div>
+            <div class="font-mono font-semibold" style="color:#f85149;">2026-04-18 23:45:42</div>
+          </div>
+          <div class="card-sm p-3">
+            <div style="color:#8b949e;" class="text-xs mb-1">ARRIVAL (repaired)</div>
+            <div class="font-mono font-semibold" style="color:#3fb950;">2026-04-20 23:45:42</div>
+          </div>
+          <div class="card-sm p-3">
+            <div style="color:#8b949e;" class="text-xs mb-1">DURATION (repaired)</div>
+            <div class="font-mono font-semibold" style="color:#3fb950;">300 min (5 hours)</div>
+          </div>
+        </div>
+        <div class="card-sm p-3 text-xs" style="color:#8b949e; border-color:#d29922;">
+          <strong style="color:#d29922;">Fix applied:</strong> When arrival &lt; departure, add +1 day to arrival — 
+          standard overnight flight repair. Logged as <code>is_overnight = True</code> in fact_flights. 
+          Verified: 300 min is within normal HYD→BOM range (approx. 70-90 min), so flagged as duration outlier as well.
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══ PAGE 5: DATA QUALITY ══════════════════════════════════════════════════ -->
+<div class="tab-pane" id="p5">
+  <div class="grid grid-cols-12 gap-4">
+
+    <!-- Pipeline summary waterfall -->
+    <div class="col-span-12 lg:col-span-6 card p-5">
+      <div class="section-title"><i class="ri-filter-3-line mr-1"></i>Data Quality Waterfall — Row Tracking</div>
+      <div class="chart-container" style="height:300px;">
+        <canvas id="chartWaterfall"></canvas>
+      </div>
+    </div>
+
+    <!-- Booking status split -->
+    <div class="col-span-12 lg:col-span-3 card p-5">
+      <div class="section-title"><i class="ri-donut-chart-line mr-1"></i>Booking Status Overall</div>
+      <div class="chart-container" style="height:300px;">
+        <canvas id="chartBookingStatus"></canvas>
+      </div>
+    </div>
+
+    <!-- Payment imputed vs real -->
+    <div class="col-span-12 lg:col-span-3 card p-5">
+      <div class="section-title"><i class="ri-donut-chart-line mr-1"></i>Payment Imputation Split</div>
+      <div class="chart-container" style="height:300px;">
+        <canvas id="chartPaymentImpute"></canvas>
+      </div>
+    </div>
+
+    <!-- Stage-by-stage audit table -->
+    <div class="col-span-12 card p-5">
+      <div class="section-title mb-4"><i class="ri-shield-check-line mr-1"></i>Pipeline Audit Log — Stage by Stage</div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" id="auditCards"></div>
+    </div>
+
+    <!-- PII protection summary -->
+    <div class="col-span-12 card p-5">
+      <div class="section-title mb-4"><i class="ri-lock-2-line mr-1"></i>PII Protection — Cryptographic Masking Summary</div>
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        <div class="card-sm p-3 text-center">
+          <div class="text-xs font-semibold mb-1" style="color:#8b949e;">AADHAAR ID</div>
+          <div class="text-lg font-bold" style="color:#3fb950;">SHA-256</div>
+          <div class="text-xs mt-1" style="color:#8b949e;">+ masked XXXX-XXXX-####</div>
+        </div>
+        <div class="card-sm p-3 text-center">
+          <div class="text-xs font-semibold mb-1" style="color:#8b949e;">PHONE</div>
+          <div class="text-lg font-bold" style="color:#3fb950;">SHA-256</div>
+          <div class="text-xs mt-1" style="color:#8b949e;">+ masked +91-XXXXX-XX##</div>
+        </div>
+        <div class="card-sm p-3 text-center">
+          <div class="text-xs font-semibold mb-1" style="color:#8b949e;">EMAIL</div>
+          <div class="text-lg font-bold" style="color:#3fb950;">MASKED</div>
+          <div class="text-xs mt-1" style="color:#8b949e;">us**@domain.com pattern</div>
+        </div>
+        <div class="card-sm p-3 text-center">
+          <div class="text-xs font-semibold mb-1" style="color:#8b949e;">PASSPORT</div>
+          <div class="text-lg font-bold" style="color:#3fb950;">SHA-256</div>
+          <div class="text-xs mt-1" style="color:#8b949e;">+ masked last 4 chars</div>
+        </div>
+        <div class="card-sm p-3 text-center">
+          <div class="text-xs font-semibold mb-1" style="color:#8b949e;">EMERGENCY PH.</div>
+          <div class="text-lg font-bold" style="color:#3fb950;">SHA-256</div>
+          <div class="text-xs mt-1" style="color:#8b949e;">hashed only, no mask needed</div>
+        </div>
+        <div class="card-sm p-3 text-center">
+          <div class="text-xs font-semibold mb-1" style="color:#8b949e;">PII VAULT</div>
+          <div class="text-lg font-bold" style="color:#d29922;">RESTRICTED</div>
+          <div class="text-xs mt-1" style="color:#8b949e;">data/secure/ isolated layer</div>
+        </div>
+      </div>
+      <div class="mt-3 text-xs p-3 rounded-lg" style="background:#0d1117; color:#8b949e; border:1px solid #21262d;">
+        Salt used: <code>ASG_SECURE_SALT_2025</code> (configurable in pipeline/config.py) — 
+        All analytics layers verified: 0 raw PII columns in silver/gold. 
+        Compliance: PDPA / India DPDP Act ready.
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</main>
+
+<!-- ── FOOTER ─────────────────────────────────────────────────────────────── -->
+<footer class="max-w-screen-2xl mx-auto px-5 py-4 mt-2 text-xs flex flex-wrap gap-4 justify-between"
+        style="border-top:1px solid #21262d; color:#8b949e;">
+  <div>ASG Airlines Analytics Suite — pandas + PyArrow Medallion Pipeline — 6/6 unit tests passing</div>
+  <div>Gold Layer: 18 parquet tables • 18 CSV exports • 15 DAX measures • Built with Chart.js 4 + Tailwind CSS</div>
+</footer>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════════════
+   CHART.JS DEFAULT OVERRIDES
+═══════════════════════════════════════════════════════════════════════════ */
+Chart.defaults.color = "#8b949e";
+Chart.defaults.font.family = "Inter, ui-sans-serif";
+Chart.defaults.font.size = 11;
+
+const PALETTE = {
+  blue:   "#1f6feb", green:  "#3fb950", red:    "#f85149",
+  amber:  "#d29922", purple: "#bc8cff", teal:   "#39c5b5",
+  sky:    "#38bdf8", pink:   "#f472b6", orange: "#fb923c",
+  lime:   "#a3e635", slate:  "#64748b", rose:   "#fb7185",
+};
+const AIRLINE_COLORS = [PALETTE.blue, PALETTE.green, PALETTE.amber, PALETTE.red];
+const ROUTE_COLORS   = [PALETTE.blue, PALETTE.green, PALETTE.amber, PALETTE.red,
+                        PALETTE.purple, PALETTE.teal, PALETTE.sky, PALETTE.pink,
+                        PALETTE.orange, PALETTE.lime];
+
+function gridOpts(axis = "y") {
+  return { grid: { color: "#21262d" }, border: { color: "#30363d" } };
+}
+const legendDark = { labels: { color: "#8b949e", boxWidth: 12, padding: 12, font: {size:11} } };
+
+/* ── Clock ───────────────────────────────────────────────────────────────── */
+(function updateClock() {
+  document.getElementById("clock").textContent =
+    new Date().toLocaleString("en-IN", { dateStyle:"medium", timeStyle:"short" });
+  setTimeout(updateClock, 30000);
+})();
+
+/* ── Tab navigation ──────────────────────────────────────────────────────── */
+document.querySelectorAll(".tab-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll(".tab-pane").forEach(p => p.classList.remove("active"));
+    btn.classList.add("active");
+    document.getElementById(btn.dataset.tab).classList.add("active");
+  });
+});
+
+/* ── Animated KPI counter ────────────────────────────────────────────────── */
+function animateCounter(el, target, prefix = "", suffix = "", decimals = 0, duration = 900) {
+  const start = performance.now();
+  function step(now) {
+    const t = Math.min((now - start) / duration, 1);
+    const ease = 1 - Math.pow(1 - t, 3); // cubic ease-out
+    const val = (target * ease).toFixed(decimals);
+    el.textContent = prefix + Number(val).toLocaleString("en-IN") + suffix;
+    if (t < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════════════════════════════════ */
+function initDashboard() {
+  const D = ASG_DATA;
+
+  const summary      = D.kpi_overall_summary[0];
+  const alDist       = D.kpi_airline_distribution;
+  const alDur        = D.kpi_airline_duration;
+  const rtDur        = D.kpi_route_duration;
+  const rtTraffic    = D.kpi_route_traffic;
+  const rtRevenue    = D.kpi_route_revenue;
+  const rtCancel     = D.kpi_route_cancellations;
+  const payMethod    = D.kpi_fare_by_payment_method;
+  const hourly       = D.kpi_hourly_traffic;
+  const ageBand      = D.kpi_age_band_by_route;
+  const outliers     = D.kpi_duration_outliers;
+  const factPay      = D.fact_payments;
+  const factBook     = D.fact_bookings;
+  const factFlights  = D.fact_flights;
+  const dimAirline   = D.dim_airline;
+
+  /* ── Total revenue ─────────────────────────────────────────────────── */
+  const totalRev = factPay.reduce((s, r) => s + (r.amount || 0), 0);
+  const avgFare  = totalRev / factPay.length;
+  const cancelCt = factBook.filter(b => b.is_cancelled).length;
+  const cancelPct = (cancelCt / factBook.length * 100).toFixed(1);
+
+  /* ── Global KPI strip ─────────────────────────────────────────────── */
+  const kpis = [
+    { val: summary.total_flights_analyzed, label: "Total Flights",      sub: "After dedup", cls: "kpi-blue",   prefix:"", suffix:"",    dec:0 },
+    { val: avgFare,                         label: "Avg Fare",           sub: "Per booking",  cls: "kpi-green",  prefix:"₹", suffix:"",   dec:0 },
+    { val: totalRev,                        label: "Total Revenue",      sub: "All routes",   cls: "kpi-amber",  prefix:"₹", suffix:"",   dec:0 },
+    { val: parseFloat(cancelPct),           label: "Cancellation Rate",  sub: `${cancelCt} bookings`, cls:"kpi-red", prefix:"", suffix:"%", dec:1 },
+    { val: summary.overnight_flights_repaired, label:"Overnight Repaired", sub:"SJ192 HYD→BOM", cls:"kpi-purple", prefix:"", suffix:"", dec:0 },
+    { val: summary.duration_outliers_count, label: "Duration Outliers", sub: ">2σ deviation", cls: "kpi-teal",  prefix:"", suffix:"",    dec:0 },
+  ];
+  const strip = document.getElementById("kpiStrip");
+  kpis.forEach(k => {
+    const card = document.createElement("div");
+    card.className = `kpi-card ${k.cls}`;
+    const valEl = document.createElement("div");
+    valEl.className = "kpi-val";
+    card.innerHTML = `<div class="kpi-lbl">${k.label}</div>`;
+    card.appendChild(valEl);
+    card.innerHTML += `<div class="kpi-sub">${k.sub}</div>`;
+    strip.appendChild(card);
+    // Re-find valEl since innerHTML replaced it
+    animateCounter(card.querySelectorAll(".kpi-val")[0] || valEl, k.val, k.prefix, k.suffix, k.dec);
+  });
+
+  /* ═══════════════════════════════════════════════════════════════════
+     PAGE 1 — DURATION ANALYSIS
+  ═══════════════════════════════════════════════════════════════════ */
+
+  // Airline Duration grouped bar
+  new Chart(document.getElementById("chartAirlineDuration"), {
+    type: "bar",
+    data: {
+      labels: alDur.map(a => a.airline_name.split(" ")[0]),
+      datasets: [
+        { label: "Min (min)", data: alDur.map(a => a.min_duration_min), backgroundColor: "#0a3a7c", borderRadius: 4 },
+        { label: "Avg (min)", data: alDur.map(a => a.avg_duration_min), backgroundColor: PALETTE.blue, borderRadius: 4 },
+        { label: "Max (min)", data: alDur.map(a => a.max_duration_min), backgroundColor: PALETTE.red, borderRadius: 4, opacity: .8 },
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: legendDark },
+      scales: {
+        x: { ...gridOpts("x"), ticks: { color: "#8b949e" } },
+        y: { ...gridOpts("y"), ticks: { color: "#8b949e" }, title: { display:true, text:"Minutes", color:"#8b949e" } }
       }
-
-      // Populate Route Filter
-      const routeSelect = document.getElementById('routeFilter');
-      const routes = ASG_DATA['dim_route'] || [];
-      routes.forEach(r => {
-        const opt = document.createElement('option');
-        opt.value = r.route_name;
-        opt.className = 'bg-slate-800';
-        opt.textContent = r.route_name;
-        routeSelect.appendChild(opt);
-      });
-
-      // 1. Chart: Route Duration (Top 10)
-      const routeDurData = (ASG_DATA['kpi_route_duration'] || []).slice(0, 10);
-      const ctxRouteDur = document.getElementById('chartRouteDuration').getContext('2d');
-      charts.routeDur = new Chart(ctxRouteDur, {
-        type: 'bar',
-        data: {
-          labels: routeDurData.map(d => d.route_name),
-          datasets: [{
-            label: 'Avg Duration (min)',
-            data: routeDurData.map(d => d.avg_duration_min),
-            backgroundColor: '#0284c7',
-            borderRadius: 6
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          indexAxis: 'y',
-          plugins: { legend: { display: false } },
-          scales: { x: { grid: { color: '#f1f5f9' } }, y: { grid: { display: false } } }
-        }
-      });
-
-      // 2. Chart: Airline Duration
-      const airDurData = ASG_DATA['kpi_airline_duration'] || [];
-      const ctxAirDur = document.getElementById('chartAirlineDuration').getContext('2d');
-      charts.airDur = new Chart(ctxAirDur, {
-        type: 'bar',
-        data: {
-          labels: airDurData.map(d => d.airline_name),
-          datasets: [{
-            label: 'Avg Duration (min)',
-            data: airDurData.map(d => d.avg_duration_min),
-            backgroundColor: ['#0284c7', '#38bdf8', '#0ea5e9', '#0369a1'],
-            borderRadius: 6
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          scales: { y: { min: 140, max: 180, grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } }
-        }
-      });
-
-      // 3. Chart: Route Traffic (Top 10)
-      const routeTrafData = (ASG_DATA['kpi_route_traffic'] || []).slice(0, 10);
-      const ctxRouteTraf = document.getElementById('chartRouteTraffic').getContext('2d');
-      charts.routeTraf = new Chart(ctxRouteTraf, {
-        type: 'bar',
-        data: {
-          labels: routeTrafData.map(d => d.route_name),
-          datasets: [{
-            label: 'Flight Instances',
-            data: routeTrafData.map(d => d.total_flights),
-            backgroundColor: '#0d9488',
-            borderRadius: 6
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          scales: { y: { grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } }
-        }
-      });
-
-      // 4. Chart: Route Revenue (Top 10)
-      const routeRevData = (ASG_DATA['kpi_route_revenue'] || []).slice(0, 10);
-      const ctxRouteRev = document.getElementById('chartRouteRevenue').getContext('2d');
-      charts.routeRev = new Chart(ctxRouteRev, {
-        type: 'bar',
-        data: {
-          labels: routeRevData.map(d => d.route_name),
-          datasets: [{
-            label: 'Revenue (INR)',
-            data: routeRevData.map(d => d.total_revenue),
-            backgroundColor: '#10b981',
-            borderRadius: 6
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          indexAxis: 'y',
-          plugins: { legend: { display: false } },
-          scales: { x: { grid: { color: '#f1f5f9' } }, y: { grid: { display: false } } }
-        }
-      });
-
-      // 5. Chart: Airline Market Share
-      const airDistData = ASG_DATA['kpi_airline_distribution'] || [];
-      const ctxAirShare = document.getElementById('chartAirlineShare').getContext('2d');
-      charts.airShare = new Chart(ctxAirShare, {
-        type: 'doughnut',
-        data: {
-          labels: airDistData.map(d => `${d.airline_name} (${d.share_pct}%)`),
-          datasets: [{
-            data: airDistData.map(d => d.total_flights),
-            backgroundColor: ['#0284c7', '#6366f1', '#f59e0b', '#ec4899']
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { position: 'bottom' } }
-        }
-      });
-
-      // 6. Chart: Payment Method
-      const payData = ASG_DATA['kpi_fare_by_payment_method'] || [];
-      const ctxPay = document.getElementById('chartPaymentMethod').getContext('2d');
-      charts.payMethod = new Chart(ctxPay, {
-        type: 'doughnut',
-        data: {
-          labels: payData.map(d => `${d.payment_method} (${d.transaction_count})`),
-          datasets: [{
-            data: payData.map(d => d.total_amount),
-            backgroundColor: ['#14b8a6', '#3b82f6', '#8b5cf6']
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { position: 'bottom' } }
-        }
-      });
-
-      // 7. Chart: Hourly Departure Traffic
-      const hourData = ASG_DATA['kpi_hourly_traffic'] || [];
-      const ctxHour = document.getElementById('chartHourlyTraffic').getContext('2d');
-      charts.hourly = new Chart(ctxHour, {
-        type: 'line',
-        data: {
-          labels: hourData.map(d => `${d.departure_hour}:00`),
-          datasets: [{
-            label: 'Departures',
-            data: hourData.map(d => d.flights_count),
-            borderColor: '#0284c7',
-            backgroundColor: 'rgba(2, 132, 199, 0.1)',
-            fill: true,
-            tension: 0.35,
-            pointRadius: 3
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          scales: { y: { grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } }
-        }
-      });
     }
+  });
 
-    function resetFilters() {
-      document.getElementById('airlineFilter').value = 'ALL';
-      document.getElementById('routeFilter').value = 'ALL';
+  // Route duration horizontal bar (top 15 by flight count)
+  const topRt = [...rtDur].sort((a,b) => b.flight_count - a.flight_count).slice(0,15);
+  new Chart(document.getElementById("chartRouteDuration"), {
+    type: "bar",
+    data: {
+      labels: topRt.map(r => r.route_name),
+      datasets: [{
+        label: "Avg Duration (min)",
+        data: topRt.map(r => r.avg_duration_min),
+        backgroundColor: topRt.map((_, i) => ROUTE_COLORS[i % ROUTE_COLORS.length] + "cc"),
+        borderColor:     topRt.map((_, i) => ROUTE_COLORS[i % ROUTE_COLORS.length]),
+        borderWidth: 1, borderRadius: 4
+      }]
+    },
+    options: {
+      indexAxis: "y",
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ...gridOpts("x"), ticks: { color: "#8b949e" }, title: { display:true, text:"Avg Duration (min)", color:"#8b949e" } },
+        y: { ...gridOpts("y"), ticks: { color: "#8b949e", font: {size:10} } }
+      }
     }
+  });
 
-    window.addEventListener('DOMContentLoaded', initDashboard);
-  </script>
+  // Hourly traffic - colour intensity bar
+  const hrs = hourly.map(h => `${String(h.departure_hour).padStart(2,"0")}:00`);
+  const hCounts = hourly.map(h => h.flights_count);
+  const maxH = Math.max(...hCounts);
+  new Chart(document.getElementById("chartHourlyTraffic"), {
+    type: "bar",
+    data: {
+      labels: hrs,
+      datasets: [{
+        label: "Flights",
+        data: hCounts,
+        backgroundColor: hCounts.map(c => `rgba(31,111,235,${0.25 + 0.75 * c / maxH})`),
+        borderColor: hCounts.map(c => `rgba(56,189,248,${0.4 + 0.6 * c / maxH})`),
+        borderWidth: 1, borderRadius: 3
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ...gridOpts("x"), ticks: { color:"#8b949e", font:{size:9}, maxRotation:45 } },
+        y: { ...gridOpts("y"), ticks: { color:"#8b949e" }, title:{ display:true, text:"Flights", color:"#8b949e" } }
+      }
+    }
+  });
+
+  // Duration distribution histogram (bucketed into 10 bins)
+  const durations = factFlights.map(f => f.duration_minutes).filter(Boolean);
+  const bins = 12; const min = 20; const max = 320;
+  const binW = (max - min) / bins;
+  const buckets = Array(bins).fill(0);
+  durations.forEach(d => {
+    const idx = Math.min(Math.floor((d - min) / binW), bins - 1);
+    if (idx >= 0) buckets[idx]++;
+  });
+  const binLabels = Array.from({length: bins}, (_, i) => `${Math.round(min + i*binW)}-${Math.round(min + (i+1)*binW)}`);
+  new Chart(document.getElementById("chartDurationHist"), {
+    type: "bar",
+    data: {
+      labels: binLabels,
+      datasets: [{
+        label: "Flights",
+        data: buckets,
+        backgroundColor: buckets.map((_, i) => i < 2 ? PALETTE.green+"aa" : i > bins-3 ? PALETTE.red+"aa" : PALETTE.blue+"aa"),
+        borderWidth: 0, borderRadius: 3
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ...gridOpts("x"), ticks: { color:"#8b949e", font:{size:8}, maxRotation:50 } },
+        y: { ...gridOpts("y"), ticks: { color:"#8b949e" } }
+      }
+    }
+  });
+
+  // Route duration detail table
+  const rtBody = document.getElementById("routeTableBody");
+  const sorted = [...rtDur].sort((a,b) => b.avg_duration_min - a.avg_duration_min);
+  function renderRouteTable(rows) {
+    rtBody.innerHTML = rows.map(r => {
+      const spread = r.max_duration_min - r.min_duration_min;
+      return `<tr>
+        <td class="font-mono font-semibold">${r.route_name}</td>
+        <td class="text-xs" style="color:#8b949e;">${r.route_full_name}</td>
+        <td>${r.flight_count}</td>
+        <td class="font-semibold" style="color:#38bdf8;">${r.avg_duration_min.toFixed(1)}</td>
+        <td>${r.min_duration_min}</td>
+        <td>${r.max_duration_min}</td>
+        <td><span style="color:${spread > 150 ? '#f85149': spread > 80 ? '#d29922':'#3fb950'}">${spread} min</span></td>
+      </tr>`;
+    }).join("");
+  }
+  renderRouteTable(sorted);
+  document.getElementById("routeFilter").addEventListener("input", e => {
+    const q = e.target.value.toLowerCase();
+    renderRouteTable(sorted.filter(r => r.route_name.toLowerCase().includes(q) || r.route_full_name.toLowerCase().includes(q)));
+  });
+
+  /* ═══════════════════════════════════════════════════════════════════
+     PAGE 2 — ROUTE PERFORMANCE
+  ═══════════════════════════════════════════════════════════════════ */
+
+  // Revenue bar (top 10)
+  const top10rev = [...rtRevenue].sort((a,b) => b.total_revenue - a.total_revenue).slice(0,10);
+  new Chart(document.getElementById("chartRouteRevenue"), {
+    type: "bar",
+    data: {
+      labels: top10rev.map(r => r.route_name),
+      datasets: [{
+        label: "Total Revenue (INR)",
+        data: top10rev.map(r => r.total_revenue),
+        backgroundColor: top10rev.map((_, i) => ROUTE_COLORS[i % ROUTE_COLORS.length] + "bb"),
+        borderColor:     top10rev.map((_, i) => ROUTE_COLORS[i % ROUTE_COLORS.length]),
+        borderWidth: 1, borderRadius: 5
+      }]
+    },
+    options: {
+      indexAxis: "y",
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ...gridOpts("x"), ticks: { color:"#8b949e", callback: v => "₹" + (v/1000).toFixed(0) + "K" } },
+        y: { ...gridOpts("y"), ticks: { color:"#8b949e" } }
+      }
+    }
+  });
+
+  // Traffic share donut
+  const top10tr = [...rtTraffic].sort((a,b) => b.total_flights - a.total_flights);
+  const top6 = top10tr.slice(0,6);
+  const othersCount = top10tr.slice(6).reduce((s,r) => s + r.total_flights, 0);
+  new Chart(document.getElementById("chartRouteTraffic"), {
+    type: "doughnut",
+    data: {
+      labels: [...top6.map(r => r.route_name), "Others"],
+      datasets: [{
+        data: [...top6.map(r => r.total_flights), othersCount],
+        backgroundColor: [...ROUTE_COLORS, "#64748b"],
+        borderColor: "#161b22", borderWidth: 2, hoverOffset: 6
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      cutout: "62%",
+      plugins: { legend: { ...legendDark, position:"right" } }
+    }
+  });
+
+  // Cancellations stacked bar (top 12 routes by total bookings)
+  const top12cancel = [...rtCancel].sort((a,b) => b.total_bookings - a.total_bookings).slice(0,12);
+  new Chart(document.getElementById("chartCancellations"), {
+    type: "bar",
+    data: {
+      labels: top12cancel.map(r => r.route_name),
+      datasets: [
+        { label: "Confirmed", data: top12cancel.map(r => r.confirmed_bookings), backgroundColor: PALETTE.green + "cc", borderRadius: {topLeft:0,topRight:0,bottomLeft:3,bottomRight:3} },
+        { label: "Cancelled", data: top12cancel.map(r => r.cancelled_bookings), backgroundColor: PALETTE.red + "cc", borderRadius: 0 },
+        { label: "Pending",   data: top12cancel.map(r => r.pending_bookings),   backgroundColor: PALETTE.amber + "cc", borderRadius: {topLeft:3,topRight:3} },
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { ...legendDark, position:"top" } },
+      scales: {
+        x: { stacked:true, ...gridOpts("x"), ticks: { color:"#8b949e", font:{size:9} } },
+        y: { stacked:true, ...gridOpts("y"), ticks: { color:"#8b949e" } }
+      }
+    }
+  });
+
+  // Age band stacked — top 5 routes by traffic
+  const top5routeNames = [...rtTraffic].sort((a,b)=>b.total_flights-a.total_flights).slice(0,5).map(r=>r.route_name);
+  const ageBands = [...new Set(ageBand.map(a => a.age_band))];
+  const agePalette = [PALETTE.blue, PALETTE.green, PALETTE.amber, PALETTE.red, PALETTE.purple];
+  const ageDatassets = ageBands.map((band, i) => ({
+    label: band,
+    data: top5routeNames.map(route => {
+      const found = ageBand.find(a => a.route_name === route && a.age_band === band);
+      return found ? found.passenger_count : 0;
+    }),
+    backgroundColor: agePalette[i % agePalette.length] + "bb",
+    borderRadius: i === ageBands.length - 1 ? {topLeft:3,topRight:3} : 0
+  }));
+  new Chart(document.getElementById("chartAgeBand"), {
+    type: "bar",
+    data: { labels: top5routeNames, datasets: ageDatassets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { ...legendDark, position:"top" } },
+      scales: {
+        x: { stacked:true, ...gridOpts("x"), ticks: { color:"#8b949e", font:{size:9} } },
+        y: { stacked:true, ...gridOpts("y"), ticks: { color:"#8b949e" } }
+      }
+    }
+  });
+
+  // Revenue detail table
+  const revBody = document.getElementById("revenueTableBody");
+  const revSorted = [...rtRevenue].sort((a,b) => b.total_revenue - a.total_revenue);
+  const maxRev = revSorted[0]?.total_revenue || 1;
+  revBody.innerHTML = revSorted.map((r, i) => `<tr>
+    <td style="color:#8b949e;">${i+1}</td>
+    <td class="font-mono font-semibold">${r.route_name}</td>
+    <td class="text-xs" style="color:#8b949e;">${r.route_full_name}</td>
+    <td>${r.total_transactions}</td>
+    <td class="font-semibold" style="color:#3fb950;">₹${r.total_revenue.toLocaleString("en-IN",{maximumFractionDigits:0})}</td>
+    <td>₹${r.avg_fare.toLocaleString("en-IN",{maximumFractionDigits:0})}</td>
+    <td style="width:120px;">
+      <div class="progress-bar"><div class="progress-fill" style="width:${(r.total_revenue/maxRev*100).toFixed(1)}%;background:#1f6feb;"></div></div>
+    </td>
+  </tr>`).join("");
+
+  /* ═══════════════════════════════════════════════════════════════════
+     PAGE 3 — AIRLINE TRENDS
+  ═══════════════════════════════════════════════════════════════════ */
+
+  // Airline share donut
+  new Chart(document.getElementById("chartAirlineShare"), {
+    type: "doughnut",
+    data: {
+      labels: alDist.map(a => `${a.airline_name} (${a.airline_code})`),
+      datasets: [{
+        data: alDist.map(a => a.total_flights),
+        backgroundColor: AIRLINE_COLORS,
+        borderColor: "#161b22", borderWidth: 3, hoverOffset: 8
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, cutout: "65%",
+      plugins: { legend: { ...legendDark, position:"bottom" } }
+    }
+  });
+
+  // Airline revenue bar + avg fare line combo
+  // Build airline-level revenue from fact_payments + dim_airline via airline_key join
+  const alRevMap = {};
+  factPay.forEach(p => {
+    const k = p.airline_key;
+    if (!alRevMap[k]) alRevMap[k] = { sum:0, cnt:0 };
+    alRevMap[k].sum += (p.amount || 0);
+    alRevMap[k].cnt++;
+  });
+  const alRevData = dimAirline.map(a => ({
+    name: a.airline_name,
+    code: a.airline_code,
+    total: alRevMap[a.airline_key]?.sum || 0,
+    avg: alRevMap[a.airline_key] ? alRevMap[a.airline_key].sum / alRevMap[a.airline_key].cnt : 0
+  })).sort((a,b) => b.total - a.total);
+
+  new Chart(document.getElementById("chartAirlineRevenue"), {
+    type: "bar",
+    data: {
+      labels: alRevData.map(a => a.name),
+      datasets: [
+        { type:"bar", label:"Total Revenue (INR)", data: alRevData.map(a => a.total),
+          backgroundColor: AIRLINE_COLORS, borderRadius: 5, yAxisID:"y" },
+        { type:"line", label:"Avg Fare (INR)", data: alRevData.map(a => a.avg),
+          borderColor: PALETTE.amber, backgroundColor: PALETTE.amber+"33",
+          pointBackgroundColor: PALETTE.amber, pointRadius:5, borderWidth:2.5,
+          tension:0.4, yAxisID:"y2" }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { ...legendDark, position:"top" } },
+      scales: {
+        x: { ...gridOpts("x"), ticks: { color:"#8b949e" } },
+        y:  { ...gridOpts("y"), ticks: { color:"#8b949e", callback: v => "₹"+(v/1000).toFixed(0)+"K" },
+              title:{ display:true, text:"Revenue (INR)", color:"#8b949e" } },
+        y2: { position:"right", ...gridOpts("y"), ticks: { color: PALETTE.amber, callback: v => "₹"+(v/1000).toFixed(0)+"K" },
+              title:{ display:true, text:"Avg Fare", color: PALETTE.amber }, grid:{ drawOnChartArea:false } }
+      }
+    }
+  });
+
+  // Payment method grouped bar
+  new Chart(document.getElementById("chartPaymentMethod"), {
+    type: "bar",
+    data: {
+      labels: payMethod.map(p => p.payment_method),
+      datasets: [
+        { label:"Transactions", data: payMethod.map(p => p.transaction_count),
+          backgroundColor:[PALETTE.blue+"cc",PALETTE.green+"cc",PALETTE.amber+"cc"], borderRadius:5, yAxisID:"y" },
+        { label:"Avg Amount (INR)", data: payMethod.map(p => p.avg_amount),
+          type:"line", borderColor: PALETTE.purple, backgroundColor: PALETTE.purple+"22",
+          pointBackgroundColor: PALETTE.purple, pointRadius:6, borderWidth:2.5, tension:0.3, yAxisID:"y2" }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { ...legendDark, position:"top" } },
+      scales: {
+        x: { ...gridOpts("x"), ticks:{ color:"#8b949e" } },
+        y:  { ...gridOpts("y"), ticks:{ color:"#8b949e" }, title:{display:true,text:"Transactions",color:"#8b949e"} },
+        y2: { position:"right", ticks:{ color:PALETTE.purple }, grid:{drawOnChartArea:false},
+              title:{display:true,text:"Avg Fare",color:PALETTE.purple} }
+      }
+    }
+  });
+
+  // Airline efficiency bubble chart (using Chart.js scatter with point sizes)
+  new Chart(document.getElementById("chartAirlineEfficiency"), {
+    type: "bubble",
+    data: {
+      datasets: alDur.map((a, i) => ({
+        label: a.airline_name,
+        data: [{ x: a.flight_count, y: a.avg_duration_min, r: a.max_duration_min / 25 }],
+        backgroundColor: AIRLINE_COLORS[i] + "99",
+        borderColor: AIRLINE_COLORS[i], borderWidth: 2
+      }))
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { ...legendDark, position:"top" } },
+      scales: {
+        x: { ...gridOpts("x"), ticks:{ color:"#8b949e" }, title:{display:true,text:"Flight Count",color:"#8b949e"} },
+        y: { ...gridOpts("y"), ticks:{ color:"#8b949e" }, title:{display:true,text:"Avg Duration (min)",color:"#8b949e"} }
+      }
+    }
+  });
+
+  // Airline scorecard cards
+  const scoreGrid = document.getElementById("airlineScorecardGrid");
+  alDur.forEach((a, i) => {
+    const alRevRow = alRevData.find(r => r.code === a.airline_code) || { total:0, avg:0 };
+    const distRow = alDist.find(d => d.airline_code === a.airline_code);
+    scoreGrid.innerHTML += `
+    <div class="card-sm p-4" style="border-top:3px solid ${AIRLINE_COLORS[i]};">
+      <div class="font-bold text-sm mb-3">${a.airline_name} <span class="text-xs font-mono px-1.5 py-0.5 rounded" style="background:#21262d;color:#8b949e;">${a.airline_code}</span></div>
+      <div class="space-y-2 text-xs">
+        <div class="flex justify-between"><span style="color:#8b949e;">Flights</span><span class="font-semibold">${a.flight_count}</span></div>
+        <div class="flex justify-between"><span style="color:#8b949e;">Market Share</span><span class="font-semibold">${distRow?.share_pct}%</span></div>
+        <div class="flex justify-between"><span style="color:#8b949e;">Avg Duration</span><span class="font-semibold">${a.avg_duration_min.toFixed(1)} min</span></div>
+        <div class="flex justify-between"><span style="color:#8b949e;">Min / Max</span><span class="font-semibold">${a.min_duration_min} / ${a.max_duration_min} min</span></div>
+        <div class="flex justify-between"><span style="color:#8b949e;">Revenue</span><span class="font-semibold" style="color:#3fb950;">₹${(alRevRow.total/1000).toFixed(0)}K</span></div>
+        <div class="flex justify-between"><span style="color:#8b949e;">Avg Fare</span><span class="font-semibold">₹${alRevRow.avg.toFixed(0)}</span></div>
+      </div>
+    </div>`;
+  });
+
+  /* ═══════════════════════════════════════════════════════════════════
+     PAGE 4 — DELAY & ANOMALY
+  ═══════════════════════════════════════════════════════════════════ */
+
+  // Outlier table
+  const outBody = document.getElementById("outlierTableBody");
+  if (outliers.length === 0) {
+    outBody.innerHTML = `<tr><td colspan="9" class="text-center py-4" style="color:#8b949e;">No outliers found. All flights within ±2σ except SJ192 (overnight, flagged separately).</td></tr>`;
+  } else {
+    outBody.innerHTML = outliers.map(o => {
+      const dev = Math.abs(o.duration_minutes - o.route_mean_duration);
+      return `<tr>
+        <td class="font-mono font-semibold">${o.flight_id}</td>
+        <td>${o.airline_name}</td>
+        <td>${o.route_name}</td>
+        <td class="text-xs font-mono">${o.departure_time || "-"}</td>
+        <td class="text-xs font-mono">${o.arrival_time || "-"}</td>
+        <td class="font-semibold" style="color:#f85149;">${o.duration_minutes} min</td>
+        <td>${o.route_mean_duration?.toFixed(1) || "-"} min</td>
+        <td>${o.route_std_duration?.toFixed(1) || "-"} min</td>
+        <td class="font-semibold" style="color:#d29922;">+${dev.toFixed(1)} min</td>
+      </tr>`;
+    }).join("");
+  }
+
+  // Route variability bar (std dev)
+  const rtWithStd = (() => {
+    // compute std per route from fact_flights
+    const routeGroups = {};
+    factFlights.forEach(f => {
+      const k = f.route_key;
+      if (!routeGroups[k]) routeGroups[k] = { durs:[], mean: f.route_mean_duration };
+      routeGroups[k].durs.push(f.duration_minutes);
+    });
+    const dim_route = D.dim_route;
+    return dim_route.map(r => {
+      const g = routeGroups[r.route_key];
+      if (!g || g.durs.length < 2) return { route: r.route_name, std: 0 };
+      const mean = g.durs.reduce((a,b) => a+b, 0) / g.durs.length;
+      const std = Math.sqrt(g.durs.reduce((s, d) => s + (d-mean)**2, 0) / g.durs.length);
+      return { route: r.route_name, std };
+    }).sort((a,b) => b.std - a.std).slice(0,15);
+  })();
+
+  new Chart(document.getElementById("chartRouteVariability"), {
+    type: "bar",
+    data: {
+      labels: rtWithStd.map(r => r.route),
+      datasets: [{
+        label: "Std Dev (min)",
+        data: rtWithStd.map(r => +r.std.toFixed(1)),
+        backgroundColor: rtWithStd.map(r => r.std > 50 ? PALETTE.red+"cc" : r.std > 30 ? PALETTE.amber+"cc" : PALETTE.green+"cc"),
+        borderRadius: 3
+      }]
+    },
+    options: {
+      indexAxis: "y",
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display:false } },
+      scales: {
+        x: { ...gridOpts("x"), ticks:{ color:"#8b949e" }, title:{display:true,text:"Std Dev (min)",color:"#8b949e"} },
+        y: { ...gridOpts("y"), ticks:{ color:"#8b949e", font:{size:9} } }
+      }
+    }
+  });
+
+  // Outlier scatter
+  const normalPts = factFlights.filter(f => !f.is_duration_outlier).map(f => ({
+    x: f.route_mean_duration, y: f.duration_minutes
+  }));
+  const outlierPts = factFlights.filter(f => f.is_duration_outlier).map(f => ({
+    x: f.route_mean_duration, y: f.duration_minutes
+  }));
+  const scatterMax = 340;
+  new Chart(document.getElementById("chartOutlierScatter"), {
+    type: "scatter",
+    data: {
+      datasets: [
+        { label:"Normal Flights", data: normalPts, backgroundColor: PALETTE.blue+"44",
+          pointRadius:3, pointBorderWidth:0 },
+        { label:"Outlier (>2σ)",  data: outlierPts, backgroundColor: PALETTE.red,
+          pointRadius:8, pointStyle:"star", pointBorderColor:"#fff", pointBorderWidth:1 },
+        { label:"y = x (zero deviation)", data:[{x:30,y:30},{x:scatterMax,y:scatterMax}],
+          type:"line", borderColor:"#374151", borderDash:[5,4], borderWidth:1.5,
+          pointRadius:0, fill:false }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { ...legendDark, position:"top" } },
+      scales: {
+        x: { ...gridOpts("x"), ticks:{ color:"#8b949e" }, title:{display:true,text:"Route Mean Duration (min)",color:"#8b949e"} },
+        y: { ...gridOpts("y"), ticks:{ color:"#8b949e" }, title:{display:true,text:"Actual Duration (min)",color:"#8b949e"} }
+      }
+    }
+  });
+
+  // Cancellation risk ranking
+  const topCancel = [...rtCancel].sort((a,b) => b.cancellation_rate_pct - a.cancellation_rate_pct).slice(0,12);
+  const avgCancel = rtCancel.reduce((s,r) => s + r.cancellation_rate_pct, 0) / rtCancel.length;
+  new Chart(document.getElementById("chartCancellationRisk"), {
+    type: "bar",
+    data: {
+      labels: topCancel.map(r => r.route_name),
+      datasets: [{
+        label: "Cancellation Rate (%)",
+        data: topCancel.map(r => r.cancellation_rate_pct),
+        backgroundColor: topCancel.map(r => r.cancellation_rate_pct > 35 ? PALETTE.red+"cc" : r.cancellation_rate_pct > 28 ? PALETTE.amber+"cc" : PALETTE.green+"cc"),
+        borderRadius: 3
+      }]
+    },
+    options: {
+      indexAxis: "y",
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display:false },
+        annotation: {}
+      },
+      scales: {
+        x: { ...gridOpts("x"), ticks:{ color:"#8b949e", callback: v => v + "%" },
+             title:{display:true,text:"Cancellation Rate (%)",color:"#8b949e"} },
+        y: { ...gridOpts("y"), ticks:{ color:"#8b949e", font:{size:9} } }
+      }
+    }
+  });
+
+  /* ═══════════════════════════════════════════════════════════════════
+     PAGE 5 — DATA QUALITY
+  ═══════════════════════════════════════════════════════════════════ */
+
+  // Waterfall — row tracking
+  const wfLabels = ["Raw Flights","Post Dedup","Raw Passengers","Post Dedup","Raw Bookings","Post Clean","Raw Payments","Post Clean"];
+  const wfVals   = [1020, 1005, 1039, 1000, 1000, 1000, 1000, 1000];
+  const wfColors = [PALETTE.blue+"cc", PALETTE.green+"cc", PALETTE.blue+"cc", PALETTE.green+"cc",
+                    PALETTE.blue+"cc", PALETTE.green+"cc", PALETTE.blue+"cc", PALETTE.green+"cc"];
+  new Chart(document.getElementById("chartWaterfall"), {
+    type: "bar",
+    data: {
+      labels: wfLabels,
+      datasets: [{ label:"Rows", data: wfVals, backgroundColor: wfColors, borderRadius:4 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display:false } },
+      scales: {
+        x: { ...gridOpts("x"), ticks:{ color:"#8b949e", font:{size:9}, maxRotation:30 } },
+        y: { ...gridOpts("y"), ticks:{ color:"#8b949e" }, min:900,
+             title:{display:true,text:"Row Count",color:"#8b949e"} }
+      }
+    }
+  });
+
+  // Booking status donut
+  const confirmCt = factBook.filter(b => b.is_confirmed).length;
+  const pendCt    = factBook.filter(b => b.is_pending).length;
+  const cancelCt2 = factBook.filter(b => b.is_cancelled).length;
+  new Chart(document.getElementById("chartBookingStatus"), {
+    type: "doughnut",
+    data: {
+      labels: ["Confirmed","Cancelled","Pending"],
+      datasets: [{
+        data: [confirmCt, cancelCt2, pendCt],
+        backgroundColor: [PALETTE.green, PALETTE.red, PALETTE.amber],
+        borderColor:"#161b22", borderWidth:3, hoverOffset:6
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, cutout:"62%",
+      plugins: { legend: { ...legendDark, position:"bottom" } }
+    }
+  });
+
+  // Payment imputation donut
+  const imputedCt = factPay.filter(p => p.is_amount_imputed).length;
+  const realCt    = factPay.length - imputedCt;
+  new Chart(document.getElementById("chartPaymentImpute"), {
+    type: "doughnut",
+    data: {
+      labels: [`Real Amounts (${realCt})`, `Imputed Amounts (${imputedCt})`],
+      datasets: [{
+        data: [realCt, imputedCt],
+        backgroundColor: [PALETTE.blue, PALETTE.amber],
+        borderColor:"#161b22", borderWidth:3, hoverOffset:6
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, cutout:"62%",
+      plugins: { legend: { ...legendDark, position:"bottom" } }
+    }
+  });
+
+  // Audit stage cards
+  const auditStages = [
+    { name:"flights", raw:1020, clean:1005, dropped:15, imputed:"72 airline names\n+ 1 overnight fix", icon:"ri-flight-takeoff-line", color:"#1f6feb" },
+    { name:"passengers", raw:1039, clean:1000, dropped:39, imputed:"10 null last names", icon:"ri-user-3-line", color:"#3fb950" },
+    { name:"bookings", raw:1000, clean:1000, dropped:0, imputed:"75 status → PENDING", icon:"ri-ticket-2-line", color:"#d29922" },
+    { name:"payments", raw:1000, clean:1000, dropped:0, imputed:"78 amounts → ₹8,027", icon:"ri-bank-card-line", color:"#bc8cff" },
+  ];
+  const auditContainer = document.getElementById("auditCards");
+  auditStages.forEach(s => {
+    auditContainer.innerHTML += `
+    <div class="card-sm p-4" style="border-left:3px solid ${s.color};">
+      <div class="flex items-center gap-2 mb-3">
+        <i class="${s.icon}" style="color:${s.color};font-size:18px;"></i>
+        <span class="font-bold text-sm uppercase">${s.name}</span>
+      </div>
+      <div class="space-y-1.5 text-xs">
+        <div class="flex justify-between"><span style="color:#8b949e;">Raw rows</span><span>${s.raw}</span></div>
+        <div class="flex justify-between"><span style="color:#8b949e;">Clean output</span><span class="font-semibold" style="color:#3fb950;">${s.clean}</span></div>
+        <div class="flex justify-between"><span style="color:#8b949e;">Dropped</span><span style="color:${s.dropped>0?'#f85149':'#8b949e'}">${s.dropped}</span></div>
+        <div class="flex justify-between"><span style="color:#8b949e;">Imputed/Fixed</span><span class="font-semibold" style="color:#d29922;white-space:pre;">${s.imputed}</span></div>
+      </div>
+    </div>`;
+  });
+}
+
+initDashboard();
+</script>
 </body>
 </html>

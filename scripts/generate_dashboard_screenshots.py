@@ -1,294 +1,694 @@
-import os
-from pathlib import Path
-import matplotlib.pyplot as plt
-import matplotlib.patches as patches
-import pandas as pd
+"""
+High-end Power BI-style dashboard page screenshot generator.
+4 full-page, 300 DPI analytics pages using real gold layer data.
+"""
 import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
+from matplotlib.patches import FancyBboxPatch
+from matplotlib.gridspec import GridSpec
+from pathlib import Path
 
-OUTPUT_DIR = Path(__file__).resolve().parent.parent / "dashboard" / "screenshots"
-OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-DATA_DIR = Path(__file__).resolve().parent.parent / "data" / "powerbi"
+GOLD = Path(__file__).resolve().parent.parent / "data" / "gold"
+OUT  = Path(__file__).resolve().parent.parent / "dashboard" / "screenshots"
+OUT.mkdir(parents=True, exist_ok=True)
 
-def set_card(ax, x, y, w, h, title, value, subtitle, icon=""):
-    # Draws a styled Power BI KPI card
-    rect = patches.FancyBboxPatch((x, y), w, h, boxstyle="round,pad=0.04",
-                                  facecolor="#FFFFFF", edgecolor="#E2E8F0", linewidth=1.5)
-    ax.add_patch(rect)
-    ax.text(x + 0.15, y + h - 0.25, title.upper(), fontsize=7.5, fontweight="bold", color="#64748B")
-    ax.text(x + 0.15, y + h - 0.65, value, fontsize=15, fontweight="bold", color="#0F172A")
-    ax.text(x + 0.15, y + 0.18, subtitle, fontsize=7.5, color="#0284C7")
+# Colour system
+BG_DARK    = "#0D1117"
+BG_CARD    = "#161B22"
+BG_HEADER  = "#0A0F1A"
+C_BORDER   = "#21262D"
+C_ACCENT   = "#1F6FEB"
+C_GREEN    = "#3FB950"
+C_RED      = "#F85149"
+C_AMBER    = "#D29922"
+C_PURPLE   = "#BC8CFF"
+C_TEAL     = "#39D353"
+WHITE      = "#FFFFFF"
+GREY1      = "#E6EDF3"
+GREY2      = "#8B949E"
+GREY3      = "#30363D"
 
-def draw_header(ax, title, active_tab_idx=0):
-    # Top banner with title and tab bar
-    rect_top = patches.Rectangle((0, 7.3), 12, 0.7, facecolor="#0F172A", edgecolor="none")
-    ax.add_patch(rect_top)
-    ax.text(0.3, 7.65, "ASG Airlines Flight Ops Dashboard", fontsize=11, fontweight="bold", color="#FFFFFF")
-    ax.text(4.5, 7.65, "• Power BI Production Suite", fontsize=8.5, color="#94A3B8")
-    ax.text(11.7, 7.65, "Gold Analytics", fontsize=8, color="#38BDF8", ha="right")
+# Data colour palettes
+PAL_AIRLINE = ["#1F6FEB", "#3FB950", "#D29922", "#F85149"]
+PAL_ROUTE   = ["#238636", "#1F6FEB", "#DA3633", "#8957E5",
+               "#0B93A0", "#DD6B20", "#6E40C9", "#1A7F37",
+               "#0969DA", "#CF222E"]
 
-    # Tab bar
-    rect_bar = patches.Rectangle((0, 6.7), 12, 0.6, facecolor="#1E293B", edgecolor="none")
-    ax.add_patch(rect_bar)
-    tabs = ["1. Duration Analysis", "2. Route Performance", "3. Airline Trends", "4. Delay & Anomaly Insights"]
-    tab_x = [0.4, 3.2, 6.2, 9.2]
-    for i, (t_name, tx) in enumerate(zip(tabs, tab_x)):
-        is_active = (i == active_tab_idx)
-        color = "#38BDF8" if is_active else "#94A3B8"
-        weight = "bold" if is_active else "normal"
-        ax.text(tx, 7.0, t_name, fontsize=8.5, color=color, fontweight=weight)
-        if is_active:
-            underline = patches.Rectangle((tx - 0.05, 6.72), 2.4, 0.05, facecolor="#0284C7", edgecolor="none")
-            ax.add_patch(underline)
+FIGW, FIGH = 22, 14
 
+
+def card_bg(ax):
+    ax.set_facecolor(BG_CARD)
+    for spine in ax.spines.values():
+        spine.set_edgecolor(C_BORDER)
+        spine.set_linewidth(0.8)
+
+
+def kpi_tile(fig, rect, value, label, delta=None, delta_good=True, accent=C_ACCENT):
+    """Small KPI card using fig.add_axes(rect)."""
+    ax = fig.add_axes(rect)
+    ax.set_facecolor(BG_CARD)
+    ax.set_xlim(0, 1)
+    ax.set_ylim(0, 1)
+    ax.axis("off")
+    for spine in ax.spines.values():
+        spine.set_edgecolor(C_BORDER)
+    # Accent top bar
+    ax.add_patch(plt.Rectangle((0, 0.88), 1, 0.12, facecolor=accent, zorder=2))
+    ax.text(0.5, 0.94, label, ha="center", va="center", fontsize=8.5,
+            color=WHITE, fontweight="bold", zorder=3)
+    ax.text(0.5, 0.54, value, ha="center", va="center", fontsize=20,
+            fontweight="bold", color=WHITE)
+    if delta:
+        col = C_GREEN if delta_good else C_RED
+        sym = "+" if delta_good else ""
+        ax.text(0.5, 0.22, f"{sym}{delta}", ha="center", va="center",
+                fontsize=9, color=col)
+
+
+def page_header(fig, page_num, title, subtitle):
+    ax = fig.add_axes([0, 0.94, 1, 0.06])
+    ax.set_facecolor(BG_HEADER)
+    ax.set_xlim(0, 1)
+    ax.set_ylim(0, 1)
+    ax.axis("off")
+    # Left — brand
+    ax.text(0.012, 0.55, "ASG Airlines | Flight Operations Analytics", ha="left", va="center",
+            fontsize=11, fontweight="bold", color=WHITE)
+    ax.text(0.012, 0.15, "Medallion Gold Layer  •  pandas + PyArrow Pipeline", ha="left",
+            va="center", fontsize=7.5, color=GREY2)
+    # Centre — page title
+    ax.text(0.5, 0.7, title, ha="center", va="center", fontsize=14,
+            fontweight="bold", color=GREY1)
+    ax.text(0.5, 0.18, subtitle, ha="center", va="center",
+            fontsize=8, color=GREY2)
+    # Right — page badge
+    ax.text(0.97, 0.6, f"Page {page_num} / 4", ha="right", va="center",
+            fontsize=9, color=GREY2)
+    ax.text(0.97, 0.22, "ASG Airlines Analytics Suite", ha="right", va="center",
+            fontsize=7.5, color=GREY2)
+    # Separator line
+    ax.axhline(0.02, color=C_BORDER, linewidth=0.8)
+
+
+def page_footer(fig, note):
+    ax = fig.add_axes([0, 0, 1, 0.03])
+    ax.set_facecolor(BG_HEADER)
+    ax.set_xlim(0, 1)
+    ax.set_ylim(0, 1)
+    ax.axis("off")
+    ax.text(0.5, 0.5, note, ha="center", va="center", fontsize=7.5, color=GREY2)
+    ax.axhline(0.95, color=C_BORDER, linewidth=0.5)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PAGE 1: Duration Analysis
+# ─────────────────────────────────────────────────────────────────────────────
 def generate_page1():
-    # Page 1: Duration Analysis
-    fig, ax = plt.subplots(figsize=(12, 8), dpi=300)
-    ax.set_xlim(0, 12)
-    ax.set_ylim(0, 8)
-    ax.axis("off")
-    fig.patch.set_facecolor("#F8FAFC")
-    ax.set_facecolor("#F8FAFC")
+    fact = pd.read_parquet(GOLD / "fact_flights.parquet")
+    kpi_airline = pd.read_parquet(GOLD / "kpi_airline_duration.parquet")
+    kpi_route = pd.read_parquet(GOLD / "kpi_route_duration.parquet").nlargest(10, "flight_count")
+    kpi_hourly = pd.read_parquet(GOLD / "kpi_hourly_traffic.parquet").sort_values("departure_hour")
+    dim_route = pd.read_parquet(GOLD / "dim_route.parquet")
+    dim_airline = pd.read_parquet(GOLD / "dim_airline.parquet")
 
-    draw_header(ax, "Duration Analysis", active_tab_idx=0)
+    fig = plt.figure(figsize=(FIGW, FIGH), dpi=300)
+    fig.patch.set_facecolor(BG_DARK)
 
-    # 4 KPI cards
-    set_card(ax, 0.4, 5.5, 2.6, 1.0, "Avg Flight Duration", "164.6 min", "≈ 2 hrs 45 mins")
-    set_card(ax, 3.3, 5.5, 2.6, 1.0, "Min Sector Duration", "30.0 min", "Shortest domestic hop")
-    set_card(ax, 6.2, 5.5, 2.6, 1.0, "Max Sector Duration", "300.0 min", "Cross-metro long sector")
-    set_card(ax, 9.1, 5.5, 2.5, 1.0, "Overnight Flights", "1 Repaired", "+1 day corrected (SJ192)")
+    page_header(fig, 1, "Duration Analysis & Flight Traffic",
+                "Average flight durations, route breakdown, hourly traffic pattern, and overnight anomaly tracking")
 
-    # Chart 1: Route Duration (Top 8)
-    # Chart container box
-    c_box1 = patches.FancyBboxPatch((0.4, 0.5), 5.5, 4.7, boxstyle="round,pad=0.04",
-                                    facecolor="#FFFFFF", edgecolor="#E2E8F0", linewidth=1.5)
-    ax.add_patch(c_box1)
-    ax.text(0.7, 4.9, "Top 8 Routes by Average Duration (min)", fontsize=9, fontweight="bold", color="#1E293B")
-    
-    # Load data
-    df_route = pd.read_csv(DATA_DIR / "kpi_route_duration.csv").head(8)
-    y_pos = np.linspace(4.4, 1.0, len(df_route))
-    max_val = df_route["avg_duration_min"].max()
-    for idx, (y, (_, row)) in enumerate(zip(y_pos, df_route.iterrows())):
-        ax.text(0.7, y, row["route_name"], fontsize=7.5, color="#334155", va="center")
-        bar_len = (row["avg_duration_min"] / max_val) * 3.0
-        bar = patches.Rectangle((2.1, y - 0.12), bar_len, 0.24, facecolor="#0284C7", edgecolor="none")
-        ax.add_patch(bar)
-        ax.text(2.1 + bar_len + 0.1, y, f"{row['avg_duration_min']:.1f}m", fontsize=7.5, color="#0F172A", va="center")
-
-    # Chart 2: Airline Duration
-    c_box2 = patches.FancyBboxPatch((6.2, 0.5), 5.4, 4.7, boxstyle="round,pad=0.04",
-                                    facecolor="#FFFFFF", edgecolor="#E2E8F0", linewidth=1.5)
-    ax.add_patch(c_box2)
-    ax.text(6.5, 4.9, "Average Flight Duration by Airline (min)", fontsize=9, fontweight="bold", color="#1E293B")
-    
-    df_air = pd.read_csv(DATA_DIR / "kpi_airline_duration.csv")
-    x_pos = np.linspace(6.8, 10.4, len(df_air))
-    colors = ["#0284C7", "#38BDF8", "#0EA5E9", "#0369A1"]
-    for x, c, (_, row) in zip(x_pos, colors, df_air.iterrows()):
-        h = (row["avg_duration_min"] / 200.0) * 2.8
-        bar = patches.Rectangle((x - 0.35, 1.2), 0.7, h, facecolor=c, edgecolor="none")
-        ax.add_patch(bar)
-        ax.text(x, 1.2 + h + 0.12, f"{row['avg_duration_min']:.1f}", fontsize=8, fontweight="bold", ha="center")
-        ax.text(x, 0.85, row["airline_name"], fontsize=7.5, ha="center", color="#334155", rotation=10)
-
-    out_p = OUTPUT_DIR / "page1_duration_analysis.png"
-    plt.tight_layout()
-    plt.savefig(out_p, dpi=300, facecolor=fig.get_facecolor(), bbox_inches="tight")
-    plt.close()
-    print(f"Rendered: {out_p}")
-
-def generate_page2():
-    # Page 2: Route Performance
-    fig, ax = plt.subplots(figsize=(12, 8), dpi=300)
-    ax.set_xlim(0, 12)
-    ax.set_ylim(0, 8)
-    ax.axis("off")
-    fig.patch.set_facecolor("#F8FAFC")
-    ax.set_facecolor("#F8FAFC")
-
-    draw_header(ax, "Route Performance", active_tab_idx=1)
-
-    set_card(ax, 0.4, 5.5, 2.6, 1.0, "Active Routes", "30 Sectors", "6 Metro Hubs")
-    set_card(ax, 3.3, 5.5, 2.6, 1.0, "Total Bookings", "1,000 Bookings", "320 Confirmed • 366 Pending")
-    set_card(ax, 6.2, 5.5, 2.6, 1.0, "Cancellation Rate", "31.40%", "314 Cancellations")
-    set_card(ax, 9.1, 5.5, 2.5, 1.0, "Total Route Revenue", "₹8.05 M", "Avg ₹8,054 per txn")
-
-    # Chart 1: Top 8 Traffic Routes
-    c_box1 = patches.FancyBboxPatch((0.4, 0.5), 5.5, 4.7, boxstyle="round,pad=0.04",
-                                    facecolor="#FFFFFF", edgecolor="#E2E8F0", linewidth=1.5)
-    ax.add_patch(c_box1)
-    ax.text(0.7, 4.9, "Top 8 Busiest Routes (Flight Instances)", fontsize=9, fontweight="bold", color="#1E293B")
-    
-    df_traf = pd.read_csv(DATA_DIR / "kpi_route_traffic.csv").head(8)
-    y_pos = np.linspace(4.4, 1.0, len(df_traf))
-    max_val = df_traf["total_flights"].max()
-    for y, (_, row) in zip(y_pos, df_traf.iterrows()):
-        ax.text(0.7, y, row["route_name"], fontsize=7.5, color="#334155", va="center")
-        bar_len = (row["total_flights"] / max_val) * 3.0
-        bar = patches.Rectangle((2.1, y - 0.12), bar_len, 0.24, facecolor="#0D9488", edgecolor="none")
-        ax.add_patch(bar)
-        ax.text(2.1 + bar_len + 0.1, y, f"{int(row['total_flights'])} flts", fontsize=7.5, color="#0F172A", va="center")
-
-    # Chart 2: Top 8 Revenue Routes
-    c_box2 = patches.FancyBboxPatch((6.2, 0.5), 5.4, 4.7, boxstyle="round,pad=0.04",
-                                    facecolor="#FFFFFF", edgecolor="#E2E8F0", linewidth=1.5)
-    ax.add_patch(c_box2)
-    ax.text(6.5, 4.9, "Top 8 Corridors by Operational Revenue (INR)", fontsize=9, fontweight="bold", color="#1E293B")
-    
-    df_rev = pd.read_csv(DATA_DIR / "kpi_route_revenue.csv").head(8)
-    y_pos = np.linspace(4.4, 1.0, len(df_rev))
-    max_rev = df_rev["total_revenue"].max()
-    for y, (_, row) in zip(y_pos, df_rev.iterrows()):
-        ax.text(6.5, y, row["route_name"], fontsize=7.5, color="#334155", va="center")
-        bar_len = (row["total_revenue"] / max_rev) * 2.8
-        bar = patches.Rectangle((7.8, y - 0.12), bar_len, 0.24, facecolor="#10B981", edgecolor="none")
-        ax.add_patch(bar)
-        ax.text(7.8 + bar_len + 0.1, y, f"₹{row['total_revenue']/1000:.0f}K", fontsize=7.5, color="#0F172A", va="center")
-
-    out_p = OUTPUT_DIR / "page2_route_performance.png"
-    plt.tight_layout()
-    plt.savefig(out_p, dpi=300, facecolor=fig.get_facecolor(), bbox_inches="tight")
-    plt.close()
-    print(f"Rendered: {out_p}")
-
-def generate_page3():
-    # Page 3: Airline Trends
-    fig, ax = plt.subplots(figsize=(12, 8), dpi=300)
-    ax.set_xlim(0, 12)
-    ax.set_ylim(0, 8)
-    ax.axis("off")
-    fig.patch.set_facecolor("#F8FAFC")
-    ax.set_facecolor("#F8FAFC")
-
-    draw_header(ax, "Airline Trends", active_tab_idx=2)
-
-    set_card(ax, 0.4, 5.5, 2.6, 1.0, "Total Flights", "1,005 Flights", "Deduplicated ops")
-    set_card(ax, 3.3, 5.5, 2.6, 1.0, "Market Leader", "IndiGo (26.77%)", "269 flights (6E/6F)")
-    set_card(ax, 6.2, 5.5, 2.6, 1.0, "Repaired Carriers", "72 Records", "41 NaN + 31 UNKNOWN")
-    set_card(ax, 9.1, 5.5, 2.5, 1.0, "Top Payment Channel", "UPI (35.8%)", "358 transactions")
-
-    # Chart 1: Donut Airline Market Share
-    c_box1 = patches.FancyBboxPatch((0.4, 0.5), 5.5, 4.7, boxstyle="round,pad=0.04",
-                                    facecolor="#FFFFFF", edgecolor="#E2E8F0", linewidth=1.5)
-    ax.add_patch(c_box1)
-    ax.text(0.7, 4.9, "Flight Share Distribution by Carrier", fontsize=9, fontweight="bold", color="#1E293B")
-    
-    # Inset pie chart
-    ax_pie = fig.add_axes([0.08, 0.12, 0.35, 0.42])
-    df_air = pd.read_csv(DATA_DIR / "kpi_airline_distribution.csv")
-    colors = ["#0284C7", "#6366F1", "#F59E0B", "#EC4899"]
-    wedges, texts, autotexts = ax_pie.pie(
-        df_air["total_flights"], labels=df_air["airline_name"],
-        autopct="%1.1f%%", colors=colors, startangle=90,
-        wedgeprops=dict(width=0.45, edgecolor='w', linewidth=2)
-    )
-    for t in texts:
-        t.set_fontsize(7.5)
-    for at in autotexts:
-        at.set_fontsize(7.5)
-        at.set_weight("bold")
-
-    # Chart 2: Payment Method Share
-    c_box2 = patches.FancyBboxPatch((6.2, 0.5), 5.4, 4.7, boxstyle="round,pad=0.04",
-                                    facecolor="#FFFFFF", edgecolor="#E2E8F0", linewidth=1.5)
-    ax.add_patch(c_box2)
-    ax.text(6.5, 4.9, "Payment Channel Distribution (Transaction Volume)", fontsize=9, fontweight="bold", color="#1E293B")
-    
-    ax_pie2 = fig.add_axes([0.56, 0.12, 0.35, 0.42])
-    df_pay = pd.read_csv(DATA_DIR / "kpi_fare_by_payment_method.csv")
-    p_colors = ["#14B8A6", "#3B82F6", "#8B5CF6"]
-    wedges2, texts2, autotexts2 = ax_pie2.pie(
-        df_pay["transaction_count"], labels=df_pay["payment_method"],
-        autopct="%1.1f%%", colors=p_colors, startangle=140,
-        wedgeprops=dict(width=0.45, edgecolor='w', linewidth=2)
-    )
-    for t in texts2:
-        t.set_fontsize(7.5)
-    for at in autotexts2:
-        at.set_fontsize(7.5)
-        at.set_weight("bold")
-
-    out_p = OUTPUT_DIR / "page3_airline_trends.png"
-    plt.tight_layout()
-    plt.savefig(out_p, dpi=300, facecolor=fig.get_facecolor(), bbox_inches="tight")
-    plt.close()
-    print(f"Rendered: {out_p}")
-
-def generate_page4():
-    # Page 4: Delay & Anomaly Insights
-    fig, ax = plt.subplots(figsize=(12, 8), dpi=300)
-    ax.set_xlim(0, 12)
-    ax.set_ylim(0, 8)
-    ax.axis("off")
-    fig.patch.set_facecolor("#F8FAFC")
-    ax.set_facecolor("#F8FAFC")
-
-    draw_header(ax, "Delay & Anomaly Insights", active_tab_idx=3)
-
-    set_card(ax, 0.4, 5.5, 2.6, 1.0, "Duration Outliers", "1 Flight", "> 2 Std Dev from route mean")
-    set_card(ax, 3.3, 5.5, 2.6, 1.0, "Negative Durations", "0 (Zero)", "100% Overnight resolved")
-    set_card(ax, 6.2, 5.5, 2.6, 1.0, "Imputed Payments", "78 Records", "Median fare ₹8,027 applied")
-    set_card(ax, 9.1, 5.5, 2.5, 1.0, "Data Loss Rate", "0.00%", "Zero orphan records")
-
-    # Chart 1: Hourly Departures
-    c_box1 = patches.FancyBboxPatch((0.4, 0.5), 5.5, 4.7, boxstyle="round,pad=0.04",
-                                    facecolor="#FFFFFF", edgecolor="#E2E8F0", linewidth=1.5)
-    ax.add_patch(c_box1)
-    ax.text(0.7, 4.9, "Diurnal Flight Traffic by Departure Hour", fontsize=9, fontweight="bold", color="#1E293B")
-    
-    df_hour = pd.read_csv(DATA_DIR / "kpi_hourly_traffic.csv")
-    ax_line = fig.add_axes([0.08, 0.12, 0.38, 0.42])
-    ax_line.plot(df_hour["departure_hour"], df_hour["flights_count"], color="#0284C7", marker="o", markersize=4, linewidth=2)
-    ax_line.fill_between(df_hour["departure_hour"], df_hour["flights_count"], color="#0284C7", alpha=0.15)
-    ax_line.set_xlabel("Hour of Day (0-23)", fontsize=7.5)
-    ax_line.set_ylabel("Flights Count", fontsize=7.5)
-    ax_line.tick_params(axis='both', which='major', labelsize=7)
-    ax_line.grid(True, linestyle=":", alpha=0.6)
-
-    # Box 2: Outlier Detail Table Simulation
-    c_box2 = patches.FancyBboxPatch((6.2, 0.5), 5.4, 4.7, boxstyle="round,pad=0.04",
-                                    facecolor="#FFFFFF", edgecolor="#E2E8F0", linewidth=1.5)
-    ax.add_patch(c_box2)
-    ax.text(6.5, 4.9, "Statistical Duration Outlier Audit", fontsize=9, fontweight="bold", color="#1E293B")
-    
-    # Table headers
-    ax.text(6.5, 4.4, "FLIGHT", fontsize=7.5, fontweight="bold", color="#64748B")
-    ax.text(7.4, 4.4, "CARRIER", fontsize=7.5, fontweight="bold", color="#64748B")
-    ax.text(8.4, 4.4, "ROUTE", fontsize=7.5, fontweight="bold", color="#64748B")
-    ax.text(9.4, 4.4, "DURATION", fontsize=7.5, fontweight="bold", color="#64748B")
-    ax.text(10.5, 4.4, "ROUTE MEAN", fontsize=7.5, fontweight="bold", color="#64748B")
-
-    # Table row
-    ax.text(6.5, 4.0, "SJ192", fontsize=8, fontweight="bold", color="#0F172A")
-    ax.text(7.4, 4.0, "SpiceJet", fontsize=7.5, color="#334155")
-    ax.text(8.4, 4.0, "HYD -> BOM", fontsize=7.5, color="#0284C7", fontweight="bold")
-    ax.text(9.4, 4.0, "300.0m (5.0h)", fontsize=7.5, fontweight="bold", color="#D97706")
-    ax.text(10.5, 4.0, "161.4m (±35m)", fontsize=7.5, color="#64748B")
-
-    # Callout inside card
-    call_rect = patches.FancyBboxPatch((6.5, 1.0), 4.8, 2.5, boxstyle="round,pad=0.04",
-                                       facecolor="#F1F5F9", edgecolor="#CBD5E1", linewidth=1)
-    ax.add_patch(call_rect)
-    ax.text(6.7, 3.2, "OPERATIONAL RESOLUTION AUDIT", fontsize=8, fontweight="bold", color="#0F172A")
-    lines = [
-        "• Outlier Detection Threshold: > 2 Standard Deviations from Route Mean.",
-        "• Observed Deviation: Flight SJ192 duration is 300 minutes vs 161.4m baseline.",
-        "• Root Cause: Cross-day overnight scheduling with 18:45 departure.",
-        "• Automated Quality Fix: +1 Day applied to arrival; prevents negative duration.",
-        "• Analytics Contract: Retained with is_duration_outlier=True for audit tracking."
+    # KPI tiles (top row)
+    kpi_data = [
+        ("1,005", "Total Flights", "1,020 raw ingested", True, "#1F6FEB"),
+        ("164.6 min", "Avg Duration", "2.74 hrs average", True, "#3FB950"),
+        ("30 min", "Min Duration", "Shortest route", True, "#D29922"),
+        ("300 min", "Max Duration", "SJ192 overnight", False, "#F85149"),
+        ("1", "Overnight Repaired", "SJ192 HYD->BOM", True, "#BC8CFF"),
     ]
-    for i, line in enumerate(lines):
-        ax.text(6.7, 2.8 - (i * 0.35), line, fontsize=7, color="#334155")
+    tile_w = 0.165
+    tile_h = 0.13
+    tile_y = 0.79
+    for i, (val, lbl, delta, good, acc) in enumerate(kpi_data):
+        kpi_tile(fig, [0.02 + i*(tile_w+0.008), tile_y, tile_w, tile_h],
+                 val, lbl, delta, good, acc)
 
-    out_p = OUTPUT_DIR / "page4_delay_anomaly_insights.png"
-    plt.tight_layout()
-    plt.savefig(out_p, dpi=300, facecolor=fig.get_facecolor(), bbox_inches="tight")
+    # Chart 1: Airline avg duration grouped bar with min/max range
+    ax1 = fig.add_axes([0.02, 0.41, 0.44, 0.35])
+    card_bg(ax1)
+    airlines = kpi_airline["airline_name"].str.replace("Air India", "Air India").values
+    short_names = [n.split()[0] if len(n.split()[0]) > 2 else n for n in airlines]
+    x = np.arange(len(airlines))
+    w = 0.25
+    ax1.bar(x - w, kpi_airline["min_duration_min"], w, label="Min", color="#0D4A8C", alpha=0.9, zorder=3)
+    ax1.bar(x, kpi_airline["avg_duration_min"], w, label="Avg", color=C_ACCENT, alpha=0.95, zorder=3)
+    ax1.bar(x + w, kpi_airline["max_duration_min"], w, label="Max", color=C_RED, alpha=0.85, zorder=3)
+    for i, (mn, avg, mx) in enumerate(zip(kpi_airline["min_duration_min"],
+                                           kpi_airline["avg_duration_min"],
+                                           kpi_airline["max_duration_min"])):
+        ax1.text(i, avg + 3, f"{avg:.0f}", ha="center", fontsize=7.5, color=GREY1)
+    ax1.set_xticks(x)
+    ax1.set_xticklabels(short_names, fontsize=9, color=GREY1)
+    ax1.set_ylabel("Duration (minutes)", color=GREY2, fontsize=8)
+    ax1.tick_params(colors=GREY2, labelsize=8)
+    ax1.set_title("Airline Duration Profile (Min / Avg / Max)", color=GREY1,
+                  fontsize=10, fontweight="bold", pad=8)
+    ax1.legend(fontsize=8, facecolor=BG_CARD, labelcolor=GREY1, framealpha=0.8)
+    ax1.yaxis.grid(True, color=GREY3, linewidth=0.5, alpha=0.6)
+    ax1.set_facecolor(BG_CARD)
+    ax1.set_ylim(0, 340)
+
+    # Chart 2: Route avg duration horizontal bar
+    ax2 = fig.add_axes([0.52, 0.41, 0.46, 0.35])
+    card_bg(ax2)
+    kpi_route_sorted = kpi_route.sort_values("avg_duration_min")
+    colors_r = [PAL_ROUTE[i % len(PAL_ROUTE)] for i in range(len(kpi_route_sorted))]
+    bars = ax2.barh(kpi_route_sorted["route_name"], kpi_route_sorted["avg_duration_min"],
+                    color=colors_r, alpha=0.92, height=0.65, zorder=3)
+    ax2.set_xlabel("Avg Duration (min)", color=GREY2, fontsize=8)
+    ax2.tick_params(colors=GREY2, labelsize=8)
+    ax2.set_title("Top 10 Routes — Avg Flight Duration", color=GREY1,
+                  fontsize=10, fontweight="bold", pad=8)
+    ax2.xaxis.grid(True, color=GREY3, linewidth=0.5, alpha=0.6)
+    ax2.set_facecolor(BG_CARD)
+    for bar, val in zip(bars, kpi_route_sorted["avg_duration_min"]):
+        ax2.text(bar.get_width() + 1.5, bar.get_y() + bar.get_height()/2,
+                 f"{val:.0f}m", va="center", fontsize=7.5, color=GREY1)
+
+    # Chart 3: Hourly traffic heatmap-style bar
+    ax3 = fig.add_axes([0.02, 0.06, 0.57, 0.30])
+    card_bg(ax3)
+    hours = kpi_hourly["departure_hour"].values
+    counts = kpi_hourly["flights_count"].values
+    max_c = counts.max()
+    bar_colors = [plt.cm.Blues(0.35 + 0.65 * (c / max_c)) for c in counts]
+    ax3.bar(hours, counts, color=bar_colors, width=0.82, zorder=3)
+    for h, c in zip(hours, counts):
+        if c > 0:
+            ax3.text(h, c + 0.3, str(c), ha="center", fontsize=6.5, color=GREY1)
+    peak_h = hours[np.argmax(counts)]
+    ax3.axvline(peak_h, color=C_AMBER, linewidth=1.2, linestyle="--", alpha=0.8, label=f"Peak: {peak_h}:00")
+    ax3.set_xticks(hours)
+    ax3.set_xticklabels([f"{h:02d}:00" for h in hours], fontsize=6.5,
+                         rotation=45, color=GREY2, ha="right")
+    ax3.set_ylabel("Flights", color=GREY2, fontsize=8)
+    ax3.tick_params(colors=GREY2)
+    ax3.set_title("Hourly Flight Traffic Distribution (24h)", color=GREY1,
+                  fontsize=10, fontweight="bold", pad=8)
+    ax3.yaxis.grid(True, color=GREY3, linewidth=0.5, alpha=0.5)
+    ax3.legend(fontsize=8, facecolor=BG_CARD, labelcolor=GREY1)
+    ax3.set_facecolor(BG_CARD)
+
+    # Chart 4: Duration histogram
+    ax4 = fig.add_axes([0.63, 0.06, 0.35, 0.30])
+    card_bg(ax4)
+    dur = fact["duration_minutes"].dropna()
+    n, bins, patches = ax4.hist(dur, bins=20, color=C_ACCENT, alpha=0.85, edgecolor=BG_DARK, linewidth=0.4, zorder=3)
+    # Colour by range
+    for patch, left in zip(patches, bins[:-1]):
+        if left < 60:
+            patch.set_facecolor(C_GREEN)
+        elif left > 240:
+            patch.set_facecolor(C_RED)
+    ax4.axvline(dur.mean(), color=C_AMBER, linewidth=1.5, linestyle="--",
+                label=f"Mean: {dur.mean():.1f} min")
+    ax4.set_xlabel("Duration (minutes)", color=GREY2, fontsize=8)
+    ax4.set_ylabel("Frequency", color=GREY2, fontsize=8)
+    ax4.tick_params(colors=GREY2, labelsize=8)
+    ax4.set_title("Duration Frequency Distribution", color=GREY1,
+                  fontsize=10, fontweight="bold", pad=8)
+    ax4.yaxis.grid(True, color=GREY3, linewidth=0.5, alpha=0.5)
+    ax4.legend(fontsize=8, facecolor=BG_CARD, labelcolor=GREY1)
+    ax4.set_facecolor(BG_CARD)
+
+    page_footer(fig, "Data Source: data/gold/fact_flights.parquet  |  kpi_airline_duration  |  kpi_route_duration  |  kpi_hourly_traffic")
+    plt.savefig(OUT / "page1_duration_analysis.png", dpi=300, bbox_inches="tight",
+                facecolor=BG_DARK)
     plt.close()
-    print(f"Rendered: {out_p}")
+    print("Page 1 saved.")
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PAGE 2: Route Performance
+# ─────────────────────────────────────────────────────────────────────────────
+def generate_page2():
+    kpi_rev = pd.read_parquet(GOLD / "kpi_route_revenue.parquet").nlargest(10, "total_revenue")
+    kpi_traffic = pd.read_parquet(GOLD / "kpi_route_traffic.parquet").nlargest(10, "total_flights")
+    kpi_cancel = pd.read_parquet(GOLD / "kpi_route_cancellations.parquet").nlargest(8, "cancellation_rate_pct")
+    kpi_age = pd.read_parquet(GOLD / "kpi_age_band_by_route.parquet")
+    fact_b = pd.read_parquet(GOLD / "fact_bookings.parquet")
+
+    total_rev = kpi_rev["total_revenue"].sum()
+    avg_fare = kpi_rev["avg_fare"].mean()
+
+    fig = plt.figure(figsize=(FIGW, FIGH), dpi=300)
+    fig.patch.set_facecolor(BG_DARK)
+
+    page_header(fig, 2, "Route Performance & Revenue Intelligence",
+                "Top revenue routes, traffic share, cancellation risk matrix, and passenger cohort distribution")
+
+    kpi_data = [
+        ("30", "Active Routes", "Unique origin-dest pairs", True, "#1F6FEB"),
+        (f"INR {total_rev/1e6:.2f}M", "Total Revenue", f"Across all routes", True, "#3FB950"),
+        (f"INR {avg_fare:,.0f}", "Avg Fare", "Per transaction", True, "#D29922"),
+        ("BOM->CCU", "Top Route", "By revenue", True, "#BC8CFF"),
+        ("31.4%", "Cancellation Rate", "Industry watch", False, "#F85149"),
+    ]
+    tile_w = 0.165
+    for i, (val, lbl, delta, good, acc) in enumerate(kpi_data):
+        kpi_tile(fig, [0.02 + i*(tile_w+0.008), 0.79, tile_w, 0.13],
+                 val, lbl, delta, good, acc)
+
+    # Chart 1: Revenue horizontal bar
+    ax1 = fig.add_axes([0.02, 0.41, 0.44, 0.35])
+    card_bg(ax1)
+    rev_sorted = kpi_rev.sort_values("total_revenue")
+    grad_colors = plt.cm.Blues(np.linspace(0.4, 0.9, len(rev_sorted)))
+    bars = ax1.barh(rev_sorted["route_name"], rev_sorted["total_revenue"] / 1000,
+                    color=grad_colors, height=0.65, zorder=3)
+    ax1.set_xlabel("Revenue (INR Thousands)", color=GREY2, fontsize=8)
+    ax1.tick_params(colors=GREY2, labelsize=8)
+    ax1.set_title("Top 10 Routes — Total Revenue (INR)", color=GREY1,
+                  fontsize=10, fontweight="bold", pad=8)
+    ax1.xaxis.grid(True, color=GREY3, linewidth=0.5, alpha=0.5)
+    for bar, val, avg in zip(bars, rev_sorted["total_revenue"], rev_sorted["avg_fare"]):
+        ax1.text(bar.get_width() + 1, bar.get_y() + bar.get_height()/2,
+                 f"₹{val/1000:.1f}K  (avg ₹{avg:,.0f})", va="center", fontsize=6.8, color=GREY1)
+    ax1.set_facecolor(BG_CARD)
+
+    # Chart 2: Traffic share pie / donut
+    ax2 = fig.add_axes([0.52, 0.41, 0.22, 0.35])
+    card_bg(ax2)
+    top5 = kpi_traffic.nlargest(5, "total_flights")
+    others = kpi_traffic.iloc[5:]["total_flights"].sum()
+    labels = list(top5["route_name"]) + ["Others"]
+    sizes  = list(top5["total_flights"]) + [others]
+    colors_pie = [*PAL_ROUTE[:5], GREY2]
+    wedges, texts, autotexts = ax2.pie(sizes, labels=None, colors=colors_pie,
+                                       autopct="%1.1f%%", startangle=120,
+                                       wedgeprops=dict(width=0.6, edgecolor=BG_DARK, linewidth=1.5),
+                                       pctdistance=0.82, textprops={"fontsize": 7.5, "color": WHITE})
+    for wt in autotexts:
+        wt.set_fontsize(7)
+    ax2.set_title("Traffic Share\n(Top Routes)", color=GREY1,
+                  fontsize=9, fontweight="bold")
+    ax2.legend(labels, fontsize=7, facecolor=BG_CARD, labelcolor=GREY1,
+               loc="lower center", ncol=2, framealpha=0.8,
+               bbox_to_anchor=(0.5, -0.15))
+
+    # Chart 3: Traffic volume bar chart
+    ax3 = fig.add_axes([0.76, 0.41, 0.22, 0.35])
+    card_bg(ax3)
+    tr_sorted = kpi_traffic.sort_values("total_flights")
+    tr_colors = [PAL_ROUTE[i % len(PAL_ROUTE)] for i in range(len(tr_sorted))]
+    ax3.barh(tr_sorted["route_name"], tr_sorted["total_flights"],
+             color=tr_colors, alpha=0.9, height=0.65, zorder=3)
+    ax3.set_xlabel("No. of Flights", color=GREY2, fontsize=7.5)
+    ax3.tick_params(colors=GREY2, labelsize=7)
+    ax3.set_title("Route Traffic\nVolume", color=GREY1,
+                  fontsize=9, fontweight="bold")
+    ax3.xaxis.grid(True, color=GREY3, linewidth=0.5, alpha=0.5)
+    ax3.set_facecolor(BG_CARD)
+
+    # Chart 4: Cancellation risk stacked bar
+    ax4 = fig.add_axes([0.02, 0.06, 0.54, 0.30])
+    card_bg(ax4)
+    x_labels = kpi_cancel["route_name"].values
+    x = np.arange(len(x_labels))
+    total = kpi_cancel["total_bookings"].values
+    confirmed = kpi_cancel["confirmed_bookings"].values
+    cancelled = kpi_cancel["cancelled_bookings"].values
+    pending = kpi_cancel["pending_bookings"].values
+    ax4.bar(x, confirmed/total*100, label="Confirmed", color=C_GREEN, alpha=0.9, zorder=3)
+    ax4.bar(x, cancelled/total*100, bottom=confirmed/total*100, label="Cancelled", color=C_RED, alpha=0.9, zorder=3)
+    ax4.bar(x, pending/total*100, bottom=(confirmed+cancelled)/total*100, label="Pending", color=C_AMBER, alpha=0.85, zorder=3)
+    ax4.set_xticks(x)
+    ax4.set_xticklabels(x_labels, fontsize=8, color=GREY2, rotation=35, ha="right")
+    ax4.set_ylabel("Booking Share (%)", color=GREY2, fontsize=8)
+    ax4.tick_params(colors=GREY2)
+    ax4.set_title("Route Booking Status Breakdown (Confirmed / Cancelled / Pending)", color=GREY1,
+                  fontsize=10, fontweight="bold", pad=8)
+    ax4.set_ylim(0, 100)
+    ax4.legend(fontsize=8, facecolor=BG_CARD, labelcolor=GREY1, loc="upper right")
+    ax4.yaxis.grid(True, color=GREY3, linewidth=0.5, alpha=0.5)
+    ax4.set_facecolor(BG_CARD)
+
+    # Chart 5: Age band by top 5 routes stacked bar
+    ax5 = fig.add_axes([0.60, 0.06, 0.38, 0.30])
+    card_bg(ax5)
+    top5_routes = kpi_traffic.nlargest(5, "total_flights")["route_name"].tolist()
+    age_filt = kpi_age[kpi_age["route_name"].isin(top5_routes)]
+    age_pivot = age_filt.pivot(index="route_name", columns="age_band", values="passenger_count").fillna(0)
+    age_colors = ["#1F6FEB", "#3FB950", "#D29922", "#F85149", "#BC8CFF"]
+    bottom_arr = np.zeros(len(age_pivot))
+    for j, band in enumerate(age_pivot.columns):
+        vals = age_pivot[band].values
+        ax5.bar(age_pivot.index, vals, bottom=bottom_arr, label=band,
+                color=age_colors[j % len(age_colors)], alpha=0.88, zorder=3)
+        bottom_arr += vals
+    ax5.set_xticklabels(age_pivot.index, rotation=20, ha="right", fontsize=7.5, color=GREY2)
+    ax5.tick_params(colors=GREY2)
+    ax5.set_ylabel("Passengers", color=GREY2, fontsize=8)
+    ax5.set_title("Age Band Distribution — Top 5 Routes", color=GREY1,
+                  fontsize=10, fontweight="bold", pad=8)
+    ax5.legend(fontsize=7, facecolor=BG_CARD, labelcolor=GREY1,
+               loc="upper right", ncol=2)
+    ax5.yaxis.grid(True, color=GREY3, linewidth=0.5, alpha=0.5)
+    ax5.set_facecolor(BG_CARD)
+
+    page_footer(fig, "Data Source: kpi_route_revenue  |  kpi_route_traffic  |  kpi_route_cancellations  |  kpi_age_band_by_route")
+    plt.savefig(OUT / "page2_route_performance.png", dpi=300, bbox_inches="tight",
+                facecolor=BG_DARK)
+    plt.close()
+    print("Page 2 saved.")
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PAGE 3: Airline Trends
+# ─────────────────────────────────────────────────────────────────────────────
+def generate_page3():
+    kpi_al_dist = pd.read_parquet(GOLD / "kpi_airline_distribution.parquet")
+    kpi_al_dur  = pd.read_parquet(GOLD / "kpi_airline_duration.parquet")
+    fact_pay    = pd.read_parquet(GOLD / "fact_payments.parquet")
+    fact_b      = pd.read_parquet(GOLD / "fact_bookings.parquet")
+    dim_al      = pd.read_parquet(GOLD / "dim_airline.parquet")
+    kpi_pay     = pd.read_parquet(GOLD / "kpi_fare_by_payment_method.parquet")
+    kpi_rev     = pd.read_parquet(GOLD / "kpi_route_revenue.parquet")
+
+    # Merge airline name into payments for groupby
+    pay_merged = fact_pay.merge(dim_al[["airline_key", "airline_name"]], on="airline_key", how="left")
+    airline_rev = pay_merged.groupby("airline_name")["amount"].agg(["sum", "mean", "count"]).reset_index()
+    airline_rev.columns = ["airline", "total_rev", "avg_fare", "transactions"]
+    airline_rev = airline_rev.sort_values("total_rev", ascending=False)
+
+    fig = plt.figure(figsize=(FIGW, FIGH), dpi=300)
+    fig.patch.set_facecolor(BG_DARK)
+
+    page_header(fig, 3, "Airline Competitive Trends & Revenue Split",
+                "Airline market share, revenue comparison, payment method analytics, and operational efficiency")
+
+    kpi_data = [
+        ("4", "Airlines", "AI, SJ, UK, IndiGo", True, "#1F6FEB"),
+        ("27.2%", "IndiGo Share", "Market leader", True, "#3FB950"),
+        (f"INR {airline_rev.iloc[0]['avg_fare']:,.0f}", "Top Avg Fare", airline_rev.iloc[0]["airline"], True, "#D29922"),
+        ("UPI 35.8%", "Top Payment", "Most used method", True, "#BC8CFF"),
+        ("164.6 min", "Fleet Avg", "All airlines combined", True, "#0B93A0"),
+    ]
+    tile_w = 0.165
+    for i, (val, lbl, delta, good, acc) in enumerate(kpi_data):
+        kpi_tile(fig, [0.02 + i*(tile_w+0.008), 0.79, tile_w, 0.13],
+                 val, lbl, delta, good, acc)
+
+    # Chart 1: Market share donut
+    ax1 = fig.add_axes([0.02, 0.41, 0.26, 0.35])
+    card_bg(ax1)
+    wedges, texts, autotexts = ax1.pie(
+        kpi_al_dist["share_pct"],
+        labels=kpi_al_dist["airline_name"],
+        colors=PAL_AIRLINE,
+        autopct="%1.1f%%",
+        startangle=130,
+        wedgeprops=dict(width=0.58, edgecolor=BG_DARK, linewidth=2.0),
+        pctdistance=0.80,
+        textprops={"fontsize": 8.5, "color": WHITE}
+    )
+    for wt in autotexts:
+        wt.set_fontsize(8)
+    ax1.set_title("Airline Market\nShare by Flights", color=GREY1,
+                  fontsize=10, fontweight="bold")
+
+    # Chart 2: Revenue by airline grouped (total + avg fare)
+    ax2 = fig.add_axes([0.31, 0.41, 0.35, 0.35])
+    card_bg(ax2)
+    airlines = airline_rev["airline"].values
+    x = np.arange(len(airlines))
+    ax2_twin = ax2.twinx()
+    bars = ax2.bar(x, airline_rev["total_rev"] / 1000, color=PAL_AIRLINE, alpha=0.9,
+                   width=0.5, zorder=3, label="Total Revenue (INR K)")
+    ax2_twin.plot(x, airline_rev["avg_fare"], "o--", color=C_AMBER, linewidth=2.0,
+                  markersize=7, zorder=5, label="Avg Fare (INR)")
+    ax2.set_xticks(x)
+    ax2.set_xticklabels([a.split()[0] for a in airlines], color=GREY2, fontsize=9)
+    ax2.set_ylabel("Revenue (INR K)", color=GREY2, fontsize=8)
+    ax2_twin.set_ylabel("Avg Fare (INR)", color=C_AMBER, fontsize=8)
+    ax2.tick_params(colors=GREY2)
+    ax2_twin.tick_params(colors=C_AMBER)
+    ax2.set_title("Revenue & Avg Fare by Airline", color=GREY1,
+                  fontsize=10, fontweight="bold", pad=8)
+    ax2.yaxis.grid(True, color=GREY3, linewidth=0.5, alpha=0.5)
+    handles1, labels1 = ax2.get_legend_handles_labels()
+    handles2, labels2 = ax2_twin.get_legend_handles_labels()
+    ax2.legend(handles1+handles2, labels1+labels2, fontsize=7.5,
+               facecolor=BG_CARD, labelcolor=GREY1, loc="upper right")
+    ax2.set_facecolor(BG_CARD)
+    ax2_twin.set_facecolor(BG_CARD)
+    for spine in ax2_twin.spines.values():
+        spine.set_edgecolor(C_BORDER)
+
+    # Chart 3: Flight count comparison bar
+    ax3 = fig.add_axes([0.69, 0.41, 0.29, 0.35])
+    card_bg(ax3)
+    ax3.bar(kpi_al_dist["airline_name"].str.split().str[0],
+            kpi_al_dist["total_flights"],
+            color=PAL_AIRLINE, alpha=0.9, width=0.55, zorder=3)
+    for i, (name, val) in enumerate(zip(kpi_al_dist["airline_name"], kpi_al_dist["total_flights"])):
+        ax3.text(i, val + 2, str(val), ha="center", fontsize=9, color=GREY1, fontweight="bold")
+    ax3.set_ylabel("Total Flights", color=GREY2, fontsize=8)
+    ax3.tick_params(colors=GREY2, labelsize=9)
+    ax3.set_title("Total Flights per Airline", color=GREY1,
+                  fontsize=10, fontweight="bold", pad=8)
+    ax3.yaxis.grid(True, color=GREY3, linewidth=0.5, alpha=0.5)
+    ax3.set_facecolor(BG_CARD)
+
+    # Chart 4: Payment method breakdown
+    ax4 = fig.add_axes([0.02, 0.06, 0.30, 0.30])
+    card_bg(ax4)
+    methods = kpi_pay["payment_method"].values
+    txn_counts = kpi_pay["transaction_count"].values
+    avg_amounts = kpi_pay["avg_amount"].values
+    x4 = np.arange(len(methods))
+    w4 = 0.35
+    b1 = ax4.bar(x4 - w4/2, txn_counts, w4, color=["#1F6FEB", "#3FB950", "#D29922"], alpha=0.9, label="Transactions", zorder=3)
+    ax4_twin = ax4.twinx()
+    ax4_twin.bar(x4 + w4/2, avg_amounts, w4, color=["#0A3A7C", "#155A2A", "#7A4500"], alpha=0.75, label="Avg Amount (INR)", zorder=3)
+    ax4.set_xticks(x4)
+    ax4.set_xticklabels(methods, color=GREY2, fontsize=10)
+    ax4.set_ylabel("Transactions", color=GREY2, fontsize=8)
+    ax4_twin.set_ylabel("Avg Amount (INR)", color=GREY2, fontsize=8)
+    ax4.tick_params(colors=GREY2)
+    ax4_twin.tick_params(colors=GREY2)
+    ax4.set_title("Payment Method — Volume & Avg Fare", color=GREY1,
+                  fontsize=10, fontweight="bold", pad=8)
+    ax4.yaxis.grid(True, color=GREY3, linewidth=0.5, alpha=0.4)
+    ax4.set_facecolor(BG_CARD)
+    for spine in ax4_twin.spines.values():
+        spine.set_edgecolor(C_BORDER)
+    handles1, _ = ax4.get_legend_handles_labels()
+    handles2, _ = ax4_twin.get_legend_handles_labels()
+    ax4.legend(handles1+handles2, ["Transactions", "Avg Amount (INR)"], fontsize=8,
+               facecolor=BG_CARD, labelcolor=GREY1)
+
+    # Chart 5: Airline duration efficiency scatter
+    ax5 = fig.add_axes([0.36, 0.06, 0.30, 0.30])
+    card_bg(ax5)
+    for i, row in kpi_al_dur.iterrows():
+        ax5.scatter(row["flight_count"], row["avg_duration_min"],
+                    s=row["max_duration_min"] * 0.8, color=PAL_AIRLINE[i], alpha=0.85,
+                    edgecolors=WHITE, linewidths=0.5, zorder=4)
+        ax5.annotate(row["airline_name"].split()[0],
+                     (row["flight_count"], row["avg_duration_min"] + 2),
+                     fontsize=9, color=WHITE, ha="center")
+    ax5.set_xlabel("Flight Count", color=GREY2, fontsize=8)
+    ax5.set_ylabel("Avg Duration (min)", color=GREY2, fontsize=8)
+    ax5.tick_params(colors=GREY2, labelsize=8)
+    ax5.set_title("Airline Efficiency Bubble\n(size = max duration)", color=GREY1,
+                  fontsize=9, fontweight="bold", pad=8)
+    ax5.yaxis.grid(True, color=GREY3, linewidth=0.5, alpha=0.5)
+    ax5.xaxis.grid(True, color=GREY3, linewidth=0.5, alpha=0.5)
+    ax5.set_facecolor(BG_CARD)
+
+    # Chart 6: Cumulative revenue by airline pie
+    ax6 = fig.add_axes([0.70, 0.06, 0.28, 0.30])
+    card_bg(ax6)
+    ax6.pie(airline_rev["total_rev"],
+            labels=[a.split()[0] for a in airline_rev["airline"]],
+            colors=PAL_AIRLINE,
+            autopct="%1.1f%%",
+            startangle=90,
+            wedgeprops=dict(width=0.55, edgecolor=BG_DARK, linewidth=1.5),
+            pctdistance=0.78,
+            textprops={"fontsize": 8.5, "color": WHITE})
+    ax6.set_title("Revenue Share\nby Airline", color=GREY1,
+                  fontsize=10, fontweight="bold")
+
+    page_footer(fig, "Data Source: kpi_airline_distribution  |  fact_payments  |  dim_airline  |  kpi_fare_by_payment_method")
+    plt.savefig(OUT / "page3_airline_trends.png", dpi=300, bbox_inches="tight",
+                facecolor=BG_DARK)
+    plt.close()
+    print("Page 3 saved.")
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PAGE 4: Delay & Anomaly Insights
+# ─────────────────────────────────────────────────────────────────────────────
+def generate_page4():
+    fact_f   = pd.read_parquet(GOLD / "fact_flights.parquet")
+    kpi_out  = pd.read_parquet(GOLD / "kpi_duration_outliers.parquet")
+    kpi_summ = pd.read_parquet(GOLD / "kpi_overall_summary.parquet")
+    kpi_cancel = pd.read_parquet(GOLD / "kpi_route_cancellations.parquet")
+    kpi_pay  = pd.read_parquet(GOLD / "kpi_fare_by_payment_method.parquet")
+    kpi_rt   = pd.read_parquet(GOLD / "kpi_route_duration.parquet")
+    kpi_al   = pd.read_parquet(GOLD / "kpi_airline_duration.parquet")
+    fact_b   = pd.read_parquet(GOLD / "fact_bookings.parquet")
+
+    fig = plt.figure(figsize=(FIGW, FIGH), dpi=300)
+    fig.patch.set_facecolor(BG_DARK)
+
+    page_header(fig, 4, "Delay, Anomaly & Data Quality Insights",
+                "Statistical outliers, overnight repairs, data imputation tracking, and booking integrity analysis")
+
+    kpi_data = [
+        ("0", "Negative Durations", "After pipeline fix", True, "#3FB950"),
+        ("1", "Outlier Flights", "> 2 std from route avg", False, "#F85149"),
+        ("1", "Overnight Repaired", "SJ192 +24h fix", True, "#D29922"),
+        ("78", "Amounts Imputed", "Median INR 8,027", True, "#1F6FEB"),
+        ("75", "Status Imputed", "Null/INVALID -> PENDING", True, "#BC8CFF"),
+    ]
+    tile_w = 0.165
+    for i, (val, lbl, delta, good, acc) in enumerate(kpi_data):
+        kpi_tile(fig, [0.02 + i*(tile_w+0.008), 0.79, tile_w, 0.13],
+                 val, lbl, delta, good, acc)
+
+    # Chart 1: Route deviation (std dev) from mean — sorted
+    ax1 = fig.add_axes([0.02, 0.41, 0.35, 0.35])
+    card_bg(ax1)
+    # Compute route-level std from fact flights merged with dim_route
+    dim_r = pd.read_parquet(GOLD / "dim_route.parquet")
+    ff_r = fact_f.merge(dim_r[["route_key", "route_name"]], on="route_key")
+    route_stats = ff_r.groupby("route_name")["duration_minutes"].agg(["mean", "std"]).reset_index()
+    route_stats["std"] = route_stats["std"].fillna(0)
+    route_stats = route_stats.sort_values("std", ascending=False).head(12)
+    ax1.barh(route_stats["route_name"], route_stats["std"],
+             color=[C_RED if v > 40 else C_AMBER if v > 25 else C_GREEN for v in route_stats["std"]],
+             alpha=0.88, height=0.65, zorder=3)
+    ax1.axvline(route_stats["std"].mean(), color=WHITE, linewidth=1.2, linestyle="--", alpha=0.6,
+                label=f"Mean std: {route_stats['std'].mean():.1f} min")
+    ax1.set_xlabel("Std Dev (minutes)", color=GREY2, fontsize=8)
+    ax1.tick_params(colors=GREY2, labelsize=7.5)
+    ax1.set_title("Duration Variability by Route (Std Dev)", color=GREY1,
+                  fontsize=10, fontweight="bold", pad=8)
+    ax1.xaxis.grid(True, color=GREY3, linewidth=0.5, alpha=0.5)
+    ax1.legend(fontsize=8, facecolor=BG_CARD, labelcolor=GREY1)
+    ax1.set_facecolor(BG_CARD)
+
+    # Chart 2: Scatter — duration vs. route mean (outlier highlighted)
+    ax2 = fig.add_axes([0.40, 0.41, 0.28, 0.35])
+    card_bg(ax2)
+    normal = fact_f[~fact_f["is_duration_outlier"]]
+    outlier = fact_f[fact_f["is_duration_outlier"]]
+    ax2.scatter(normal["route_mean_duration"], normal["duration_minutes"],
+                s=12, alpha=0.35, color=C_ACCENT, label="Normal flights", zorder=3)
+    ax2.scatter(outlier["route_mean_duration"], outlier["duration_minutes"],
+                s=80, alpha=0.95, color=C_RED, marker="*", label="Outlier (>2σ)", zorder=5, edgecolors=WHITE, linewidths=0.5)
+    max_d = max(fact_f["duration_minutes"].max(), fact_f["route_mean_duration"].max())
+    ax2.plot([0, max_d], [0, max_d], "--", color=GREY2, linewidth=0.8, alpha=0.6, label="y = x (no deviation)")
+    ax2.set_xlabel("Route Mean Duration (min)", color=GREY2, fontsize=8)
+    ax2.set_ylabel("Actual Duration (min)", color=GREY2, fontsize=8)
+    ax2.tick_params(colors=GREY2, labelsize=8)
+    ax2.set_title("Actual vs Route Mean Duration\n(Outlier Detection)", color=GREY1,
+                  fontsize=10, fontweight="bold", pad=8)
+    ax2.legend(fontsize=7.5, facecolor=BG_CARD, labelcolor=GREY1)
+    ax2.xaxis.grid(True, color=GREY3, linewidth=0.5, alpha=0.4)
+    ax2.yaxis.grid(True, color=GREY3, linewidth=0.5, alpha=0.4)
+    ax2.set_facecolor(BG_CARD)
+
+    # Chart 3: Cancellation heatmap by route (top 10)
+    ax3 = fig.add_axes([0.72, 0.41, 0.26, 0.35])
+    card_bg(ax3)
+    top_cancel = kpi_cancel.nlargest(10, "cancellation_rate_pct").sort_values("cancellation_rate_pct")
+    bar_colors_c = [C_RED if v > 35 else C_AMBER if v > 28 else C_GREEN for v in top_cancel["cancellation_rate_pct"]]
+    ax3.barh(top_cancel["route_name"], top_cancel["cancellation_rate_pct"],
+             color=bar_colors_c, alpha=0.9, height=0.65, zorder=3)
+    ax3.axvline(31.4, color=WHITE, linewidth=1.2, linestyle="--", alpha=0.7, label="Overall avg: 31.4%")
+    for i, (route, val) in enumerate(zip(top_cancel["route_name"], top_cancel["cancellation_rate_pct"])):
+        ax3.text(val + 0.3, i, f"{val:.1f}%", va="center", fontsize=7.5, color=GREY1)
+    ax3.set_xlabel("Cancellation Rate (%)", color=GREY2, fontsize=8)
+    ax3.tick_params(colors=GREY2, labelsize=7.5)
+    ax3.set_title("Route Cancellation Rate\nRisk Ranking", color=GREY1,
+                  fontsize=10, fontweight="bold", pad=8)
+    ax3.xaxis.grid(True, color=GREY3, linewidth=0.5, alpha=0.5)
+    ax3.legend(fontsize=8, facecolor=BG_CARD, labelcolor=GREY1)
+    ax3.set_facecolor(BG_CARD)
+
+    # Chart 4: Imputation audit waterfall
+    ax4 = fig.add_axes([0.02, 0.06, 0.35, 0.30])
+    card_bg(ax4)
+    categories = ["Raw Flights", "After Dedup", "Raw Passengers", "After Dedup",
+                  "Bookings Status\nImputed", "Payments\nImputed"]
+    values = [1020, 1005, 1039, 1000, 75, 78]
+    bar_cs = [C_ACCENT, C_GREEN, C_ACCENT, C_GREEN, C_AMBER, C_AMBER]
+    ax4.barh(categories, values, color=bar_cs, alpha=0.9, height=0.65, zorder=3)
+    for i, v in enumerate(values):
+        ax4.text(v + 3, i, str(v), va="center", fontsize=9, color=GREY1, fontweight="bold")
+    ax4.tick_params(colors=GREY2, labelsize=7.5)
+    ax4.set_xlabel("Row Count", color=GREY2, fontsize=8)
+    ax4.set_title("Data Quality — Row Tracking Summary", color=GREY1,
+                  fontsize=10, fontweight="bold", pad=8)
+    ax4.xaxis.grid(True, color=GREY3, linewidth=0.5, alpha=0.5)
+    ax4.set_facecolor(BG_CARD)
+    legend_patches = [
+        mpatches.Patch(color=C_ACCENT, label="Raw ingested"),
+        mpatches.Patch(color=C_GREEN, label="After dedup"),
+        mpatches.Patch(color=C_AMBER, label="Imputed records"),
+    ]
+    ax4.legend(handles=legend_patches, fontsize=7.5, facecolor=BG_CARD, labelcolor=GREY1)
+
+    # Chart 5: Booking status donut overall
+    ax5 = fig.add_axes([0.41, 0.06, 0.26, 0.30])
+    card_bg(ax5)
+    status_counts = fact_b["status"].value_counts()
+    ax5.pie(status_counts.values,
+            labels=status_counts.index,
+            colors=[C_GREEN, C_RED, C_AMBER],
+            autopct="%1.1f%%",
+            startangle=90,
+            wedgeprops=dict(width=0.58, edgecolor=BG_DARK, linewidth=1.5),
+            pctdistance=0.80,
+            textprops={"fontsize": 9, "color": WHITE})
+    ax5.set_title("Overall Booking\nStatus Split", color=GREY1,
+                  fontsize=10, fontweight="bold")
+
+    # Chart 6: Imputed vs real amounts payment
+    ax6 = fig.add_axes([0.71, 0.06, 0.27, 0.30])
+    card_bg(ax6)
+    pay_merged = pd.read_parquet(GOLD / "fact_payments.parquet")
+    imputed = pay_merged[pay_merged["is_amount_imputed"]]["amount"]
+    real = pay_merged[~pay_merged["is_amount_imputed"]]["amount"]
+    ax6.hist(real, bins=20, alpha=0.8, color=C_ACCENT, label=f"Real ({len(real)})", density=True, zorder=3)
+    ax6.hist(imputed, bins=6, alpha=0.7, color=C_AMBER, label=f"Imputed ({len(imputed)})", density=True, zorder=4)
+    ax6.axvline(real.mean(), color=WHITE, linestyle="--", linewidth=1.0, alpha=0.6)
+    ax6.axvline(8027.12, color=C_AMBER, linestyle="-", linewidth=1.5, alpha=0.8)
+    ax6.set_xlabel("Amount (INR)", color=GREY2, fontsize=8)
+    ax6.set_ylabel("Density", color=GREY2, fontsize=8)
+    ax6.tick_params(colors=GREY2, labelsize=7.5)
+    ax6.set_title("Real vs Imputed Payment\nAmount Distribution", color=GREY1,
+                  fontsize=10, fontweight="bold", pad=8)
+    ax6.legend(fontsize=8, facecolor=BG_CARD, labelcolor=GREY1)
+    ax6.yaxis.grid(True, color=GREY3, linewidth=0.5, alpha=0.5)
+    ax6.set_facecolor(BG_CARD)
+
+    page_footer(fig, "Data Source: fact_flights  |  kpi_duration_outliers  |  kpi_route_cancellations  |  fact_payments  |  fact_bookings")
+    plt.savefig(OUT / "page4_delay_anomaly_insights.png", dpi=300, bbox_inches="tight",
+                facecolor=BG_DARK)
+    plt.close()
+    print("Page 4 saved.")
+
 
 if __name__ == "__main__":
     generate_page1()
     generate_page2()
     generate_page3()
     generate_page4()
-    print("All 4 Power BI dashboard page screenshots rendered successfully.")
+    print("All 4 Power BI-style dashboard pages generated.")
