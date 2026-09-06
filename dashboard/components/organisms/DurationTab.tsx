@@ -4,6 +4,7 @@ import React, { useState, useMemo } from "react";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/atoms/Card";
 import { SearchInput } from "@/components/atoms/SearchInput";
 import { asgData } from "@/lib/data";
+import { useTheme } from "@/lib/theme";
 import {
   ResponsiveContainer,
   BarChart,
@@ -19,6 +20,7 @@ import { RiTimerLine, RiBarChartGroupedLine, RiTimeLine, RiTableLine } from "@re
 
 export function DurationTab() {
   const [searchTerm, setSearchTerm] = useState("");
+  const { isDark } = useTheme();
 
   const airlineDurationData = useMemo(() => {
     return asgData.kpi_airline_duration.map((item) => ({
@@ -85,14 +87,17 @@ export function DurationTab() {
 
   const maxHourlyFlights = Math.max(...hourlyData.map((d) => d.flights));
 
-  const tooltipStyle = {
-    backgroundColor: "rgba(255, 255, 255, 0.95)",
-    border: "2px solid #A7F3D0",
-    borderRadius: "16px",
-    boxShadow: "0 10px 25px -5px rgba(16, 185, 129, 0.15)",
-    fontSize: "12px",
-    color: "#065F46",
-    fontWeight: 600,
+  const chartTheme = {
+    grid: isDark ? "#334155" : "#E2E8F0",
+    text: isDark ? "#94A3B8" : "#475569",
+    tooltip: {
+      backgroundColor: isDark ? "#0F172A" : "#FFFFFF",
+      borderColor: isDark ? "#334155" : "#CBD5E1",
+      borderRadius: "12px",
+      boxShadow: "0 4px 14px rgba(0, 0, 0, 0.1)",
+      fontSize: "12px",
+      color: isDark ? "#F8FAFC" : "#0F172A",
+    },
   };
 
   return (
@@ -104,7 +109,7 @@ export function DurationTab() {
           <CardHeader>
             <div>
               <CardTitle>
-                <RiBarChartGroupedLine className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                <RiBarChartGroupedLine className="w-5 h-5 text-sky-600 dark:text-sky-400" />
                 Airline Duration Profile (Min / Avg / Max)
               </CardTitle>
               <CardDescription>
@@ -115,14 +120,14 @@ export function DurationTab() {
           <div className="h-72 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={airlineDurationData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#10b981" opacity={0.15} />
-                <XAxis dataKey="name" stroke="#059669" fontSize={12} tickLine={false} />
-                <YAxis stroke="#059669" fontSize={12} tickLine={false} unit="m" />
-                <Tooltip contentStyle={tooltipStyle} />
+                <CartesianGrid strokeDasharray="3 3" stroke={chartTheme.grid} opacity={0.6} />
+                <XAxis dataKey="name" stroke={chartTheme.text} fontSize={12} tickLine={false} />
+                <YAxis stroke={chartTheme.text} fontSize={12} tickLine={false} unit="m" />
+                <Tooltip contentStyle={chartTheme.tooltip} />
                 <Legend wrapperStyle={{ fontSize: "12px", paddingTop: "8px" }} />
-                <Bar dataKey="Min" fill="#34D399" radius={[6, 6, 0, 0]} />
-                <Bar dataKey="Avg" fill="#059669" radius={[6, 6, 0, 0]} />
-                <Bar dataKey="Max" fill="#F43F5E" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="Min" fill="#0284C7" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="Avg" fill="#38BDF8" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="Max" fill="#F43F5E" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -148,19 +153,19 @@ export function DurationTab() {
                 data={topRoutesByDuration}
                 margin={{ top: 5, right: 20, left: 10, bottom: 5 }}
               >
-                <CartesianGrid strokeDasharray="3 3" stroke="#10b981" opacity={0.15} />
-                <XAxis type="number" stroke="#059669" fontSize={12} tickLine={false} unit="m" />
+                <CartesianGrid strokeDasharray="3 3" stroke={chartTheme.grid} opacity={0.6} />
+                <XAxis type="number" stroke={chartTheme.text} fontSize={12} tickLine={false} unit="m" />
                 <YAxis
                   dataKey="name"
                   type="category"
-                  stroke="#059669"
+                  stroke={chartTheme.text}
                   fontSize={11}
                   tickLine={false}
                   width={80}
-                  tick={{ fill: "#065F46", fontFamily: "monospace", fontWeight: 700 }}
+                  tick={{ fill: chartTheme.text, fontFamily: "monospace", fontWeight: 700 }}
                 />
-                <Tooltip contentStyle={tooltipStyle} formatter={(val: any) => [`${val} min`, "Avg Duration"]} />
-                <Bar dataKey="avgDuration" fill="#10B981" radius={[0, 8, 8, 0]}>
+                <Tooltip contentStyle={chartTheme.tooltip} formatter={(val: any) => [`${val} min`, "Avg Duration"]} />
+                <Bar dataKey="avgDuration" fill="#10B981" radius={[0, 6, 6, 0]}>
                   {topRoutesByDuration.map((_, index) => (
                     <Cell
                       key={`cell-${index}`}
@@ -181,8 +186,8 @@ export function DurationTab() {
           <CardHeader>
             <div>
               <CardTitle>
-                <RiTimeLine className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-                24-Hour Flight Departure Traffic Heatmap
+                <RiTimeLine className="w-5 h-5 text-sky-600 dark:text-sky-400" />
+                24-Hour Flight Departure Traffic Pattern
               </CardTitle>
               <CardDescription>
                 Flight schedule intensity across departure hours (Peak at 15:00-18:00 IST)
@@ -192,19 +197,19 @@ export function DurationTab() {
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={hourlyData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#10b981" opacity={0.15} />
-                <XAxis dataKey="hour" stroke="#059669" fontSize={11} tickLine={false} />
-                <YAxis stroke="#059669" fontSize={12} tickLine={false} />
-                <Tooltip contentStyle={tooltipStyle} formatter={(val: any) => [`${val} flights`, "Volume"]} />
-                <Bar dataKey="flights" radius={[6, 6, 0, 0]}>
+                <CartesianGrid strokeDasharray="3 3" stroke={chartTheme.grid} opacity={0.6} />
+                <XAxis dataKey="hour" stroke={chartTheme.text} fontSize={11} tickLine={false} />
+                <YAxis stroke={chartTheme.text} fontSize={12} tickLine={false} />
+                <Tooltip contentStyle={chartTheme.tooltip} formatter={(val: any) => [`${val} flights`, "Volume"]} />
+                <Bar dataKey="flights" radius={[4, 4, 0, 0]}>
                   {hourlyData.map((entry, index) => {
                     const intensity = entry.flights / maxHourlyFlights;
                     const fill =
                       intensity > 0.85
                         ? "#F59E0B"
                         : intensity > 0.5
-                        ? "#10B981"
-                        : "#6EE7B7";
+                        ? "#0284C7"
+                        : "#38BDF8";
                     return <Cell key={`cell-hour-${index}`} fill={fill} />;
                   })}
                 </Bar>
@@ -218,7 +223,7 @@ export function DurationTab() {
           <CardHeader>
             <div>
               <CardTitle>
-                <RiTimerLine className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                <RiTimerLine className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                 Duration Frequency (Histogram)
               </CardTitle>
               <CardDescription>
@@ -229,11 +234,11 @@ export function DurationTab() {
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={durationHistogram} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#10b981" opacity={0.15} />
-                <XAxis dataKey="range" stroke="#059669" fontSize={10} tickLine={false} angle={-25} textAnchor="end" height={40} />
-                <YAxis stroke="#059669" fontSize={11} tickLine={false} />
-                <Tooltip contentStyle={tooltipStyle} />
-                <Bar dataKey="flights" fill="#059669" radius={[6, 6, 0, 0]} />
+                <CartesianGrid strokeDasharray="3 3" stroke={chartTheme.grid} opacity={0.6} />
+                <XAxis dataKey="range" stroke={chartTheme.text} fontSize={10} tickLine={false} angle={-25} textAnchor="end" height={40} />
+                <YAxis stroke={chartTheme.text} fontSize={11} tickLine={false} />
+                <Tooltip contentStyle={chartTheme.tooltip} />
+                <Bar dataKey="flights" fill="#8B5CF6" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -245,7 +250,7 @@ export function DurationTab() {
         <CardHeader>
           <div>
             <CardTitle>
-              <RiTableLine className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+              <RiTableLine className="w-5 h-5 text-sky-600 dark:text-sky-400" />
               Comprehensive Route Flight Duration Master (All 30 Routes)
             </CardTitle>
             <CardDescription>
@@ -259,12 +264,12 @@ export function DurationTab() {
           />
         </CardHeader>
 
-        <div className="overflow-x-auto max-h-96 overflow-y-auto rounded-2xl border-2 border-emerald-100 dark:border-emerald-900/40">
+        <div className="overflow-x-auto max-h-96 overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-800">
           <table className="w-full text-left text-xs border-collapse">
-            <thead className="sticky top-0 bg-emerald-50 dark:bg-emerald-900/90 border-b-2 border-emerald-200 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200 uppercase tracking-wider font-extrabold">
+            <thead className="sticky top-0 bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 uppercase tracking-wider font-bold">
               <tr>
                 <th className="py-3.5 px-4">Route</th>
-                <th className="py-3.5 px-4">Full Route Name</th>
+                <th className="py-3.5 px-4 font-sans">Full Route Name</th>
                 <th className="py-3.5 px-4 text-right">Flights</th>
                 <th className="py-3.5 px-4 text-right">Avg Duration</th>
                 <th className="py-3.5 px-4 text-right">Min Duration</th>
@@ -272,27 +277,27 @@ export function DurationTab() {
                 <th className="py-3.5 px-4 text-right">Spread</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-emerald-100 dark:divide-emerald-900/40 font-mono">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-mono">
               {filteredRoutes.map((r, i) => {
                 const spread = r.max_duration_min - r.min_duration_min;
                 return (
-                  <tr key={i} className="hover:bg-emerald-50/60 dark:hover:bg-emerald-900/30 transition-colors">
-                    <td className="py-3 px-4 font-bold text-emerald-700 dark:text-emerald-300">{r.route_name}</td>
-                    <td className="py-3 px-4 font-sans font-medium text-emerald-950 dark:text-emerald-100">{r.route_full_name}</td>
-                    <td className="py-3 px-4 text-right text-emerald-900 dark:text-emerald-200">{r.flight_count}</td>
-                    <td className="py-3 px-4 text-right text-emerald-700 dark:text-emerald-300 font-bold">
+                  <tr key={i} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors">
+                    <td className="py-3 px-4 font-bold text-sky-700 dark:text-sky-300">{r.route_name}</td>
+                    <td className="py-3 px-4 font-sans font-medium text-slate-900 dark:text-slate-100">{r.route_full_name}</td>
+                    <td className="py-3 px-4 text-right text-slate-700 dark:text-slate-300">{r.flight_count}</td>
+                    <td className="py-3 px-4 text-right text-emerald-600 dark:text-emerald-400 font-bold">
                       {r.avg_duration_min.toFixed(1)} m
                     </td>
-                    <td className="py-3 px-4 text-right text-emerald-800/70 dark:text-emerald-300/70">{r.min_duration_min} m</td>
-                    <td className="py-3 px-4 text-right text-emerald-800/70 dark:text-emerald-300/70">{r.max_duration_min} m</td>
+                    <td className="py-3 px-4 text-right text-slate-600 dark:text-slate-400">{r.min_duration_min} m</td>
+                    <td className="py-3 px-4 text-right text-slate-600 dark:text-slate-400">{r.max_duration_min} m</td>
                     <td className="py-3 px-4 text-right">
                       <span
-                        className={`px-2.5 py-1 rounded-full text-[11px] font-bold ${
+                        className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
                           spread > 150
-                            ? "bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300"
+                            ? "bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300 border border-rose-200 dark:border-rose-800"
                             : spread > 80
-                            ? "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300"
-                            : "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
+                            ? "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border border-amber-200 dark:border-amber-800"
+                            : "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800"
                         }`}
                       >
                         {spread} m

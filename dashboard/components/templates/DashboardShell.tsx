@@ -41,27 +41,27 @@ export function DashboardShell() {
     {
       id: "anomalies" as TabId,
       label: "Delay & Anomaly",
-      icon: <RiAlertLine className="w-4 h-4" />,
+      icon: <RiAlertLine className="w-4 h-4 text-rose-500" />,
       badgeCount: 1,
     },
     {
       id: "quality" as TabId,
       label: "Data Quality & PII",
-      icon: <RiShieldCheckLine className="w-4 h-4" />,
+      icon: <RiShieldCheckLine className="w-4 h-4 text-emerald-500" />,
     },
   ];
 
   return (
-    <div className="min-h-screen flex flex-col transition-colors duration-300">
+    <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-[#0B0F19] text-slate-900 dark:text-slate-100 transition-colors duration-200">
       {/* Navbar Organism with Light/Dark Button Switch */}
       <Navbar />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         {/* Executive KPI Overview Molecule */}
         <KpiStrip />
 
-        {/* Claymorphism Tab Navigation Container */}
-        <div className="p-1.5 rounded-3xl bg-emerald-100/60 dark:bg-emerald-950/60 border-2 border-emerald-200/80 dark:border-emerald-800/40 shadow-inner flex overflow-x-auto gap-1.5 no-scrollbar">
+        {/* High-Contrast Segment Tab Navigation Container */}
+        <div className="p-1.5 rounded-2xl bg-slate-200/60 dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-800 flex overflow-x-auto gap-1.5 no-scrollbar shadow-2xs">
           {tabs.map((tab) => (
             <TabButton
               key={tab.id}
@@ -85,23 +85,23 @@ export function DashboardShell() {
         </div>
       </main>
 
-      {/* Executive Clay Footer */}
-      <footer className="border-t-2 border-emerald-100/80 dark:border-emerald-900/50 bg-white/60 dark:bg-emerald-950/60 backdrop-blur-md py-6 mt-16 text-xs text-emerald-800/70 dark:text-emerald-300/70">
+      {/* Executive Clean Footer */}
+      <footer className="border-t border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md py-6 mt-16 text-xs text-slate-500 dark:text-slate-400">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <span className="font-extrabold text-emerald-950 dark:text-emerald-100">
-              ASG Airlines Ops Data Engineering
+            <span className="font-bold text-slate-800 dark:text-slate-200">
+              ASG Airlines Ops Data Engineering Suite
             </span>
             <span>•</span>
-            <span className="font-medium">Next.js 16 + TypeScript + Claymorphism Emerald Theme</span>
+            <span>Next.js 16 + TypeScript + Tailwind CSS + Recharts</span>
           </div>
 
-          <div className="flex items-center gap-4 font-mono font-bold">
-            <span className="text-emerald-700 dark:text-emerald-400">6/6 Tests Passing</span>
+          <div className="flex items-center gap-4 font-mono font-semibold">
+            <span className="text-emerald-600 dark:text-emerald-400">6/6 Tests Passing</span>
             <span>•</span>
-            <span className="text-teal-700 dark:text-teal-300">100% Referential Integrity</span>
+            <span className="text-sky-600 dark:text-sky-400">100% Referential Integrity</span>
             <span>•</span>
-            <span className="text-emerald-800/70 dark:text-emerald-400/70">India DPDP Compliant</span>
+            <span className="text-slate-600 dark:text-slate-400">India DPDP Compliant</span>
           </div>
         </div>
       </footer>

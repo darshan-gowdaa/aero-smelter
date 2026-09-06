@@ -20,23 +20,23 @@ export function TabButton({
     <button
       type="button"
       className={cn(
-        "relative flex items-center gap-2 px-5 py-2.5 text-xs font-bold tracking-wide rounded-2xl transition-all duration-200 cursor-pointer whitespace-nowrap",
+        "relative flex items-center gap-2 px-4 py-2.5 text-xs font-semibold tracking-wide rounded-xl transition-all duration-150 cursor-pointer whitespace-nowrap select-none",
         active
-          ? "bg-emerald-600 text-white shadow-[0_6px_16px_rgba(16,185,129,0.35),inset_1px_1px_2px_rgba(255,255,255,0.4)] border-2 border-emerald-400/40 transform -translate-y-0.5"
-          : "bg-white/80 dark:bg-emerald-950/40 text-emerald-900/80 dark:text-emerald-200/80 hover:bg-white dark:hover:bg-emerald-900/60 shadow-[3px_3px_8px_rgba(16,76,52,0.06),-2px_-2px_6px_#ffffff] dark:shadow-none border-2 border-emerald-100 dark:border-emerald-800/40",
+          ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xs border border-slate-200/90 dark:border-slate-700"
+          : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800/50",
         className
       )}
       {...props}
     >
-      {icon && <span className="w-4 h-4">{icon}</span>}
+      {icon && <span className="w-4 h-4 shrink-0">{icon}</span>}
       <span>{children}</span>
       {typeof badgeCount === "number" && (
         <span
           className={cn(
-            "ml-1 text-[10px] px-2 py-0.5 rounded-full font-mono font-bold",
+            "ml-1 text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold",
             active
-              ? "bg-white/25 text-white"
-              : "bg-emerald-100 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-300"
+              ? "bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-400"
+              : "bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-400"
           )}
         >
           {badgeCount}

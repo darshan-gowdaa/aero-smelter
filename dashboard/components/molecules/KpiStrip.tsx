@@ -35,18 +35,18 @@ export function KpiStrip() {
         subValue="1,020 raw · 15 dropped"
         badgeText="100% Valid"
         badgeVariant="success"
-        accentColor="green"
-        icon={<RiFlightTakeoffLine className="w-5 h-5" />}
+        accentColor="sky"
+        icon={<RiFlightTakeoffLine className="w-4 h-4" />}
       />
 
       <MetricItem
-        label="Avg Duration"
+        label="Avg Flight Duration"
         value={`${avgDuration.toFixed(1)} m`}
         subValue="2.74 hrs average fleet-wide"
         badgeText="Optimal"
         badgeVariant="info"
-        accentColor="emerald"
-        icon={<RiTimerLine className="w-5 h-5" />}
+        accentColor="indigo"
+        icon={<RiTimerLine className="w-4 h-4" />}
       />
 
       <MetricItem
@@ -55,28 +55,28 @@ export function KpiStrip() {
         subValue="1,000 transactions verified"
         badgeText="Audited"
         badgeVariant="success"
-        accentColor="green"
-        icon={<RiMoneyDollarCircleLine className="w-5 h-5" />}
+        accentColor="emerald"
+        icon={<RiMoneyDollarCircleLine className="w-4 h-4" />}
       />
 
       <MetricItem
         label="Cancellation Rate"
         value={`${cancellationRate.toFixed(1)}%`}
         subValue="314 cancelled bookings"
-        badgeText="Monitored"
+        badgeText="Watch"
         badgeVariant="danger"
         accentColor="rose"
-        icon={<RiCloseCircleLine className="w-5 h-5" />}
+        icon={<RiCloseCircleLine className="w-4 h-4" />}
       />
 
       <MetricItem
         label="Overnight Repaired"
         value={formatNumber(summary.overnight_flights_repaired)}
         subValue="SJ192 (HYD→BOM) +24h fix"
-        badgeText="+1 Day Fixed"
+        badgeText="+1 Day"
         badgeVariant="warning"
         accentColor="amber"
-        icon={<RiMoonLine className="w-5 h-5" />}
+        icon={<RiMoonLine className="w-4 h-4" />}
       />
 
       <MetricItem
@@ -86,7 +86,7 @@ export function KpiStrip() {
         badgeText="Flagged"
         badgeVariant="purple"
         accentColor="purple"
-        icon={<RiAlertLine className="w-5 h-5" />}
+        icon={<RiAlertLine className="w-4 h-4" />}
       />
     </div>
   );

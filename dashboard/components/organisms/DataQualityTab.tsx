@@ -4,6 +4,7 @@ import React, { useMemo } from "react";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/atoms/Card";
 import { PiiVaultStatus } from "@/components/molecules/PiiVaultStatus";
 import { asgData, confirmedBookingsCount, cancelledBookingsCount, pendingBookingsCount, imputedPaymentCount } from "@/lib/data";
+import { useTheme } from "@/lib/theme";
 import {
   ResponsiveContainer,
   BarChart,
@@ -26,23 +27,25 @@ import {
 } from "@remixicon/react";
 
 export function DataQualityTab() {
+  const { isDark } = useTheme();
+
   const waterfallData = useMemo(() => {
     return [
-      { stage: "Flights (Raw)", count: 1020, fill: "#34D399" },
-      { stage: "Flights (Clean)", count: 1005, fill: "#059669" },
-      { stage: "Pax (Raw)", count: 1039, fill: "#34D399" },
-      { stage: "Pax (Clean)", count: 1000, fill: "#059669" },
-      { stage: "Bookings (Raw)", count: 1000, fill: "#34D399" },
-      { stage: "Bookings (Clean)", count: 1000, fill: "#059669" },
-      { stage: "Payments (Raw)", count: 1000, fill: "#34D399" },
-      { stage: "Payments (Clean)", count: 1000, fill: "#059669" },
+      { stage: "Flights (Raw)", count: 1020, fill: "#0284C7" },
+      { stage: "Flights (Clean)", count: 1005, fill: "#10B981" },
+      { stage: "Pax (Raw)", count: 1039, fill: "#0284C7" },
+      { stage: "Pax (Clean)", count: 1000, fill: "#10B981" },
+      { stage: "Bookings (Raw)", count: 1000, fill: "#0284C7" },
+      { stage: "Bookings (Clean)", count: 1000, fill: "#10B981" },
+      { stage: "Payments (Raw)", count: 1000, fill: "#0284C7" },
+      { stage: "Payments (Clean)", count: 1000, fill: "#10B981" },
     ];
   }, []);
 
   const bookingStatusData = useMemo(() => {
     return [
       { name: "Confirmed", value: confirmedBookingsCount, fill: "#10B981" },
-      { name: "Cancelled", value: cancelledBookingsCount, fill: "#FB7185" },
+      { name: "Cancelled", value: cancelledBookingsCount, fill: "#F43F5E" },
       { name: "Pending (Standardized)", value: pendingBookingsCount, fill: "#F59E0B" },
     ];
   }, []);
@@ -50,7 +53,7 @@ export function DataQualityTab() {
   const paymentImputationData = useMemo(() => {
     const realCount = asgData.fact_payments.length - imputedPaymentCount;
     return [
-      { name: "Real Amount", value: realCount, fill: "#059669" },
+      { name: "Real Amount", value: realCount, fill: "#0284C7" },
       { name: "Median Imputed", value: imputedPaymentCount, fill: "#F59E0B" },
     ];
   }, []);
@@ -62,8 +65,8 @@ export function DataQualityTab() {
       clean: 1005,
       dropped: 15,
       actions: "Repaired 72 missing airline names via prefix lookup; resolved overnight SJ192 date rollover; 15 duplicates dropped.",
-      color: "border-emerald-200 dark:border-emerald-800",
-      accent: "#10B981",
+      color: "border-sky-200 dark:border-sky-800",
+      accent: "#0284C7",
     },
     {
       name: "Passengers Layer",
@@ -71,8 +74,8 @@ export function DataQualityTab() {
       clean: 1000,
       dropped: 39,
       actions: "Deduplicated by passenger_id & completeness score; imputed 10 missing last names; SHA-256 salted Aadhaar/phone/passport.",
-      color: "border-teal-200 dark:border-teal-800",
-      accent: "#059669",
+      color: "border-emerald-200 dark:border-emerald-800",
+      accent: "#10B981",
     },
     {
       name: "Bookings Layer",
@@ -94,14 +97,17 @@ export function DataQualityTab() {
     },
   ];
 
-  const tooltipStyle = {
-    backgroundColor: "rgba(255, 255, 255, 0.95)",
-    border: "2px solid #A7F3D0",
-    borderRadius: "16px",
-    boxShadow: "0 10px 25px -5px rgba(16, 185, 129, 0.15)",
-    fontSize: "12px",
-    color: "#065F46",
-    fontWeight: 600,
+  const chartTheme = {
+    grid: isDark ? "#334155" : "#E2E8F0",
+    text: isDark ? "#94A3B8" : "#475569",
+    tooltip: {
+      backgroundColor: isDark ? "#0F172A" : "#FFFFFF",
+      borderColor: isDark ? "#334155" : "#CBD5E1",
+      borderRadius: "12px",
+      boxShadow: "0 4px 14px rgba(0, 0, 0, 0.1)",
+      fontSize: "12px",
+      color: isDark ? "#F8FAFC" : "#0F172A",
+    },
   };
 
   return (
@@ -116,7 +122,7 @@ export function DataQualityTab() {
           <CardHeader>
             <div>
               <CardTitle>
-                <RiFilter3Line className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                <RiFilter3Line className="w-5 h-5 text-sky-600 dark:text-sky-400" />
                 Pipeline Ingestion vs Cleaned Retained Rows
               </CardTitle>
               <CardDescription>
@@ -127,22 +133,22 @@ export function DataQualityTab() {
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={waterfallData} margin={{ top: 10, right: 10, left: -20, bottom: 20 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#10b981" opacity={0.15} />
+                <CartesianGrid strokeDasharray="3 3" stroke={chartTheme.grid} opacity={0.6} />
                 <XAxis
                   dataKey="stage"
-                  stroke="#059669"
+                  stroke={chartTheme.text}
                   fontSize={10}
                   tickLine={false}
                   angle={-30}
                   textAnchor="end"
                   height={45}
                 />
-                <YAxis stroke="#059669" fontSize={11} domain={[900, 1060]} tickLine={false} />
+                <YAxis stroke={chartTheme.text} fontSize={11} domain={[900, 1060]} tickLine={false} />
                 <Tooltip
-                  contentStyle={tooltipStyle}
+                  contentStyle={chartTheme.tooltip}
                   formatter={(val: any) => [`${val} rows`, "Count"]}
                 />
-                <Bar dataKey="count" radius={[6, 6, 0, 0]}>
+                <Bar dataKey="count" radius={[4, 4, 0, 0]}>
                   {waterfallData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.fill} />
                   ))}
@@ -157,7 +163,7 @@ export function DataQualityTab() {
           <CardHeader>
             <div>
               <CardTitle>
-                <RiPieChartLine className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                <RiPieChartLine className="w-5 h-5 text-amber-600 dark:text-amber-400" />
                 Booking Status
               </CardTitle>
               <CardDescription>
@@ -182,7 +188,7 @@ export function DataQualityTab() {
                     <Cell key={`book-cell-${index}`} fill={entry.fill} />
                   ))}
                 </Pie>
-                <Tooltip contentStyle={tooltipStyle} />
+                <Tooltip contentStyle={chartTheme.tooltip} />
                 <Legend wrapperStyle={{ fontSize: "10px", paddingTop: "4px" }} />
               </PieChart>
             </ResponsiveContainer>
@@ -194,7 +200,7 @@ export function DataQualityTab() {
           <CardHeader>
             <div>
               <CardTitle>
-                <RiDatabaseLine className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                <RiDatabaseLine className="w-5 h-5 text-sky-600 dark:text-sky-400" />
                 Payment Imputation
               </CardTitle>
               <CardDescription>
@@ -219,7 +225,7 @@ export function DataQualityTab() {
                     <Cell key={`pay-cell-${index}`} fill={entry.fill} />
                   ))}
                 </Pie>
-                <Tooltip contentStyle={tooltipStyle} />
+                <Tooltip contentStyle={chartTheme.tooltip} />
                 <Legend wrapperStyle={{ fontSize: "10px", paddingTop: "4px" }} />
               </PieChart>
             </ResponsiveContainer>
@@ -229,37 +235,37 @@ export function DataQualityTab() {
 
       {/* 4 Stage-by-Stage Audit Cards */}
       <div>
-        <div className="flex items-center gap-2 mb-3 text-xs uppercase font-extrabold text-emerald-900/70 dark:text-emerald-300/70 tracking-wider">
+        <div className="flex items-center gap-2 mb-3 text-xs uppercase font-bold text-slate-500 dark:text-slate-400 tracking-wider">
           <RiShieldCheckLine className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
           Medallion Pipeline Stage-by-Stage Verification Ledger
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {auditStages.map((stage, i) => (
-            <Card key={i} className={`border-2 ${stage.color} relative overflow-hidden`}>
-              <div className="absolute top-0 left-0 right-0 h-1.5" style={{ backgroundColor: stage.accent }} />
+            <Card key={i} className={`border ${stage.color} relative overflow-hidden`}>
+              <div className="absolute top-0 left-0 right-0 h-1" style={{ backgroundColor: stage.accent }} />
               <div className="flex items-center justify-between mb-3">
-                <h4 className="font-extrabold text-emerald-950 dark:text-emerald-100 text-sm">{stage.name}</h4>
+                <h4 className="font-bold text-slate-900 dark:text-white text-sm">{stage.name}</h4>
                 <RiCheckDoubleLine className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
               </div>
 
               <div className="space-y-2 text-xs font-mono mb-3">
-                <div className="flex justify-between text-emerald-900 dark:text-emerald-200">
-                  <span className="text-emerald-800/60 dark:text-emerald-300/60 font-sans font-medium">Raw Ingested:</span>
-                  <span className="font-bold">{stage.raw}</span>
+                <div className="flex justify-between text-slate-700 dark:text-slate-300">
+                  <span className="text-slate-500 dark:text-slate-400 font-sans">Raw Ingested:</span>
+                  <span className="font-semibold">{stage.raw}</span>
                 </div>
-                <div className="flex justify-between text-emerald-700 dark:text-emerald-300 font-bold">
-                  <span className="text-emerald-800/60 dark:text-emerald-300/60 font-sans font-medium">Clean Retained:</span>
+                <div className="flex justify-between text-emerald-700 dark:text-emerald-400 font-bold">
+                  <span className="text-slate-500 dark:text-slate-400 font-sans">Clean Retained:</span>
                   <span>{stage.clean}</span>
                 </div>
-                <div className="flex justify-between text-emerald-900 dark:text-emerald-200">
-                  <span className="text-emerald-800/60 dark:text-emerald-300/60 font-sans font-medium">Duplicates Dropped:</span>
-                  <span className={stage.dropped > 0 ? "text-rose-600 dark:text-rose-400 font-bold" : "text-emerald-800/60"}>
+                <div className="flex justify-between text-slate-700 dark:text-slate-300">
+                  <span className="text-slate-500 dark:text-slate-400 font-sans">Duplicates Dropped:</span>
+                  <span className={stage.dropped > 0 ? "text-rose-600 dark:text-rose-400 font-bold" : "text-slate-400"}>
                     {stage.dropped}
                   </span>
                 </div>
               </div>
 
-              <p className="text-[11px] text-emerald-800/80 dark:text-emerald-300/70 font-sans border-t border-emerald-100 dark:border-emerald-900/60 pt-2.5 leading-relaxed">
+              <p className="text-[11px] text-slate-600 dark:text-slate-400 font-sans border-t border-slate-100 dark:border-slate-800 pt-2.5 leading-relaxed">
                 {stage.actions}
               </p>
             </Card>

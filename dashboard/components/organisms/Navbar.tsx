@@ -14,7 +14,7 @@ import {
 
 export function Navbar() {
   const [currentTime, setCurrentTime] = useState<string>("");
-  const { theme, toggleTheme } = useTheme();
+  const { theme, isDark, toggleTheme } = useTheme();
 
   useEffect(() => {
     const updateTime = () => {
@@ -32,47 +32,48 @@ export function Navbar() {
   }, []);
 
   return (
-    <header className="sticky top-0 z-50 border-b-2 border-emerald-100/80 dark:border-emerald-900/50 bg-white/80 dark:bg-emerald-950/80 backdrop-blur-md transition-colors duration-300 shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-wrap items-center justify-between gap-4">
+    <header className="sticky top-0 z-50 border-b border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md transition-colors duration-200">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap items-center justify-between gap-4">
         {/* Brand identity */}
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-emerald-600 via-emerald-500 to-teal-400 flex items-center justify-center text-white shadow-lg shadow-emerald-500/25 border-2 border-white/50">
-            <RiFlightTakeoffLine className="w-6 h-6" />
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-600 via-sky-500 to-cyan-400 flex items-center justify-center text-white shadow-sm">
+            <RiFlightTakeoffLine className="w-5 h-5" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-lg font-extrabold text-emerald-950 dark:text-emerald-50 tracking-tight">
+              <h1 className="text-base font-extrabold text-slate-900 dark:text-white tracking-tight">
                 ASG Airlines
               </h1>
-              <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/80 text-emerald-800 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-700/60 font-bold tracking-wide">
-                FLIGHT OPS
+              <span className="text-[10px] px-2 py-0.5 rounded-md bg-sky-100 dark:bg-sky-950 text-sky-800 dark:text-sky-300 font-mono font-bold tracking-wider uppercase">
+                Flight Operations
               </span>
             </div>
-            <p className="text-xs text-emerald-800/60 dark:text-emerald-300/60 font-medium">
-              Claymorphism Emerald Analytics Suite • Star Schema Gold Layer
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-normal">
+              Executive Power BI & Medallion Star Schema Analytics Suite
             </p>
           </div>
         </div>
 
-        {/* Status Badges + Theme Switcher */}
+        {/* Controls and Status */}
         <div className="flex items-center gap-3">
           {/* Light / Dark Mode Toggle Switch Button */}
           <button
             type="button"
             onClick={toggleTheme}
-            className="clay-btn relative flex items-center gap-2 px-3.5 py-2 rounded-2xl text-xs font-bold text-emerald-900 dark:text-emerald-100 border-2 border-emerald-200/80 dark:border-emerald-700/50 transition-all cursor-pointer select-none"
-            title={`Switch to ${theme === "light" ? "Dark" : "Light"} mode`}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all cursor-pointer select-none shadow-2xs"
+            title={`Switch to ${isDark ? "Light" : "Dark"} mode`}
           >
-            <div className="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-sm">
-              {theme === "light" ? (
-                <RiSunLine className="w-3.5 h-3.5 text-amber-100" />
-              ) : (
-                <RiMoonLine className="w-3.5 h-3.5 text-emerald-100" />
-              )}
-            </div>
-            <span className="hidden sm:inline capitalize">
-              {theme === "light" ? "Light Mode" : "Dark Mode"}
-            </span>
+            {isDark ? (
+              <>
+                <RiSunLine className="w-4 h-4 text-amber-400" />
+                <span className="hidden sm:inline">Light Mode</span>
+              </>
+            ) : (
+              <>
+                <RiMoonLine className="w-4 h-4 text-slate-600" />
+                <span className="hidden sm:inline">Dark Mode</span>
+              </>
+            )}
           </button>
 
           <Badge variant="success" size="md" className="hidden md:inline-flex">
@@ -80,14 +81,14 @@ export function Navbar() {
             <span>Pipeline: 1.02s</span>
           </Badge>
 
-          <Badge variant="default" size="md" className="hidden lg:inline-flex">
+          <Badge variant="info" size="md" className="hidden lg:inline-flex">
             <RiDatabase2Line className="w-4 h-4" />
             <span>18 Gold Tables</span>
           </Badge>
 
           {currentTime && (
-            <div className="hidden sm:flex items-center gap-1.5 text-xs text-emerald-800/80 dark:text-emerald-200/80 font-mono bg-emerald-50 dark:bg-emerald-900/50 px-3 py-1.5 rounded-xl border border-emerald-200/70 dark:border-emerald-800/50">
-              <RiTimeLine className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+            <div className="hidden sm:flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-300 font-mono bg-slate-50 dark:bg-slate-800/80 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700">
+              <RiTimeLine className="w-3.5 h-3.5 text-slate-400" />
               <span>{currentTime}</span>
             </div>
           )}

@@ -15,17 +15,17 @@ export function Badge({
 }: BadgeProps) {
   const variantStyles = {
     default:
-      "bg-emerald-100/80 dark:bg-emerald-950/70 text-emerald-900 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/60",
+      "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700",
     success:
-      "bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-200 border-emerald-300/80 dark:border-emerald-700/60",
+      "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/60",
     warning:
-      "bg-amber-100/90 dark:bg-amber-950/70 text-amber-800 dark:text-amber-300 border-amber-300/80 dark:border-amber-700/60",
+      "bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-800/60",
     danger:
-      "bg-rose-100/90 dark:bg-rose-950/70 text-rose-800 dark:text-rose-300 border-rose-300/80 dark:border-rose-700/60",
+      "bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800/60",
     info:
-      "bg-sky-100/90 dark:bg-sky-950/70 text-sky-800 dark:text-sky-300 border-sky-300/80 dark:border-sky-700/60",
+      "bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 border-sky-200 dark:border-sky-800/60",
     purple:
-      "bg-purple-100/90 dark:bg-purple-950/70 text-purple-800 dark:text-purple-300 border-purple-300/80 dark:border-purple-700/60",
+      "bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800/60",
   };
 
   const sizeStyles = {
@@ -36,7 +36,7 @@ export function Badge({
   return (
     <span
       className={cn(
-        "clay-badge inline-flex items-center gap-1.5 font-semibold transition-all border",
+        "inline-flex items-center gap-1.5 font-semibold rounded-full border shadow-2xs transition-colors",
         variantStyles[variant],
         sizeStyles[size],
         className
