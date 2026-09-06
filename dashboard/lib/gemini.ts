@@ -99,10 +99,28 @@ export const PRECOMPUTED_INSIGHTS: Record<string, string> = {
 - **3. Fair Price Advisor (Gradient Boosting)**:
   - Recommends market-optimal ticket fares based on route distance, airline demand, and lead time.
   - Achieves an average accuracy variance of [GREEN] **₹3,436**, helping commercial teams price off-peak flights competitively.
-- **Executive Recommendation**: [GREEN] Passenger privacy is 100% safeguarded. All Aadhaar numbers are salted and encrypted via SHA-256 before model training, ensuring full compliance with data privacy regulations.`
+- **Executive Recommendation**: [GREEN] Passenger privacy is 100% safeguarded. All Aadhaar numbers are salted and encrypted via SHA-256 before model training, ensuring full compliance with data privacy regulations.`,
+
+  risk: `### [RED] ASG Airlines Operational & Commercial Risk Assessment
+
+- **1. High Flight Cancellation Exposure**:
+  - Fleet-wide cancellation rate is [RED] **31.4%** (314 of 1,000 bookings cancelled), causing significant schedule disruption and fleet underutilization.
+  - Metro corridors face severe volatility: **Delhi to Mumbai (DEL → BOM)** leads at [RED] **41.2% cancellations**, followed by **Hyderabad to Chennai (HYD → MAA)** at [RED] **38.5%**.
+  - Premium-fare bookings experience the highest cancellation rate due to corporate flexibility ([RED] **43.7%** feature weight).
+- **2. Flight Duration & Operational Delay Anomalies**:
+  - Unsupervised AI watchdog (Isolation Forest) identified [RED] **16 operational outliers** exceeding normal block hours (1.59% contamination rate).
+  - High-profile sector delays: Flight \`UK193\` (35 min recorded on a 185 min sector) and Flight \`SJ155\` (300 min recorded on a 151 min sector) caused by severe ground holding patterns.
+  - Previous system bug logged Flight \`SJ192\` as [RED] **-1,370 minutes** due to unhandled midnight rollover; our data pipeline corrected it to [GREEN] **300 minutes (5.0 hours)**.
+- **3. Financial Working Capital & Revenue Leakage**:
+  - [YELLOW] **₹1,154,235.00** currently tied up in **Pending** bookings across 168 transactions awaiting bank settlement (primarily via Net Banking timeouts).
+  - [RED] **₹2,157,320.00** in gross revenue tied to cancelled flights, requiring automated refund liquidity reserves.
+- **4. Predictive Model Governance & Limits**:
+  - Cancellation Prediction (Random Forest): [GREEN] **69.21% validation accuracy**, but ROC-AUC is **0.5143**, indicating class imbalance requiring oversampling on volatile corridors.
+  - Dynamic Fare Regressor: R² = 0.48 with Mean Absolute Error of **₹3,436.22**.
+- **Executive Recommendation**: [GREEN] Implement real-time departure calendar boundary validation at airport gates, deploy dynamic overbooking thresholds on DEL-BOM, and automate payment retries on Net Banking to capture pending revenue.`
 };
 
-// Calls Google Gemini API with strict grounding and human-friendly executive instructions
+// Calls Google Gemini API with strict grounding, 8192 token headroom, and full part extraction
 export async function callGeminiApi(userPrompt: string, apiKey: string): Promise<string> {
   const cleanKey = apiKey.trim();
   if (!cleanKey) {
@@ -118,13 +136,15 @@ COMMUNICATION GUIDELINES:
 1. Speak in human-friendly, plain English. Avoid overly dense data engineering jargon (explain what numbers mean in practical flight and business terms).
 2. Ground your answers 100% in the verified flight, booking, and revenue figures provided. Never invent data.
 3. Structure answers cleanly with Markdown:
+   - NEVER start with conversational pleasantries like "Here is your executive assessment...". Begin IMMEDIATELY with the first section header: '### [COLOR] Section Title'.
    - Use '### [COLOR] Header Title' for section titles, where [COLOR] is [RED], [YELLOW], or [GREEN].
-   - Use '- **Bold Metric/Topic**: explanation' for clear bullet points.
+   - Use '- **Bold Topic**: explanation' for clear bullet points.
    - Use '*italic*' for subtle operational context and \`code\` for flight IDs or airport codes.
    - Tag high-risk issues, severe delays, or high cancellations with [RED].
    - Tag operational notices, pending funds, or schedule adjustments with [YELLOW].
    - Tag healthy financials, verified solutions, and successful operations with [GREEN].
-4. Always conclude with a clear, practical 'Executive Recommendation: [GREEN] ...'.`;
+4. Always conclude with a dedicated section: '### [GREEN] Executive Recommendation & Action Plan' with 2-3 clear action items.
+5. Provide a complete, fully finished response. Do not stop midway.`;
 
   const payload = {
     contents: [
@@ -132,49 +152,73 @@ COMMUNICATION GUIDELINES:
         role: "user",
         parts: [
           {
-            text: `${systemInstruction}\n\n=== VERIFIED GROUND TRUTH DATA ===\n${context}\n\n=== EXECUTIVE QUESTION ===\n${userPrompt}\n\nProvide your executive data-driven assessment now:`
+            text: `${systemInstruction}\n\n=== VERIFIED GROUND TRUTH DATA ===\n${context}\n\n=== EXECUTIVE QUESTION ===\n${userPrompt}\n\nBegin your comprehensive executive assessment now:`
           }
         ]
       }
     ],
     generationConfig: {
       temperature: 0.2,
-      maxOutputTokens: 1200,
+      maxOutputTokens: 8192,
     }
   };
 
-  // Try gemini-2.5-flash first, fallback to gemini-1.5-flash
-  const models = ["gemini-2.5-flash", "gemini-1.5-flash"];
+  // Try gemini-2.5-flash with latency config, fallback to standard gemini-2.5-flash, then gemini-1.5-flash
+  const modelAttempts = [
+    { name: "gemini-2.5-flash", disableThinking: true },
+    { name: "gemini-2.5-flash", disableThinking: false },
+    { name: "gemini-1.5-flash", disableThinking: false },
+  ];
   let lastError: Error | null = null;
 
-  for (const model of models) {
+  for (const item of modelAttempts) {
     try {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${cleanKey}`;
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${item.name}:generateContent?key=${cleanKey}`;
+      
+      const requestPayload: any = {
+        ...payload,
+        generationConfig: {
+          ...payload.generationConfig,
+          ...(item.disableThinking ? { thinkingConfig: { thinkingBudget: 0 } } : {})
+        }
+      };
+
       const response = await fetch(url, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(requestPayload),
       });
 
       if (!response.ok) {
         const errJson = await response.json().catch(() => ({}));
         const errMsg = errJson?.error?.message || `HTTP ${response.status}: ${response.statusText}`;
-        throw new Error(`Gemini API Error (${model}): ${errMsg}`);
+        // If thinkingConfig is rejected as unknown field, try next attempt
+        if (errMsg.includes("thinkingConfig") || errMsg.includes("unknown field")) {
+          continue;
+        }
+        throw new Error(`Gemini API Error (${item.name}): ${errMsg}`);
       }
 
       const resData = await response.json();
-      const generatedText = resData?.candidates?.[0]?.content?.parts?.[0]?.text;
+      const candidate = resData?.candidates?.[0];
+      const parts = candidate?.content?.parts || [];
+      
+      // Filter out thought chunks and concatenate all text parts
+      const textParts = parts
+        .filter((p: any) => typeof p.text === "string" && !p.thought)
+        .map((p: any) => p.text)
+        .join("")
+        .trim();
 
-      if (!generatedText) {
+      if (!textParts) {
         throw new Error("No text content returned by Gemini API.");
       }
 
-      return generatedText;
+      return textParts;
     } catch (err: any) {
       lastError = err;
-      // If error is invalid API key or quota, don't retry other models
       if (err.message?.includes("API_KEY_INVALID") || err.message?.includes("403")) {
         throw err;
       }

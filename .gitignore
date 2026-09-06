@@ -77,4 +77,7 @@ secrets/
 
 # Agent Skills & Workspace Cache
 .agents/
+.vercel/
+scripts/
+
 

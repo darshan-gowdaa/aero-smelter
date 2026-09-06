@@ -102,6 +102,42 @@ export function FormattedAiInsight({ content }: FormattedAiInsightProps) {
       continue;
     }
 
+    // Horizontal Divider
+    if (trimmed === "---" || trimmed === "***" || trimmed === "___") {
+      renderedElements.push(<hr key={i} className="my-3 border-[var(--color-surface-variant)]" />);
+      continue;
+    }
+
+    // Blockquote
+    if (trimmed.startsWith("> ")) {
+      renderedElements.push(
+        <blockquote
+          key={i}
+          className="my-2 pl-3.5 border-l-3 border-[var(--color-primary)] text-xs sm:text-sm italic text-[var(--color-on-surface-variant)] bg-[var(--color-surface-variant)]/20 py-1.5 rounded-r-[var(--radius-sm)]"
+        >
+          {renderInlineText(trimmed.slice(2))}
+        </blockquote>
+      );
+      continue;
+    }
+
+    // Lead introductory highlight
+    if (
+      trimmed.toLowerCase().startsWith("here is your") ||
+      trimmed.toLowerCase().startsWith("executive summary:") ||
+      trimmed.toLowerCase().startsWith("overview:")
+    ) {
+      renderedElements.push(
+        <div
+          key={i}
+          className="p-3 rounded-[var(--radius-md)] bg-[var(--color-surface-variant)]/40 border-l-4 border-l-[var(--color-primary)] text-xs sm:text-sm font-semibold text-[var(--color-on-surface)] shadow-2xs"
+        >
+          {renderInlineText(trimmed)}
+        </div>
+      );
+      continue;
+    }
+
     // Section Header: ### [COLOR] Title or ### Title
     if (trimmed.startsWith("### ") || trimmed.startsWith("## ") || trimmed.startsWith("# ")) {
       const headerText = trimmed.replace(/^#+\s*/, "");
