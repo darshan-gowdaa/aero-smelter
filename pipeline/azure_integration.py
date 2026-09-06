@@ -214,10 +214,8 @@ print("✓ Databricks PySpark Medallion Delta Lake Pipeline Executed Successfull
 
     def _generate_synapse_sql(self):
         """Generates Azure Synapse Serverless SQL views definition."""
-        sql_views = """-- ==============================================================================
--- ASG AIRLINES: AZURE SYNAPSE ANALYTICS SERVERLESS SQL EXTERNAL VIEWS
--- Enables direct querying of Gold Parquet data stored in Azure Data Lake Gen2
--- ==============================================================================
+        sql_views = """-- ASG Airlines: Azure Synapse Serverless SQL external views
+-- Direct querying of Gold Parquet data stored in Azure Data Lake Gen2
 
 CREATE SCHEMA IF NOT EXISTS gold;
 GO

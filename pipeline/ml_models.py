@@ -14,7 +14,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 if str(BASE_DIR) not in sys.path:
     sys.path.insert(0, str(BASE_DIR))
 
-import numpy as np
 import pandas as pd
 from sklearn.ensemble import IsolationForest, RandomForestClassifier, GradientBoostingRegressor
 from sklearn.preprocessing import LabelEncoder
@@ -29,7 +28,6 @@ logger = pipeline_logger.logger
 class FlightMLPipeline:
     def __init__(self, gold_dir: Path = GOLD_DIR):
         self.gold_dir = gold_dir
-        self.models_dir = gold_dir
 
     def run_all(self):
         logger.info("Initializing ASG Airlines Machine Learning Operations (MLOps)...")
@@ -90,15 +88,13 @@ class FlightMLPipeline:
         preds = iso.fit_predict(X)
         scores = iso.decision_function(X)
 
-        # Normalize score: lower decision function means higher anomaly
-        # Rescale into 0.0 to 1.0 where 1.0 is highest anomaly
+        # Rescale decision scores to a 0.0-1.0 range where 1.0 indicates highest anomaly
         min_s, max_s = scores.min(), scores.max()
         normalized_anomaly = 1.0 - (scores - min_s) / (max_s - min_s + 1e-6)
 
         df["ml_is_anomaly"] = (preds == -1).astype(int)
         df["ml_anomaly_score"] = normalized_anomaly.round(4)
 
-        top_anomalies = df.sort_values("ml_anomaly_score", ascending=False).head(10)
         contamination = (df["ml_is_anomaly"].sum() / len(df)) * 100
 
         res_cols = [

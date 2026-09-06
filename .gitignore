@@ -86,6 +86,9 @@ secrets/
 # PII / sensitive vault — never commit
 data/secure/
 
+# Legacy powerbi directory — consolidated into root powerbi/
+data/powerbi/
+
 # Dashboard generated data files — large, auto-generated from pipeline outputs
 dashboard/data.js
 dashboard/lib/data.json

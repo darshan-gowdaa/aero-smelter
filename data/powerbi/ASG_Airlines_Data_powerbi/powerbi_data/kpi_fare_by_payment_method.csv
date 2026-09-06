@@ -1,4 +1,0 @@
-payment_method,transaction_count,total_amount,avg_amount,imputed_transactions
-UPI,358,2835419.01,7920.16,27
-CARD,329,2633598.52,8004.86,29
-NETBANKING,313,2542240.81,8122.18,22

@@ -20,15 +20,14 @@ class CleaningLayer:
         self.logger = logger or PipelineLogger()
 
     def _hash_pii(self, val: str) -> str:
-        # Cryptographic hashing function using SHA-256 with salt
-        # Hashing turns sensitive text into fixed-length irreversible strings
+        # Salted SHA-256 hash to protect sensitive values while allowing exact match joins
         if pd.isna(val) or val is None or str(val).strip() == "":
             return None
         text_to_hash = f"{PII_SALT}:{str(val).strip()}"
         return hashlib.sha256(text_to_hash.encode("utf-8")).hexdigest()
 
     def _mask_email(self, email: str) -> str:
-        # Masks email user part but keeps the domain for analytics
+        # Mask username prefix but preserve domain for provider level analysis
         if pd.isna(email) or "@" not in str(email):
             return "masked@unknown.com"
         email_str = str(email).strip()
@@ -40,7 +39,7 @@ class CleaningLayer:
         return f"{masked_user}@{domain}"
 
     def _get_age_band(self, age: int) -> str:
-        # Groups individual ages into standard demographic bands
+        # Group raw passenger ages into standard demographic bands
         if pd.isna(age) or age < 0:
             return "Unknown"
         age = int(age)
@@ -56,10 +55,9 @@ class CleaningLayer:
             return "Senior (65+)"
 
     def clean_flights(self, df: pd.DataFrame) -> pd.DataFrame:
-        # Clean flights dataset: repair flight_ids, fix timestamps, overnight flights, duration
+        # Clean flights dataset: normalize identifiers, adjust overnight departures, recompute duration
         self.logger.info("Cleaning 'flights' dataset...")
         clean_df = df.copy()
-        initial_count = len(clean_df)
 
         # 1. Normalize flight_id: strip whitespace and uppercase
         clean_df["flight_id"] = clean_df["flight_id"].astype(str).str.strip().str.upper()
@@ -210,13 +208,11 @@ class CleaningLayer:
         self.logger.info("Cleaning 'bookings' dataset...")
         clean_df = df.copy()
 
-        # 1. Clean booking status
-        # Standard valid statuses are CONFIRMED, CANCELLED, PENDING
+        # 1. Clean booking status: standardize to CONFIRMED, CANCELLED, or PENDING
         valid_statuses = ["CONFIRMED", "CANCELLED", "PENDING"]
-        clean_df["status_raw"] = clean_df["status"]
         clean_df["is_status_imputed"] = ~clean_df["status"].isin(valid_statuses)
         
-        # When status is null or INVALID, we default to PENDING with an audit flag
+        # Default unknown or invalid status values to PENDING with an audit flag
         clean_df["status"] = clean_df["status"].apply(
             lambda s: s if s in valid_statuses else "PENDING"
         )

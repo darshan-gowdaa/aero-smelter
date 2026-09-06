@@ -27,9 +27,8 @@ class PowerBIExporter:
 
         # Generate DAX measures reference file
         dax_path = self.output_dir / "powerbi_dax_measures.dax"
-        dax_content = """// ==========================================
-// ASG AIRLINES POWER BI DAX MEASURES
-// ==========================================
+        dax_content = """// ASG Airlines Power BI DAX Measures
+// Key analytical measures for dashboard pages
 
 // PAGE 1: DURATION ANALYSIS
 Total Flights = COUNTROWS('fact_flights')
@@ -87,5 +86,8 @@ Imputed Payment Amount Count = CALCULATE(COUNTROWS('fact_payments'), 'fact_payme
 """
         with open(dax_path, "w", encoding="utf-8") as f:
             f.write(dax_content)
+        if self.output_dir.name == "data" and self.output_dir.parent.exists():
+            with open(self.output_dir.parent / "powerbi_dax_measures.dax", "w", encoding="utf-8") as f:
+                f.write(dax_content)
 
         self.logger.info(f"Generated DAX measures definition file: {dax_path}")

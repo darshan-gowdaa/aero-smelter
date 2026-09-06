@@ -15,14 +15,21 @@ from pipeline.kpis import KPICalculator
 class TestASGAirlinesPipeline(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        # Verify required directories exist
+        # Set up directory references
         cls.gold_dir = GOLD_DIR
         cls.silver_dir = SILVER_DIR
         cls.secure_dir = SECURE_DIR
         cls.bronze_dir = BRONZE_DIR
 
+        # Automatically execute pipeline if bronze parquet files are missing
+        bronze_sheets = ["flights", "bookings", "passengers", "payments"]
+        missing_bronze = any(not (cls.bronze_dir / f"{sheet}_raw.parquet").exists() for sheet in bronze_sheets)
+        if missing_bronze:
+            from pipeline.run_pipeline import run_full_pipeline
+            run_full_pipeline()
+
     def test_01_bronze_layer_exists(self):
-        # Test that raw bronze parquet snapshots exist for all 4 sheets
+        # Verify raw bronze parquet snapshots exist for all four sheets
         for sheet in ["flights", "bookings", "passengers", "payments"]:
             path = self.bronze_dir / f"{sheet}_raw.parquet"
             self.assertTrue(path.exists(), f"Missing bronze snapshot: {path}")
@@ -30,7 +37,7 @@ class TestASGAirlinesPipeline(unittest.TestCase):
             self.assertGreater(len(df), 0, f"Bronze table {sheet} is empty")
 
     def test_02_silver_flights_overnight_fix(self):
-        # Test overnight flight duration recomputation
+        # Verify overnight flight duration and timestamp adjustments
         path = self.silver_dir / "flights_silver.parquet"
         self.assertTrue(path.exists())
         df = pd.read_parquet(path)
@@ -46,7 +53,7 @@ class TestASGAirlinesPipeline(unittest.TestCase):
         self.assertTrue(sj192.iloc[0]["is_overnight"], "SJ192 is_overnight flag not set to True")
 
     def test_03_silver_flights_airline_recovery(self):
-        # Test that all missing/UNKNOWN airlines were recovered from prefix
+        # Verify missing or UNKNOWN airlines were recovered from flight prefix
         df = pd.read_parquet(self.silver_dir / "flights_silver.parquet")
         null_airlines = df["airline"].isna().sum()
         unknown_airlines = (df["airline"].str.upper() == "UNKNOWN").sum()
@@ -54,20 +61,20 @@ class TestASGAirlinesPipeline(unittest.TestCase):
         self.assertEqual(unknown_airlines, 0, "UNKNOWN airline names found in silver layer")
 
     def test_04_passengers_pii_protection(self):
-        # Test that raw PII columns are stripped from silver and gold
+        # Verify raw PII columns are removed from silver layer
         df = pd.read_parquet(self.silver_dir / "passengers_silver.parquet")
         forbidden_cols = ["aadhaar_id", "phone", "date_of_birth", "email"]
         for col in forbidden_cols:
             self.assertNotIn(col, df.columns, f"Raw PII column '{col}' exposed in silver layer")
 
-        # Test that secure vault exists and contains mappings
+        # Verify secure vault exists and holds lookup records
         vault_path = self.secure_dir / "pii_vault.parquet"
         self.assertTrue(vault_path.exists(), "PII secure vault is missing")
         vault = pd.read_parquet(vault_path)
         self.assertEqual(len(vault), 1000, "PII vault row count does not match clean passengers")
 
     def test_05_referential_integrity(self):
-        # Test foreign key referential integrity in gold layer
+        # Verify foreign key referential integrity in gold layer
         fact_f = pd.read_parquet(self.gold_dir / "fact_flights.parquet")
         fact_b = pd.read_parquet(self.gold_dir / "fact_bookings.parquet")
         fact_p = pd.read_parquet(self.gold_dir / "fact_payments.parquet")
@@ -92,7 +99,7 @@ class TestASGAirlinesPipeline(unittest.TestCase):
         self.assertEqual(orphan_booking, 0, "Found orphan booking references in fact_payments")
 
     def test_06_gold_kpis_validity(self):
-        # Test that precomputed KPI tables exist and contain logical metrics
+        # Verify precomputed KPI tables exist and contain logical metrics
         summary = pd.read_parquet(self.gold_dir / "kpi_overall_summary.parquet")
         self.assertEqual(len(summary), 1)
         self.assertEqual(summary.iloc[0]["negative_duration_count"], 0)
@@ -101,7 +108,7 @@ class TestASGAirlinesPipeline(unittest.TestCase):
         self.assertEqual(len(route_traffic), 30, "Route traffic should cover 30 distinct route pairs")
 
     def test_07_ml_models_gold_tables(self):
-        # Test that all 4 ML output tables exist in Gold layer
+        # Verify machine learning output tables exist in gold layer
         anomalies = pd.read_parquet(self.gold_dir / "ml_anomaly_scores.parquet")
         self.assertGreater(len(anomalies), 1000)
         self.assertIn("ml_anomaly_score", anomalies.columns)
@@ -119,7 +126,7 @@ class TestASGAirlinesPipeline(unittest.TestCase):
         self.assertGreater(len(metrics), 0)
 
     def test_08_azure_cloud_orchestration(self):
-        # Test Azure Data Factory, Databricks, and Synapse templates exist
+        # Verify Azure Data Factory, Databricks, and Synapse templates exist
         from pipeline.azure_integration import AzureCloudIntegrator
         integrator = AzureCloudIntegrator()
         result = integrator.sync_to_azure_storage()

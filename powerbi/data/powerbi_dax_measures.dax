@@ -1,6 +1,5 @@
-// ==========================================
-// ASG AIRLINES POWER BI DAX MEASURES
-// ==========================================
+// ASG Airlines Power BI DAX Measures
+// Key analytical measures for dashboard pages
 
 // PAGE 1: DURATION ANALYSIS
 Total Flights = COUNTROWS('fact_flights')

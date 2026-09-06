@@ -1,4 +1,3 @@
-import os
 from pathlib import Path
 
 # Base project directory
@@ -15,7 +14,7 @@ BRONZE_DIR = BASE_DIR / "data" / "bronze"
 SILVER_DIR = BASE_DIR / "data" / "silver"
 GOLD_DIR = BASE_DIR / "data" / "gold"
 SECURE_DIR = BASE_DIR / "data" / "secure"
-POWERBI_DIR = BASE_DIR / "data" / "powerbi"
+POWERBI_DIR = BASE_DIR / "powerbi" / "data"
 DOCS_DIR = BASE_DIR / "docs"
 REPORTS_DIR = BASE_DIR / "reports"
 ASSETS_DIR = REPORTS_DIR / "assets"

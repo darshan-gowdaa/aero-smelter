@@ -1,5 +1,5 @@
 import { asgData, totalRevenue, cancellationRate } from "./data";
-import { formatCurrency, formatNumber } from "./utils";
+import { formatCurrency } from "./utils";
 
 // Builds grounded operational context from ASG Gold Dataset for Gemini API prompt
 export function buildGroundedContext(): string {

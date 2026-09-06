@@ -7,7 +7,7 @@
       {
         "type": "Folder",
         "name": "GoldDataFolder",
-        "connectionString": "data/powerbi/"
+        "connectionString": "powerbi/data/"
       }
     ],
     "tables": [

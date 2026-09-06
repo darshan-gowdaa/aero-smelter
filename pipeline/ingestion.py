@@ -20,7 +20,7 @@ class IngestionLayer:
             raw_df = pd.read_excel(self.excel_path, sheet_name=sheet_name)
         except Exception as e:
             self.logger.error(f"Failed to read sheet '{sheet_name}': {str(e)}")
-            raise e
+            raise
 
         row_count = len(raw_df)
         col_count = len(raw_df.columns)

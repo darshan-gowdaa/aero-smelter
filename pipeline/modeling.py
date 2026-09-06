@@ -1,5 +1,4 @@
 import pandas as pd
-import numpy as np
 from pathlib import Path
 
 from pipeline.config import GOLD_DIR, AIRPORT_CITIES, ANOMALY_STD_DEV_THRESHOLD

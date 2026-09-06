@@ -11,7 +11,7 @@ export function ThemeProvider({
 }
 
 export function useTheme() {
-  const { theme, resolvedTheme, setTheme } = useNextTheme();
+  const { resolvedTheme, setTheme } = useNextTheme();
   const isDark = resolvedTheme === "dark";
   const toggleTheme = () => setTheme(isDark ? "light" : "dark");
 

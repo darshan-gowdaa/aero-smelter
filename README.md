@@ -11,7 +11,7 @@
 > **Source Case Study Specification**: [`docs/specifications/Airlines_Pipeline_Requirements_Specification.docx`](docs/specifications/Airlines_Pipeline_Requirements_Specification.docx)  
 > **Executive Technical Word Report (4.07 MB)**: [`reports/ASG_Airlines_Pipeline_Documentation.docx`](reports/ASG_Airlines_Pipeline_Documentation.docx)  
 > **Jupyter Senior DE & MLOps Walkthrough**: [`notebooks/AeroSmelter_Pipeline_Walkthrough.ipynb`](notebooks/AeroSmelter_Pipeline_Walkthrough.ipynb)  
-> **Power BI Production Report (.pbix)**: [`dashboard/ASG_Airlines_Report.pbix`](dashboard/ASG_Airlines_Report.pbix) | [Template (.pbit)](dashboard/ASG_Airlines_Report.pbit)
+> **Power BI Production Report (.pbix)**: [`powerbi/ASG_Airlines_Report.pbix`](powerbi/ASG_Airlines_Report.pbix) | [Template (.pbit)](powerbi/ASG_Airlines_Executive_Report.pbit)
 
 ---
 
@@ -63,7 +63,7 @@ graph TD
 
     subgraph S5["Consumption & Presentation Layer"]
         PBI_EXP["pipeline/export_powerbi.py<br/>• Parquet & CSV Dual Export<br/>• DAX Measure Catalog"]
-        PBI["dashboard/ASG_Airlines_Report.pbix<br/>4-Chapter Power BI Suite"]
+        PBI["powerbi/ASG_Airlines_Report.pbix<br/>4-Chapter Power BI Suite"]
         WEB["Next.js 15 Web Application<br/>Live at aero-smelter.vercel.app"]
         AZURE["azure/ Templates<br/>ADF • Databricks • Synapse"]
     end
@@ -333,7 +333,7 @@ erDiagram
 
 ## 6. Core Business KPIs & Operational Analytics
 
-Calculated in [`pipeline/kpis.py`](pipeline/kpis.py) and exported as pre-aggregated marts in [`data/gold/`](data/gold/) and [`data/powerbi/`](data/powerbi/):
+Calculated in [`pipeline/kpis.py`](pipeline/kpis.py) and exported as pre-aggregated marts in [`data/gold/`](data/gold/) and [`powerbi/data/`](powerbi/data/):
 
 | Business KPI | Result Metric | Operational Business Interpretation |
 | :--- | :--- | :--- |
@@ -386,22 +386,22 @@ AeroSmelter provides two production consumption interfaces: an official 4-chapte
 ### Chapter 1: Duration Analysis
 *Fleet duration distributions, airline min/avg/max duration profiles, hourly schedule traffic, and full route duration catalog.*
 
-![Page 1: Duration Analysis](dashboard/screenshots/page1_duration_analysis.png?raw=true&v=2)
+![Page 1: Duration Analysis](powerbi/screenshots/page1_duration_analysis.png?raw=true&v=2)
 
 ### Chapter 2: Route Performance & Revenue Matrix
 *Corridor traffic volume, top revenue routes, commercial load factors, and sector-level cancellation exposure.*
 
-![Page 2: Route Performance](dashboard/screenshots/page2_route_performance.png?raw=true&v=2)
+![Page 2: Route Performance](powerbi/screenshots/page2_route_performance.png?raw=true&v=2)
 
 ### Chapter 3: Airline Fleet Trends & Passenger Demographics
 *Carrier flight shares, age cohort distributions across routes, payment method transaction shares, and passenger loyalty metrics.*
 
-![Page 3: Airline Trends](dashboard/screenshots/page3_airline_trends.png?raw=true&v=2)
+![Page 3: Airline Trends](powerbi/screenshots/page3_airline_trends.png?raw=true&v=2)
 
 ### Chapter 4: Delay, Anomaly & PII Governance Watchdog
 *Isolation Forest anomaly score histograms, Random Forest cancellation drivers, overnight flight repair audit, and PII vault status.*
 
-![Page 4: Delay and Anomaly Insights](dashboard/screenshots/page4_delay_anomaly_insights.png?raw=true&v=2)
+![Page 4: Delay and Anomaly Insights](powerbi/screenshots/page4_delay_anomaly_insights.png?raw=true&v=2)
 
 ---
 
@@ -443,21 +443,17 @@ aero-smelter/
 │   ├── adf/                                  # Azure Data Factory pipeline & linked service definitions
 │   ├── databricks/                           # PySpark Medallion Lakehouse ETL notebook
 │   └── synapse/                              # Azure Synapse Serverless SQL view definitions
-├── dashboard/                                # Next.js 15 TSX Claymorphism Dashboard & Power BI Assets
+├── dashboard/                                # Next.js 15 TSX Claymorphism Dashboard
 │   ├── app/                                  # App Router (layout.tsx, page.tsx, globals.css)
 │   ├── app/api/copilot/                      # Gemini AI Copilot route with serverless fallback
 │   ├── components/                           # Atomic Design Component Architecture (Atoms, Molecules, Organisms)
-│   ├── lib/                                  # Data layer, TypeScript interfaces, Gemini AI copilot client
-│   ├── ASG_Airlines_Report.pbix / .pbit      # Production Power BI desktop and template files
-│   ├── index.html                            # Standalone offline web dashboard
-│   └── screenshots/                          # 300 DPI high-resolution Power BI dashboard captures
+│   └── lib/                                  # Data layer, TypeScript interfaces, Gemini AI copilot client
 ├── data/                                     # Medallion Lakehouse Storage Architecture
 │   ├── source/                               # Immutable raw source files (UseCase - Airlines.xlsx)
 │   ├── bronze/                               # Raw immutable Parquet snapshots (pipeline generated, gitignored)
 │   ├── silver/                               # Cleaned, standardized, PII-masked Parquet tables (generated, gitignored)
 │   ├── gold/                                 # Star schema facts, dimensions & KPI marts (generated, gitignored)
-│   ├── secure/                               # Air-gapped salted SHA-256 PII vault (zero-trust compliance, gitignored)
-│   └── powerbi/                              # Curated CSV & DAX exports, schema definitions & PBIX reports
+│   └── secure/                               # Air-gapped salted SHA-256 PII vault (zero-trust compliance, gitignored)
 ├── docs/                                     # Project documentation, specifications & architecture
 │   └── specifications/                       # Case study requirements & client problem statements
 ├── logs/                                     # Execution logs & run traces (gitignored)
@@ -476,15 +472,20 @@ aero-smelter/
 │   ├── ml_models.py                          # Isolation Forest anomaly detection & Random Forest classifier
 │   ├── modeling.py                           # Gold dimensional modeling (Kimball Star Schema)
 │   └── run_pipeline.py                       # Master pipeline execution orchestrator
+├── powerbi/                                  # Production Power BI Suite & Artifacts
+│   ├── ASG_Airlines_Report.pbix              # Production 4-chapter Power BI desktop report
+│   ├── ASG_Airlines_Executive_Report.pbit    # Power BI template with parameterized data source
+│   ├── powerbi_dax_measures.dax              # Production DAX measure catalog
+│   ├── ASG_Airlines_Theme.json               # Custom aviation corporate design theme
+│   ├── POWERBI_INTERACTIVE_GUIDE.md          # 4-chapter storytelling walkthrough & DAX dictionary
+│   ├── screenshots/                          # 300 DPI high-resolution Power BI dashboard captures
+│   └── data/                                 # Gold facts, dimensions, and KPI mart CSV/Parquet feeds
 ├── reports/                                  # Technical reports & publication figures
 │   ├── ASG_Airlines_Pipeline_Documentation.docx  # Comprehensive technical Word document (4.07 MB)
 │   └── assets/                               # Architecture diagrams, data flows, and ERD models
 ├── scripts/                                  # Developer automation & compilation utilities
-│   ├── generate_dashboard_screenshots.py     # Power BI report screenshot generator
 │   ├── generate_diagrams.py                  # Publication diagram rendering script
 │   ├── generate_docs.py                      # Technical Word documentation compiler
-│   ├── generate_notebook.py                  # Standard Jupyter notebook generator
-│   ├── generate_pbit.py                      # Power BI template binary packager
 │   └── generate_rich_notebook.py             # Senior-level executed walkthrough notebook generator
 ├── tests/                                    # CI/CD Quality Gates & Automated Unit Tests
 │   ├── __init__.py

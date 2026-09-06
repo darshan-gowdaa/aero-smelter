@@ -454,13 +454,13 @@ def build_documentation():
     p_pbi = doc.add_paragraph(
         "The Power BI report was architected as a production-grade 4-page analytical suite. Each page contains executive KPI cards, "
         "interactive slicers (Airline, Route, Date Range), and cross-filtering analytical visuals. The dataset is exported in dual Parquet "
-        "and CSV formats (`data/powerbi/`) accompanied by a standardized Power BI template (`dashboard/ASG_Airlines_Report.pbit`) and "
-        "pre-calculated DAX measures (`data/powerbi/powerbi_dax_measures.dax`)."
+        "and CSV formats (`powerbi/data/`) accompanied by a standardized Power BI template (`powerbi/ASG_Airlines_Executive_Report.pbit`) and "
+        "pre-calculated DAX measures (`powerbi/powerbi_dax_measures.dax`)."
     )
     p_pbi.runs[0].font.size = Pt(10)
 
     # Embed 4 Dashboard Screenshots
-    dash_screens_dir = Path(__file__).resolve().parent.parent / "dashboard" / "screenshots"
+    dash_screens_dir = Path(__file__).resolve().parent.parent / "powerbi" / "screenshots"
     pages_meta = [
         ("page1_duration_analysis.png", "Figure 4: Power BI Page 1 — Flight Duration & Sector Analysis", [
             "KPI Cards: Overall Avg Duration (164.6 min), Min Duration (30.0 min), Max Duration (300.0 min), Overnight Repaired (1).",

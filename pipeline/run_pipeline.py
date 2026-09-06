@@ -22,44 +22,37 @@ def run_full_pipeline():
 
     logger.info("Starting ASG Airlines Data Engineering Pipeline...")
 
-    # ==========================================
-    # STAGE 1: INGESTION & VALIDATION (BRONZE)
-    # Process sheet by sheet as specified
-    # ==========================================
+    # Stage 1: Ingest and validate bronze layer sheet by sheet
     ingestion = IngestionLayer(logger=logger)
 
-    # 1. Ingest and validate flights sheet first
-    logger.info("--- Ingesting Sheet 1/4: flights ---")
+    # Ingest raw flights sheet
+    logger.info("Ingesting sheet 1/4: flights")
     raw_flights, quarantine_flights = ingestion.ingest_sheet("flights")
 
-    # 2. Ingest and validate bookings sheet
-    logger.info("--- Ingesting Sheet 2/4: bookings ---")
+    # Ingest raw bookings sheet
+    logger.info("Ingesting sheet 2/4: bookings")
     raw_bookings, quarantine_bookings = ingestion.ingest_sheet("bookings")
 
-    # 3. Ingest and validate passengers sheet
-    logger.info("--- Ingesting Sheet 3/4: passengers ---")
+    # Ingest raw passengers sheet
+    logger.info("Ingesting sheet 3/4: passengers")
     raw_passengers, quarantine_passengers = ingestion.ingest_sheet("passengers")
 
-    # 4. Ingest and validate payments sheet
-    logger.info("--- Ingesting Sheet 4/4: payments ---")
+    # Ingest raw payments sheet
+    logger.info("Ingesting sheet 4/4: payments")
     raw_payments, quarantine_payments = ingestion.ingest_sheet("payments")
 
-    # ==========================================
-    # STAGE 2: CLEANING & TRANSFORMATION (SILVER)
-    # ==========================================
+    # Stage 2: Clean and transform silver layer datasets
     cleaning = CleaningLayer(logger=logger)
 
-    logger.info("--- Cleaning and Transforming Silver Layer ---")
+    logger.info("Cleaning and transforming silver layer")
     flights_silver = cleaning.clean_flights(raw_flights)
     passengers_silver, pii_vault = cleaning.clean_passengers(raw_passengers)
     bookings_silver = cleaning.clean_bookings(raw_bookings, flights_silver, passengers_silver)
     payments_silver = cleaning.clean_payments(raw_payments, bookings_silver)
 
-    # ==========================================
-    # STAGE 3: MODELLING (GOLD - STAR SCHEMA)
-    # ==========================================
+    # Stage 3: Build dimensional star schema for gold layer
     modeling = ModelingLayer(logger=logger)
-    logger.info("--- Building Dimensional Star Schema (Gold Layer) ---")
+    logger.info("Building dimensional star schema (gold layer)")
     gold_tables = modeling.build_star_schema(
         flights_silver=flights_silver,
         passengers_silver=passengers_silver,
@@ -67,30 +60,24 @@ def run_full_pipeline():
         payments_silver=payments_silver
     )
 
-    # ==========================================
-    # STAGE 4: KPIS & ANALYTICS COMPUTATION
-    # ==========================================
+    # Stage 4: Compute business KPIs and operational metrics
     kpi_calc = KPICalculator(logger=logger)
-    logger.info("--- Computing Business KPIs & Anomaly Analytics ---")
+    logger.info("Computing business KPIs and operational metrics")
     kpi_results = kpi_calc.compute_all_kpis(gold_tables)
 
-    # ==========================================
-    # STAGE 5: MACHINE LEARNING & PREDICTIVE MLOPS
-    # ==========================================
+    # Stage 5: Train ML models for anomaly detection and cancellation risk
     from pipeline.ml_models import FlightMLPipeline
-    logger.info("--- Training ML Models (Anomaly Detection, Cancellation, Pricing) ---")
+    logger.info("Training ML models for anomaly detection and cancellation risk")
     ml_pipe = FlightMLPipeline()
     ml_results = ml_pipe.run_all()
 
-    # ==========================================
-    # STAGE 6: POWER BI & CONSUMPTION EXPORT
-    # ==========================================
+    # Stage 6: Export datasets and DAX definitions for Power BI reporting
     exporter = PowerBIExporter(logger=logger)
-    logger.info("--- Exporting Datasets & DAX for Power BI ---")
+    logger.info("Exporting datasets and DAX measures for Power BI")
     exporter.export_tables(gold_tables)
     exporter.export_tables(kpi_results)
 
-    # Also export ML tables
+    # Export machine learning prediction tables
     ml_tables = {
         "ml_anomaly_scores": pd.read_parquet(BASE_DIR / "data" / "gold" / "ml_anomaly_scores.parquet"),
         "ml_cancellation_predictions": pd.read_parquet(BASE_DIR / "data" / "gold" / "ml_cancellation_predictions.parquet"),
@@ -99,10 +86,8 @@ def run_full_pipeline():
     }
     exporter.export_tables(ml_tables)
 
-    # ==========================================
-    # STAGE 7: AZURE CLOUD INTEGRATION (ADF/SYNAPSE/DATABRICKS/ADLS)
-    # ==========================================
-    logger.info("--- Azure Cloud Integration (ADF, Databricks, Synapse, ADLS Gen2) ---")
+    # Stage 7: Generate Azure templates and sync to storage if configured
+    logger.info("Running Azure cloud integration (ADF, Databricks, Synapse)")
     from pipeline.azure_integration import AzureCloudIntegrator
     azure_integrator = AzureCloudIntegrator()
     azure_sync_result = azure_integrator.sync_to_azure_storage()

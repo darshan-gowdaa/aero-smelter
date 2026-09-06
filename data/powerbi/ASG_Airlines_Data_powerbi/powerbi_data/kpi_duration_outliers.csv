@@ -1,2 +1,0 @@
-flight_id,airline_name,route_name,departure_time,arrival_time,duration_minutes,route_mean_duration,route_std_duration
-6F212,IndiGo,BLR -> CCU,2026-04-19 06:10:41.703,2026-04-19 10:52:41.703,282.0,128.52380952380952,75.23338291451412

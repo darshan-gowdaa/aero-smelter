@@ -1,5 +1,4 @@
 import pandas as pd
-import numpy as np
 from pathlib import Path
 
 from pipeline.config import GOLD_DIR
@@ -49,14 +48,14 @@ class KPICalculator:
         ).reset_index().sort_values(by="total_flights", ascending=False)
         route_traffic["traffic_share_pct"] = (route_traffic["total_flights"] / len(flights_enriched) * 100).round(2)
 
-        # 3. Flight distribution by airline (%)
+        # 3. Flight distribution by airline percentage
         airline_dist = flights_enriched.groupby(["airline_name", "airline_code"])["flight_instance_id"].agg(
             total_flights="count"
         ).reset_index()
         airline_dist["share_pct"] = (airline_dist["total_flights"] / len(flights_enriched) * 100).round(2)
         airline_dist.sort_values(by="total_flights", ascending=False, inplace=True)
 
-        # 4. Delay & Anomaly detection
+        # 4. Delay and anomaly summary
         total_flights = len(flights_enriched)
         outlier_count = flights_enriched["is_duration_outlier"].sum()
         negative_duration_count = (flights_enriched["duration_minutes"] <= 0).sum()
@@ -77,7 +76,7 @@ class KPICalculator:
             "arrival_time", "duration_minutes", "route_mean_duration", "route_std_duration"
         ]].copy()
 
-        # 5. Extra KPI: Booking to cancellation rate per route
+        # 5. Cancellation rate by route
         bookings_enriched = fact_bookings.merge(dim_route, on="route_key", how="left")
         route_cancellations = bookings_enriched.groupby(["route_name", "route_full_name"]).agg(
             total_bookings=("booking_id", "count"),
@@ -90,7 +89,7 @@ class KPICalculator:
         ).round(2)
         route_cancellations.sort_values(by="total_bookings", ascending=False, inplace=True)
 
-        # 6. Extra KPI: Revenue per route (from payments)
+        # 6. Revenue and average fare per route
         payments_enriched = fact_payments.merge(dim_route, on="route_key", how="left")
         route_revenue = payments_enriched.groupby(["route_name", "route_full_name"]).agg(
             total_transactions=("payment_id", "count"),
@@ -98,7 +97,7 @@ class KPICalculator:
             avg_fare=("amount", "mean")
         ).round(2).reset_index().sort_values(by="total_revenue", ascending=False)
 
-        # 7. Extra KPI: Average fare by payment method
+        # 7. Average fare and transaction volume by payment method
         fare_by_payment = fact_payments.groupby("payment_method").agg(
             transaction_count=("payment_id", "count"),
             total_amount=("amount", "sum"),
@@ -106,12 +105,12 @@ class KPICalculator:
             imputed_transactions=("is_amount_imputed", "sum")
         ).round(2).reset_index().sort_values(by="total_amount", ascending=False)
 
-        # 8. Extra KPI: Peak departure hour distribution
+        # 8. Flight departure distribution by hour
         hourly_traffic = flights_enriched.groupby("departure_hour")["flight_instance_id"].agg(
             flights_count="count"
         ).reset_index().sort_values(by="departure_hour")
 
-        # 9. Extra KPI: Passenger age-band distribution per route
+        # 9. Passenger age band distribution across routes
         bp = fact_bookings.merge(dim_passenger, on="passenger_key", how="left").merge(dim_route, on="route_key", how="left")
         age_band_route = bp.groupby(["route_name", "age_band"])["booking_id"].agg(
             passenger_count="count"

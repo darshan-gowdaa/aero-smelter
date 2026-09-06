@@ -4,10 +4,10 @@
 This Power BI suite delivers an enterprise-grade operational intelligence platform for **ASG Airlines**, modeled on a Kimball Star Schema with automated Medallion data engineering (`Bronze` -> `Silver` -> `Gold` -> `MLOps`).
 
 ### Report File Locations
-- **Power BI Template**: [`dashboard/ASG_Airlines_Report.pbit`](file:///Z:/Github%20Projects/NeoStats/dashboard/ASG_Airlines_Report.pbit)
-- **Power BI Report**: [`dashboard/ASG_Airlines_Report.pbix`](file:///Z:/Github%20Projects/NeoStats/dashboard/ASG_Airlines_Report.pbix)
-- **Production DAX Measures**: [`data/powerbi/powerbi_dax_measures.dax`](file:///Z:/Github%20Projects/NeoStats/data/powerbi/powerbi_dax_measures.dax)
-- **Gold Ingestion Datasets**: [`data/powerbi/`](file:///Z:/Github%20Projects/NeoStats/data/powerbi/) (both `.parquet` and `.csv` available)
+- **Power BI Template**: [`powerbi/ASG_Airlines_Executive_Report.pbit`](file:///Z:/Github%20Projects/NeoStats/powerbi/ASG_Airlines_Executive_Report.pbit)
+- **Power BI Report**: [`powerbi/ASG_Airlines_Report.pbix`](file:///Z:/Github%20Projects/NeoStats/powerbi/ASG_Airlines_Report.pbix)
+- **Production DAX Measures**: [`powerbi/powerbi_dax_measures.dax`](file:///Z:/Github%20Projects/NeoStats/powerbi/powerbi_dax_measures.dax)
+- **Gold Ingestion Datasets**: [`powerbi/data/`](file:///Z:/Github%20Projects/NeoStats/powerbi/data/) (both `.parquet` and `.csv` available)
 
 ---
 
@@ -70,6 +70,6 @@ This Power BI suite delivers an enterprise-grade operational intelligence platfo
 
 ## 4. How to Open & Refresh in Power BI Desktop
 1. Launch **Power BI Desktop**.
-2. Go to **File -> Open** and select [`dashboard/ASG_Airlines_Report.pbix`](file:///Z:/Github%20Projects/NeoStats/dashboard/ASG_Airlines_Report.pbix) (or open `.pbit` to connect directly to local folder).
-3. Verify data source points to `data/powerbi/` (pre-populated with 11 Gold tables).
+2. Go to **File -> Open** and select [`powerbi/ASG_Airlines_Report.pbix`](file:///Z:/Github%20Projects/NeoStats/powerbi/ASG_Airlines_Report.pbix) (or open [`powerbi/ASG_Airlines_Executive_Report.pbit`](file:///Z:/Github%20Projects/NeoStats/powerbi/ASG_Airlines_Executive_Report.pbit) to connect directly to local folder).
+3. Verify data source points to `powerbi/data/` (pre-populated with 11 Gold tables).
 4. Click **Refresh** on the Home ribbon to pull the latest Parquet/CSV data after running the pipeline.

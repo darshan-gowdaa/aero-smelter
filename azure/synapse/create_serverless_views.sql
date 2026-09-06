@@ -1,7 +1,5 @@
--- ==============================================================================
--- ASG AIRLINES: AZURE SYNAPSE ANALYTICS SERVERLESS SQL EXTERNAL VIEWS
--- Enables direct querying of Gold Parquet data stored in Azure Data Lake Gen2
--- ==============================================================================
+-- ASG Airlines: Azure Synapse Serverless SQL external views
+-- Direct querying of Gold Parquet data stored in Azure Data Lake Gen2
 
 CREATE SCHEMA IF NOT EXISTS gold;
 GO
