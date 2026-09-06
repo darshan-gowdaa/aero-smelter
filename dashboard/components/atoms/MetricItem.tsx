@@ -8,7 +8,7 @@ export interface MetricItemProps {
   badgeText?: string;
   badgeVariant?: "success" | "warning" | "danger" | "info" | "purple";
   icon?: React.ReactNode;
-  accentColor?: "sky" | "emerald" | "amber" | "rose" | "purple" | "indigo";
+  accentColor?: "green" | "emerald" | "amber" | "rose" | "purple" | "sky";
 }
 
 export function MetricItem({
@@ -16,60 +16,68 @@ export function MetricItem({
   value,
   subValue,
   badgeText,
-  badgeVariant = "info",
+  badgeVariant = "success",
   icon,
-  accentColor = "sky",
+  accentColor = "green",
 }: MetricItemProps) {
-  const accentBorders = {
-    sky: "before:bg-gradient-to-r before:from-sky-500 before:to-cyan-400",
-    emerald: "before:bg-gradient-to-r before:from-emerald-500 before:to-teal-400",
-    amber: "before:bg-gradient-to-r before:from-amber-500 before:to-yellow-400",
-    rose: "before:bg-gradient-to-r before:from-rose-500 before:to-red-400",
-    purple: "before:bg-gradient-to-r before:from-purple-500 before:to-violet-400",
-    indigo: "before:bg-gradient-to-r before:from-indigo-500 before:to-blue-400",
+  const badgeStyles = {
+    success: "text-emerald-800 dark:text-emerald-300 bg-emerald-100/90 dark:bg-emerald-950/80 border-emerald-300 dark:border-emerald-700/60",
+    warning: "text-amber-800 dark:text-amber-300 bg-amber-100/90 dark:bg-amber-950/80 border-amber-300 dark:border-amber-700/60",
+    danger: "text-rose-800 dark:text-rose-300 bg-rose-100/90 dark:bg-rose-950/80 border-rose-300 dark:border-rose-700/60",
+    info: "text-sky-800 dark:text-sky-300 bg-sky-100/90 dark:bg-sky-950/80 border-sky-300 dark:border-sky-700/60",
+    purple: "text-purple-800 dark:text-purple-300 bg-purple-100/90 dark:bg-purple-950/80 border-purple-300 dark:border-purple-700/60",
   };
 
-  const badgeStyles = {
-    success: "text-emerald-400 bg-emerald-950/60 border-emerald-800/50",
-    warning: "text-amber-400 bg-amber-950/60 border-amber-800/50",
-    danger: "text-rose-400 bg-rose-950/60 border-rose-800/50",
-    info: "text-sky-400 bg-sky-950/60 border-sky-800/50",
-    purple: "text-purple-400 bg-purple-950/60 border-purple-800/50",
+  const iconGradients = {
+    green: "bg-gradient-to-tr from-emerald-500 to-teal-400 text-white shadow-emerald-500/20",
+    emerald: "bg-gradient-to-tr from-emerald-600 to-emerald-400 text-white shadow-emerald-600/20",
+    amber: "bg-gradient-to-tr from-amber-500 to-yellow-400 text-white shadow-amber-500/20",
+    rose: "bg-gradient-to-tr from-rose-500 to-pink-400 text-white shadow-rose-500/20",
+    purple: "bg-gradient-to-tr from-purple-500 to-indigo-400 text-white shadow-purple-500/20",
+    sky: "bg-gradient-to-tr from-sky-500 to-cyan-400 text-white shadow-sky-500/20",
   };
 
   return (
-    <div
-      className={cn(
-        "relative rounded-xl border border-slate-800/80 bg-slate-900/90 p-4 transition-all duration-200 hover:border-slate-700/80",
-        "before:absolute before:top-0 before:left-0 before:right-0 before:h-1 before:rounded-t-xl",
-        accentBorders[accentColor]
-      )}
-    >
-      <div className="flex items-center justify-between gap-2 mb-2">
-        <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-          {label}
-        </span>
-        {icon && <span className="text-slate-400 opacity-80">{icon}</span>}
-      </div>
+    <div className="clay-card relative p-5 flex flex-col justify-between overflow-hidden">
+      {/* Top subtle decorative strip */}
+      <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-500 opacity-80" />
 
-      <div className="flex items-baseline gap-2">
-        <span className="text-2xl font-bold tracking-tight text-white font-mono">
-          {value}
-        </span>
-        {badgeText && (
-          <span
-            className={cn(
-              "text-[10px] font-semibold px-2 py-0.5 rounded-full border",
-              badgeStyles[badgeVariant]
-            )}
-          >
-            {badgeText}
+      <div>
+        <div className="flex items-center justify-between gap-2 mb-3">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-900/70 dark:text-emerald-200/70">
+            {label}
           </span>
-        )}
+          {icon && (
+            <div
+              className={cn(
+                "w-8 h-8 rounded-xl flex items-center justify-center shadow-md",
+                iconGradients[accentColor]
+              )}
+            >
+              {icon}
+            </div>
+          )}
+        </div>
+
+        <div className="flex items-baseline gap-2 flex-wrap">
+          <span className="text-2xl lg:text-3xl font-extrabold tracking-tight text-emerald-950 dark:text-emerald-50 font-mono">
+            {value}
+          </span>
+          {badgeText && (
+            <span
+              className={cn(
+                "text-[10px] font-bold px-2 py-0.5 rounded-full border shadow-sm",
+                badgeStyles[badgeVariant]
+              )}
+            >
+              {badgeText}
+            </span>
+          )}
+        </div>
       </div>
 
       {subValue && (
-        <p className="mt-1.5 text-xs text-slate-400 truncate">
+        <p className="mt-3 pt-2 text-xs text-emerald-800/60 dark:text-emerald-300/60 border-t border-emerald-100/80 dark:border-emerald-900/40 truncate">
           {subValue}
         </p>
       )}

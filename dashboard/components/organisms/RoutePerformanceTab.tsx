@@ -25,23 +25,23 @@ import {
   RiTableLine,
 } from "@remixicon/react";
 
-const ROUTE_COLORS = [
-  "#0284c7",
-  "#10b981",
-  "#f59e0b",
-  "#f43f5e",
-  "#a855f7",
-  "#06b6d4",
-  "#eab308",
-  "#64748b",
+const ROUTE_CLAY_COLORS = [
+  "#10B981",
+  "#059669",
+  "#34D399",
+  "#065F46",
+  "#F59E0B",
+  "#38BDF8",
+  "#FB7185",
+  "#6EE7B7",
 ];
 
-const AGE_COLORS: Record<string, string> = {
-  "Youth (<18)": "#06b6d4",
-  "Young Adult (18-35)": "#0284c7",
-  "Adult (36-50)": "#10b981",
-  "Senior (51-65)": "#f59e0b",
-  "Elderly (>65)": "#a855f7",
+const AGE_CLAY_COLORS: Record<string, string> = {
+  "Youth (<18)": "#34D399",
+  "Young Adult (18-35)": "#10B981",
+  "Adult (36-50)": "#059669",
+  "Senior (51-65)": "#F59E0B",
+  "Elderly (>65)": "#A78BFA",
 };
 
 export function RoutePerformanceTab() {
@@ -106,6 +106,16 @@ export function RoutePerformanceTab() {
 
   const maxRevenueVal = top10RevenueRoutes[0]?.totalRevenue || 1;
 
+  const tooltipStyle = {
+    backgroundColor: "rgba(255, 255, 255, 0.95)",
+    border: "2px solid #A7F3D0",
+    borderRadius: "16px",
+    boxShadow: "0 10px 25px -5px rgba(16, 185, 129, 0.15)",
+    fontSize: "12px",
+    color: "#065F46",
+    fontWeight: 600,
+  };
+
   return (
     <div className="space-y-6">
       {/* Top 2 charts: Revenue + Traffic Share */}
@@ -115,14 +125,14 @@ export function RoutePerformanceTab() {
           <CardHeader>
             <div>
               <CardTitle>
-                <RiMoneyDollarCircleLine className="w-4 h-4 text-emerald-400" />
+                <RiMoneyDollarCircleLine className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                 Top 10 Routes by Total Revenue (INR Thousands)
               </CardTitle>
               <CardDescription>
-                Financial contribution across high-demand domestic sectors
+                Financial yield across high-demand domestic corridors
               </CardDescription>
             </div>
-            <span className="text-xs font-mono font-bold text-emerald-400 bg-emerald-950/80 px-2.5 py-1 rounded-lg border border-emerald-800/40">
+            <span className="text-xs font-mono font-bold text-emerald-800 dark:text-emerald-200 bg-emerald-100 dark:bg-emerald-900/80 px-3 py-1 rounded-full border border-emerald-300 dark:border-emerald-700">
               Total: {formatCurrency(totalRevenue)}
             </span>
           </CardHeader>
@@ -133,26 +143,26 @@ export function RoutePerformanceTab() {
                 data={top10RevenueRoutes}
                 margin={{ top: 5, right: 30, left: 10, bottom: 5 }}
               >
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" opacity={0.6} />
-                <XAxis type="number" stroke="#94a3b8" fontSize={11} tickLine={false} unit="K" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#10b981" opacity={0.15} />
+                <XAxis type="number" stroke="#059669" fontSize={11} tickLine={false} unit="K" />
                 <YAxis
                   dataKey="name"
                   type="category"
-                  stroke="#94a3b8"
+                  stroke="#059669"
                   fontSize={11}
                   tickLine={false}
                   width={80}
-                  tick={{ fill: "#cbd5e1", fontFamily: "monospace" }}
+                  tick={{ fill: "#065F46", fontFamily: "monospace", fontWeight: 700 }}
                 />
                 <Tooltip
-                  contentStyle={{ backgroundColor: "#0f172a", borderColor: "#334155", borderRadius: "8px", fontSize: "12px" }}
+                  contentStyle={tooltipStyle}
                   formatter={(val: any) => [`₹${(Number(val) * 1000).toLocaleString("en-IN")}`, "Revenue"]}
                 />
-                <Bar dataKey="revenueK" fill="#0284c7" radius={[0, 4, 4, 0]}>
+                <Bar dataKey="revenueK" fill="#10B981" radius={[0, 8, 8, 0]}>
                   {top10RevenueRoutes.map((_, index) => (
                     <Cell
                       key={`rev-cell-${index}`}
-                      fill={index === 0 ? "#10b981" : index < 3 ? "#0284c7" : "#0369a1"}
+                      fill={index === 0 ? "#059669" : index < 3 ? "#10B981" : "#34D399"}
                     />
                   ))}
                 </Bar>
@@ -166,7 +176,7 @@ export function RoutePerformanceTab() {
           <CardHeader>
             <div>
               <CardTitle>
-                <RiPieChart2Line className="w-4 h-4 text-sky-400" />
+                <RiPieChart2Line className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                 Route Traffic Share
               </CardTitle>
               <CardDescription>
@@ -185,17 +195,17 @@ export function RoutePerformanceTab() {
                   cy="50%"
                   innerRadius={55}
                   outerRadius={85}
-                  paddingAngle={3}
+                  paddingAngle={4}
                 >
                   {trafficShareData.map((_, index) => (
                     <Cell
                       key={`pie-cell-${index}`}
-                      fill={ROUTE_COLORS[index % ROUTE_COLORS.length]}
+                      fill={ROUTE_CLAY_COLORS[index % ROUTE_CLAY_COLORS.length]}
                     />
                   ))}
                 </Pie>
                 <Tooltip
-                  contentStyle={{ backgroundColor: "#0f172a", borderColor: "#334155", borderRadius: "8px", fontSize: "12px" }}
+                  contentStyle={tooltipStyle}
                   formatter={(val: any) => [`${val} flights`, "Traffic"]}
                 />
                 <Legend wrapperStyle={{ fontSize: "11px", paddingTop: "8px" }} />
@@ -212,7 +222,7 @@ export function RoutePerformanceTab() {
           <CardHeader>
             <div>
               <CardTitle>
-                <RiStackLine className="w-4 h-4 text-amber-400" />
+                <RiStackLine className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                 Booking Status Breakdown by Route (Top 12)
               </CardTitle>
               <CardDescription>
@@ -223,16 +233,14 @@ export function RoutePerformanceTab() {
           <div className="h-72 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={cancellationStackedData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" opacity={0.6} />
-                <XAxis dataKey="name" stroke="#94a3b8" fontSize={10} tickLine={false} angle={-25} textAnchor="end" height={35} />
-                <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} />
-                <Tooltip
-                  contentStyle={{ backgroundColor: "#0f172a", borderColor: "#334155", borderRadius: "8px", fontSize: "12px" }}
-                />
+                <CartesianGrid strokeDasharray="3 3" stroke="#10b981" opacity={0.15} />
+                <XAxis dataKey="name" stroke="#059669" fontSize={10} tickLine={false} angle={-25} textAnchor="end" height={35} />
+                <YAxis stroke="#059669" fontSize={11} tickLine={false} />
+                <Tooltip contentStyle={tooltipStyle} />
                 <Legend wrapperStyle={{ fontSize: "12px", paddingTop: "4px" }} />
-                <Bar dataKey="Confirmed" stackId="a" fill="#10b981" />
-                <Bar dataKey="Cancelled" stackId="a" fill="#f43f5e" />
-                <Bar dataKey="Pending" stackId="a" fill="#f59e0b" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="Confirmed" stackId="a" fill="#10B981" />
+                <Bar dataKey="Cancelled" stackId="a" fill="#FB7185" />
+                <Bar dataKey="Pending" stackId="a" fill="#F59E0B" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -243,7 +251,7 @@ export function RoutePerformanceTab() {
           <CardHeader>
             <div>
               <CardTitle>
-                <RiUserFollowLine className="w-4 h-4 text-purple-400" />
+                <RiUserFollowLine className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                 Passenger Age Band Demographics (Top 5 Routes)
               </CardTitle>
               <CardDescription>
@@ -254,15 +262,13 @@ export function RoutePerformanceTab() {
           <div className="h-72 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={ageBandStackedData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" opacity={0.6} />
-                <XAxis dataKey="routeName" stroke="#94a3b8" fontSize={11} tickLine={false} />
-                <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} />
-                <Tooltip
-                  contentStyle={{ backgroundColor: "#0f172a", borderColor: "#334155", borderRadius: "8px", fontSize: "12px" }}
-                />
+                <CartesianGrid strokeDasharray="3 3" stroke="#10b981" opacity={0.15} />
+                <XAxis dataKey="routeName" stroke="#059669" fontSize={11} tickLine={false} />
+                <YAxis stroke="#059669" fontSize={11} tickLine={false} />
+                <Tooltip contentStyle={tooltipStyle} />
                 <Legend wrapperStyle={{ fontSize: "10px", paddingTop: "4px" }} />
-                {Object.keys(AGE_COLORS).map((band) => (
-                  <Bar key={band} dataKey={band} stackId="age" fill={AGE_COLORS[band]} />
+                {Object.keys(AGE_CLAY_COLORS).map((band) => (
+                  <Bar key={band} dataKey={band} stackId="age" fill={AGE_CLAY_COLORS[band]} />
                 ))}
               </BarChart>
             </ResponsiveContainer>
@@ -275,7 +281,7 @@ export function RoutePerformanceTab() {
         <CardHeader>
           <div>
             <CardTitle>
-              <RiTableLine className="w-4 h-4 text-emerald-400" />
+              <RiTableLine className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
               Route Revenue Intelligence Scorecard
             </CardTitle>
             <CardDescription>
@@ -284,9 +290,9 @@ export function RoutePerformanceTab() {
           </div>
         </CardHeader>
 
-        <div className="overflow-x-auto max-h-80 overflow-y-auto">
+        <div className="overflow-x-auto max-h-80 overflow-y-auto rounded-2xl border-2 border-emerald-100 dark:border-emerald-900/40">
           <table className="w-full text-left text-xs border-collapse font-mono">
-            <thead className="sticky top-0 bg-slate-950/95 border-b border-slate-800 text-slate-400 uppercase tracking-wider font-semibold">
+            <thead className="sticky top-0 bg-emerald-50 dark:bg-emerald-900/90 border-b-2 border-emerald-200 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200 uppercase tracking-wider font-extrabold">
               <tr>
                 <th className="py-3 px-4">#</th>
                 <th className="py-3 px-4">Route</th>
@@ -294,28 +300,28 @@ export function RoutePerformanceTab() {
                 <th className="py-3 px-4 text-right">Transactions</th>
                 <th className="py-3 px-4 text-right">Total Revenue</th>
                 <th className="py-3 px-4 text-right">Avg Fare</th>
-                <th className="py-3 px-4">Revenue Relative Weight</th>
+                <th className="py-3 px-4">Yield Weight</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60">
+            <tbody className="divide-y divide-emerald-100 dark:divide-emerald-900/40">
               {top10RevenueRoutes.map((r, i) => {
                 const pct = (r.totalRevenue / maxRevenueVal) * 100;
                 return (
-                  <tr key={i} className="hover:bg-slate-800/40 transition-colors">
-                    <td className="py-2.5 px-4 text-slate-500">{i + 1}</td>
-                    <td className="py-2.5 px-4 font-bold text-sky-400">{r.name}</td>
-                    <td className="py-2.5 px-4 font-sans text-slate-300">{r.fullName}</td>
-                    <td className="py-2.5 px-4 text-right text-slate-300">{r.transactions}</td>
-                    <td className="py-2.5 px-4 text-right font-bold text-emerald-400">
+                  <tr key={i} className="hover:bg-emerald-50/60 dark:hover:bg-emerald-900/30 transition-colors">
+                    <td className="py-3 px-4 text-emerald-600/70 dark:text-emerald-400/70">{i + 1}</td>
+                    <td className="py-3 px-4 font-bold text-emerald-700 dark:text-emerald-300">{r.name}</td>
+                    <td className="py-3 px-4 font-sans text-emerald-950 dark:text-emerald-100 font-medium">{r.fullName}</td>
+                    <td className="py-3 px-4 text-right text-emerald-900 dark:text-emerald-200">{r.transactions}</td>
+                    <td className="py-3 px-4 text-right font-extrabold text-emerald-700 dark:text-emerald-300">
                       {formatCurrency(r.totalRevenue)}
                     </td>
-                    <td className="py-2.5 px-4 text-right text-slate-300">
+                    <td className="py-3 px-4 text-right text-emerald-900 dark:text-emerald-200">
                       {formatCurrency(r.avgFare)}
                     </td>
-                    <td className="py-2.5 px-4 w-44">
-                      <div className="w-full bg-slate-800/80 rounded-full h-2 overflow-hidden">
+                    <td className="py-3 px-4 w-44">
+                      <div className="w-full bg-emerald-100 dark:bg-emerald-950 rounded-full h-2.5 overflow-hidden shadow-inner">
                         <div
-                          className="bg-emerald-500 h-2 rounded-full"
+                          className="bg-gradient-to-r from-emerald-500 to-teal-400 h-2.5 rounded-full"
                           style={{ width: `${pct}%` }}
                         />
                       </div>

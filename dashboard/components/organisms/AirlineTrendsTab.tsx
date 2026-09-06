@@ -27,7 +27,7 @@ import {
   RiDashboardLine,
 } from "@remixicon/react";
 
-const AIRLINE_PALETTE = ["#0284c7", "#10b981", "#f59e0b", "#f43f5e"];
+const AIRLINE_CLAY_PALETTE = ["#059669", "#10B981", "#F59E0B", "#F43F5E"];
 
 export function AirlineTrendsTab() {
   const airlineRevenueMap = useMemo(() => {
@@ -61,7 +61,7 @@ export function AirlineTrendsTab() {
         revenue: revInfo.revenue,
         avgFare: avgFare,
         revenueK: Math.round(revInfo.revenue / 1000),
-        color: AIRLINE_PALETTE[idx % AIRLINE_PALETTE.length],
+        color: AIRLINE_CLAY_PALETTE[idx % AIRLINE_CLAY_PALETTE.length],
       };
     }).sort((a, b) => b.flights - a.flights);
   }, [airlineRevenueMap]);
@@ -75,12 +75,22 @@ export function AirlineTrendsTab() {
     }));
   }, []);
 
+  const tooltipStyle = {
+    backgroundColor: "rgba(255, 255, 255, 0.95)",
+    border: "2px solid #A7F3D0",
+    borderRadius: "16px",
+    boxShadow: "0 10px 25px -5px rgba(16, 185, 129, 0.15)",
+    fontSize: "12px",
+    color: "#065F46",
+    fontWeight: 600,
+  };
+
   return (
     <div className="space-y-6">
       {/* 4 Airline Scorecards */}
       <div>
-        <div className="flex items-center gap-2 mb-3 text-xs uppercase font-bold text-slate-400 tracking-wider">
-          <RiDashboardLine className="w-4 h-4 text-sky-400" />
+        <div className="flex items-center gap-2 mb-3 text-xs uppercase font-extrabold text-emerald-900/70 dark:text-emerald-300/70 tracking-wider">
+          <RiDashboardLine className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
           Carrier Fleet Operational Performance Scorecards
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -109,7 +119,7 @@ export function AirlineTrendsTab() {
           <CardHeader>
             <div>
               <CardTitle>
-                <RiPieChartLine className="w-4 h-4 text-sky-400" />
+                <RiPieChartLine className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                 Fleet Market Share (By Flights)
               </CardTitle>
               <CardDescription>
@@ -128,14 +138,14 @@ export function AirlineTrendsTab() {
                   cy="50%"
                   innerRadius={55}
                   outerRadius={85}
-                  paddingAngle={4}
+                  paddingAngle={5}
                 >
                   {airlineData.map((al) => (
                     <Cell key={al.code} fill={al.color} />
                   ))}
                 </Pie>
                 <Tooltip
-                  contentStyle={{ backgroundColor: "#0f172a", borderColor: "#334155", borderRadius: "8px", fontSize: "12px" }}
+                  contentStyle={tooltipStyle}
                   formatter={(val: any, name: any, item: any) => [
                     `${val} flights (${item.payload.sharePct}%)`,
                     name,
@@ -152,7 +162,7 @@ export function AirlineTrendsTab() {
           <CardHeader>
             <div>
               <CardTitle>
-                <RiBarChart2Line className="w-4 h-4 text-emerald-400" />
+                <RiBarChart2Line className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                 Revenue & Average Fare by Airline (Bar + Line)
               </CardTitle>
               <CardDescription>
@@ -163,30 +173,28 @@ export function AirlineTrendsTab() {
           <div className="h-72 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart data={airlineData} margin={{ top: 10, right: 20, left: 10, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" opacity={0.6} />
-                <XAxis dataKey="shortName" stroke="#94a3b8" fontSize={11} tickLine={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#10b981" opacity={0.15} />
+                <XAxis dataKey="shortName" stroke="#059669" fontSize={11} tickLine={false} />
                 <YAxis
                   yAxisId="left"
-                  stroke="#94a3b8"
+                  stroke="#059669"
                   fontSize={11}
                   tickLine={false}
                   unit="K"
-                  label={{ value: "Revenue (INR K)", angle: -90, position: "insideLeft", fill: "#94a3b8", fontSize: 10 }}
+                  label={{ value: "Revenue (INR K)", angle: -90, position: "insideLeft", fill: "#059669", fontSize: 10 }}
                 />
                 <YAxis
                   yAxisId="right"
                   orientation="right"
-                  stroke="#f59e0b"
+                  stroke="#F59E0B"
                   fontSize={11}
                   tickLine={false}
                   unit="₹"
-                  label={{ value: "Avg Fare", angle: 90, position: "insideRight", fill: "#f59e0b", fontSize: 10 }}
+                  label={{ value: "Avg Fare", angle: 90, position: "insideRight", fill: "#F59E0B", fontSize: 10 }}
                 />
-                <Tooltip
-                  contentStyle={{ backgroundColor: "#0f172a", borderColor: "#334155", borderRadius: "8px", fontSize: "12px" }}
-                />
+                <Tooltip contentStyle={tooltipStyle} />
                 <Legend wrapperStyle={{ fontSize: "12px", paddingTop: "8px" }} />
-                <Bar yAxisId="left" dataKey="revenueK" name="Total Revenue (INR K)" fill="#0284c7" radius={[4, 4, 0, 0]}>
+                <Bar yAxisId="left" dataKey="revenueK" name="Total Revenue (INR K)" fill="#059669" radius={[6, 6, 0, 0]}>
                   {airlineData.map((entry) => (
                     <Cell key={`bar-${entry.code}`} fill={entry.color} />
                   ))}
@@ -196,9 +204,9 @@ export function AirlineTrendsTab() {
                   type="monotone"
                   dataKey="avgFare"
                   name="Avg Fare (INR)"
-                  stroke="#f59e0b"
-                  strokeWidth={3}
-                  dot={{ r: 5, fill: "#f59e0b" }}
+                  stroke="#F59E0B"
+                  strokeWidth={3.5}
+                  dot={{ r: 6, fill: "#F59E0B" }}
                 />
               </ComposedChart>
             </ResponsiveContainer>
@@ -213,7 +221,7 @@ export function AirlineTrendsTab() {
           <CardHeader>
             <div>
               <CardTitle>
-                <RiBankCardLine className="w-4 h-4 text-purple-400" />
+                <RiBankCardLine className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                 Payment Method — Transaction Volume & Value
               </CardTitle>
               <CardDescription>
@@ -224,15 +232,13 @@ export function AirlineTrendsTab() {
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={paymentMethodData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" opacity={0.6} />
-                <XAxis dataKey="method" stroke="#94a3b8" fontSize={11} tickLine={false} />
-                <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} />
-                <Tooltip
-                  contentStyle={{ backgroundColor: "#0f172a", borderColor: "#334155", borderRadius: "8px", fontSize: "12px" }}
-                />
+                <CartesianGrid strokeDasharray="3 3" stroke="#10b981" opacity={0.15} />
+                <XAxis dataKey="method" stroke="#059669" fontSize={11} tickLine={false} />
+                <YAxis stroke="#059669" fontSize={11} tickLine={false} />
+                <Tooltip contentStyle={tooltipStyle} />
                 <Legend wrapperStyle={{ fontSize: "12px", paddingTop: "8px" }} />
-                <Bar dataKey="transactions" name="Transactions Count" fill="#a855f7" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="totalRevenueK" name="Revenue (INR K)" fill="#38bdf8" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="transactions" name="Transactions Count" fill="#10B981" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="totalRevenueK" name="Revenue (INR K)" fill="#34D399" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -243,7 +249,7 @@ export function AirlineTrendsTab() {
           <CardHeader>
             <div>
               <CardTitle>
-                <RiFlightLandLine className="w-4 h-4 text-sky-400" />
+                <RiFlightLandLine className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                 Carrier Duration & Operating Efficiency Summary
               </CardTitle>
               <CardDescription>
@@ -256,18 +262,18 @@ export function AirlineTrendsTab() {
               <div key={al.code} className="space-y-1.5">
                 <div className="flex justify-between items-center text-xs">
                   <div className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: al.color }} />
-                    <span className="font-semibold text-slate-200">{al.name}</span>
-                    <span className="text-[10px] text-slate-500 font-mono">({al.code})</span>
+                    <span className="w-3 h-3 rounded-full shadow-sm" style={{ backgroundColor: al.color }} />
+                    <span className="font-bold text-emerald-950 dark:text-emerald-100">{al.name}</span>
+                    <span className="text-[10px] text-emerald-700/60 dark:text-emerald-300/60 font-mono">({al.code})</span>
                   </div>
-                  <div className="font-mono text-slate-300">
-                    <span className="font-bold text-sky-400">{al.avgDuration.toFixed(1)} m</span> avg
-                    <span className="text-slate-500 ml-2">({al.minDuration}m - {al.maxDuration}m)</span>
+                  <div className="font-mono text-emerald-900 dark:text-emerald-200">
+                    <span className="font-bold text-emerald-600 dark:text-emerald-400">{al.avgDuration.toFixed(1)} m</span> avg
+                    <span className="text-emerald-600/60 dark:text-emerald-400/60 ml-2">({al.minDuration}m - {al.maxDuration}m)</span>
                   </div>
                 </div>
-                <div className="w-full bg-slate-800/80 rounded-full h-2 overflow-hidden">
+                <div className="w-full bg-emerald-100 dark:bg-emerald-950 rounded-full h-3 overflow-hidden shadow-inner">
                   <div
-                    className="h-2 rounded-full"
+                    className="h-3 rounded-full transition-all duration-500"
                     style={{
                       width: `${(al.avgDuration / 300) * 100}%`,
                       backgroundColor: al.color,
@@ -276,7 +282,7 @@ export function AirlineTrendsTab() {
                 </div>
               </div>
             ))}
-            <p className="text-[11px] text-slate-400 mt-3 pt-3 border-t border-slate-800/80">
+            <p className="text-[11px] text-emerald-800/70 dark:text-emerald-300/70 mt-3 pt-3 border-t border-emerald-100 dark:border-emerald-900/60 leading-relaxed">
               * Note: SpiceJet (SJ) maximum duration includes Flight SJ192 (HYD → BOM), which was repaired from overnight date mismatch to 300.0 minutes.
             </p>
           </div>

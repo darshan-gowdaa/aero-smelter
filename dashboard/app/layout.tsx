@@ -1,20 +1,11 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+import { ThemeProvider } from "@/lib/theme";
 
 export const metadata: Metadata = {
   title: "ASG Airlines | Flight Operations Analytics Suite",
-  description: "Executive Flight Operations Analytics Suite - Medallion Architecture with Star Schema Gold Layer",
+  description:
+    "Executive Flight Operations Analytics Suite - Medallion Architecture with Claymorphism Theme & Star Schema Gold Layer",
 };
 
 export default function RootLayout({
@@ -23,12 +14,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} dark antialiased`}
-    >
-      <body className="min-h-screen bg-[#070B14] text-slate-100 font-sans selection:bg-sky-500/30 selection:text-sky-200">
-        {children}
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+          rel="stylesheet"
+        />
+      </head>
+      <body className="min-h-screen antialiased">
+        <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>
   );

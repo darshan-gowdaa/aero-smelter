@@ -2,32 +2,22 @@ import React from "react";
 import { cn } from "@/lib/utils";
 
 export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
-  glow?: "none" | "blue" | "emerald" | "amber" | "rose" | "purple";
+  staticCard?: boolean;
   noPadding?: boolean;
 }
 
 export function Card({
   className,
-  glow = "none",
+  staticCard = false,
   noPadding = false,
   children,
   ...props
 }: CardProps) {
-  const glowStyles = {
-    none: "border-slate-800/80 bg-slate-900/90",
-    blue: "border-sky-800/40 bg-slate-900/90 shadow-[0_0_15px_-3px_rgba(56,189,248,0.1)]",
-    emerald: "border-emerald-800/40 bg-slate-900/90 shadow-[0_0_15px_-3px_rgba(16,185,129,0.1)]",
-    amber: "border-amber-800/40 bg-slate-900/90 shadow-[0_0_15px_-3px_rgba(245,158,11,0.1)]",
-    rose: "border-rose-800/40 bg-slate-900/90 shadow-[0_0_15px_-3px_rgba(244,63,94,0.1)]",
-    purple: "border-purple-800/40 bg-slate-900/90 shadow-[0_0_15px_-3px_rgba(168,85,247,0.1)]",
-  };
-
   return (
     <div
       className={cn(
-        "rounded-xl border backdrop-blur-md transition-all duration-200",
-        glowStyles[glow],
-        !noPadding && "p-5",
+        staticCard ? "clay-card-static" : "clay-card",
+        !noPadding && "p-6",
         className
       )}
       {...props}
@@ -43,7 +33,7 @@ export function CardHeader({
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={cn("flex items-center justify-between gap-2 mb-4", className)} {...props}>
+    <div className={cn("flex flex-wrap items-center justify-between gap-3 mb-4", className)} {...props}>
       {children}
     </div>
   );
@@ -57,7 +47,7 @@ export function CardTitle({
   return (
     <h3
       className={cn(
-        "text-sm font-semibold tracking-wide text-slate-200 uppercase flex items-center gap-2",
+        "text-sm font-bold tracking-tight text-emerald-950 dark:text-emerald-100 flex items-center gap-2",
         className
       )}
       {...props}
@@ -73,7 +63,7 @@ export function CardDescription({
   ...props
 }: React.HTMLAttributes<HTMLParagraphElement>) {
   return (
-    <p className={cn("text-xs text-slate-400 mt-0.5", className)} {...props}>
+    <p className={cn("text-xs text-emerald-800/70 dark:text-emerald-300/70 mt-0.5", className)} {...props}>
       {children}
     </p>
   );

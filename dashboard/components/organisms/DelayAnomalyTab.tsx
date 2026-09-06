@@ -53,7 +53,7 @@ export function DelayAnomalyTab() {
   const scatterData = useMemo(() => {
     const normalFlights = asgData.fact_flights
       .filter((f) => f.is_duration_outlier === 0)
-      .slice(0, 250) // Sample for snappy performance
+      .slice(0, 250) // Sample for responsive rendering
       .map((f) => ({
         x: Number(f.route_mean_duration.toFixed(1)),
         y: Number(f.duration_minutes.toFixed(1)),
@@ -87,6 +87,16 @@ export function DelayAnomalyTab() {
 
   const outliersList = asgData.kpi_duration_outliers;
 
+  const tooltipStyle = {
+    backgroundColor: "rgba(255, 255, 255, 0.95)",
+    border: "2px solid #A7F3D0",
+    borderRadius: "16px",
+    boxShadow: "0 10px 25px -5px rgba(16, 185, 129, 0.15)",
+    fontSize: "12px",
+    color: "#065F46",
+    fontWeight: 600,
+  };
+
   return (
     <div className="space-y-6">
       {/* Overnight Flight Engineering Callout */}
@@ -97,7 +107,7 @@ export function DelayAnomalyTab() {
         <CardHeader>
           <div>
             <CardTitle>
-              <RiAlertLine className="w-4 h-4 text-rose-400" />
+              <RiAlertLine className="w-5 h-5 text-rose-500" />
               Statistical Duration Outliers Identified (&gt;2σ Threshold)
             </CardTitle>
             <CardDescription>
@@ -106,41 +116,41 @@ export function DelayAnomalyTab() {
           </div>
         </CardHeader>
 
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto rounded-2xl border-2 border-emerald-100 dark:border-emerald-900/40">
           <table className="w-full text-left text-xs border-collapse font-mono">
-            <thead className="bg-slate-950/95 border-b border-slate-800 text-slate-400 uppercase tracking-wider font-semibold">
+            <thead className="bg-emerald-50 dark:bg-emerald-900/90 border-b-2 border-emerald-200 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200 uppercase tracking-wider font-extrabold">
               <tr>
-                <th className="py-3 px-4">Flight ID</th>
-                <th className="py-3 px-4">Airline</th>
-                <th className="py-3 px-4">Sector</th>
-                <th className="py-3 px-4">Departure</th>
-                <th className="py-3 px-4">Arrival</th>
-                <th className="py-3 px-4 text-right">Duration</th>
-                <th className="py-3 px-4 text-right">Route Mean</th>
-                <th className="py-3 px-4 text-right">Route Std Dev</th>
-                <th className="py-3 px-4 text-right">Deviation</th>
+                <th className="py-3.5 px-4">Flight ID</th>
+                <th className="py-3.5 px-4">Airline</th>
+                <th className="py-3.5 px-4">Sector</th>
+                <th className="py-3.5 px-4">Departure</th>
+                <th className="py-3.5 px-4">Arrival</th>
+                <th className="py-3.5 px-4 text-right">Duration</th>
+                <th className="py-3.5 px-4 text-right">Route Mean</th>
+                <th className="py-3.5 px-4 text-right">Route Std Dev</th>
+                <th className="py-3.5 px-4 text-right">Deviation</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60">
+            <tbody className="divide-y divide-emerald-100 dark:divide-emerald-900/40">
               {outliersList.map((o, idx) => {
                 const dev = Math.abs(o.duration_minutes - o.route_mean_duration);
                 return (
-                  <tr key={idx} className="hover:bg-slate-800/40 transition-colors">
-                    <td className="py-2.5 px-4 font-bold text-rose-400">{o.flight_id}</td>
-                    <td className="py-2.5 px-4 font-sans text-slate-200">{o.airline_name}</td>
-                    <td className="py-2.5 px-4 text-sky-400">{o.route_name}</td>
-                    <td className="py-2.5 px-4 text-slate-400 text-[11px]">{o.departure_time || "-"}</td>
-                    <td className="py-2.5 px-4 text-slate-400 text-[11px]">{o.arrival_time || "-"}</td>
-                    <td className="py-2.5 px-4 text-right font-bold text-rose-400">
+                  <tr key={idx} className="hover:bg-emerald-50/60 dark:hover:bg-emerald-900/30 transition-colors">
+                    <td className="py-3 px-4 font-extrabold text-rose-600 dark:text-rose-400">{o.flight_id}</td>
+                    <td className="py-3 px-4 font-sans font-bold text-emerald-950 dark:text-emerald-100">{o.airline_name}</td>
+                    <td className="py-3 px-4 font-bold text-emerald-700 dark:text-emerald-300">{o.route_name}</td>
+                    <td className="py-3 px-4 text-emerald-800/70 dark:text-emerald-300/70 text-[11px]">{o.departure_time || "-"}</td>
+                    <td className="py-3 px-4 text-emerald-800/70 dark:text-emerald-300/70 text-[11px]">{o.arrival_time || "-"}</td>
+                    <td className="py-3 px-4 text-right font-extrabold text-rose-600 dark:text-rose-400">
                       {o.duration_minutes} m
                     </td>
-                    <td className="py-2.5 px-4 text-right text-slate-300">
+                    <td className="py-3 px-4 text-right text-emerald-900 dark:text-emerald-200">
                       {o.route_mean_duration?.toFixed(1)} m
                     </td>
-                    <td className="py-2.5 px-4 text-right text-slate-400">
+                    <td className="py-3 px-4 text-right text-emerald-800/70 dark:text-emerald-300/70">
                       ±{o.route_std_duration?.toFixed(1)} m
                     </td>
-                    <td className="py-2.5 px-4 text-right font-bold text-amber-400">
+                    <td className="py-3 px-4 text-right font-bold text-amber-600 dark:text-amber-400">
                       +{dev.toFixed(1)} m
                     </td>
                   </tr>
@@ -158,7 +168,7 @@ export function DelayAnomalyTab() {
           <CardHeader>
             <div>
               <CardTitle>
-                <RiAlertLine className="w-4 h-4 text-amber-400" />
+                <RiAlertLine className="w-5 h-5 text-amber-500" />
                 Route Duration Variability (Standard Deviation)
               </CardTitle>
               <CardDescription>
@@ -173,26 +183,23 @@ export function DelayAnomalyTab() {
                 data={routeVariabilityData}
                 margin={{ top: 5, right: 20, left: 10, bottom: 5 }}
               >
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" opacity={0.6} />
-                <XAxis type="number" stroke="#94a3b8" fontSize={11} tickLine={false} unit="m" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#10b981" opacity={0.15} />
+                <XAxis type="number" stroke="#059669" fontSize={11} tickLine={false} unit="m" />
                 <YAxis
                   dataKey="route"
                   type="category"
-                  stroke="#94a3b8"
+                  stroke="#059669"
                   fontSize={11}
                   tickLine={false}
                   width={75}
-                  tick={{ fill: "#cbd5e1", fontFamily: "monospace" }}
+                  tick={{ fill: "#065F46", fontFamily: "monospace", fontWeight: 700 }}
                 />
-                <Tooltip
-                  contentStyle={{ backgroundColor: "#0f172a", borderColor: "#334155", borderRadius: "8px", fontSize: "12px" }}
-                  formatter={(val: any) => [`${val} min`, "Std Dev"]}
-                />
-                <Bar dataKey="std" fill="#f59e0b" radius={[0, 4, 4, 0]}>
+                <Tooltip contentStyle={tooltipStyle} formatter={(val: any) => [`${val} min`, "Std Dev"]} />
+                <Bar dataKey="std" fill="#F59E0B" radius={[0, 8, 8, 0]}>
                   {routeVariabilityData.map((entry, index) => (
                     <Cell
                       key={`var-cell-${index}`}
-                      fill={entry.std > 40 ? "#f43f5e" : entry.std > 25 ? "#f59e0b" : "#0284c7"}
+                      fill={entry.std > 40 ? "#F43F5E" : entry.std > 25 ? "#F59E0B" : "#10B981"}
                     />
                   ))}
                 </Bar>
@@ -206,7 +213,7 @@ export function DelayAnomalyTab() {
           <CardHeader>
             <div>
               <CardTitle>
-                <RiFocus2Line className="w-4 h-4 text-sky-400" />
+                <RiFocus2Line className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                 Actual vs Route Mean Duration (Outlier Scatter)
               </CardTitle>
               <CardDescription>
@@ -217,32 +224,32 @@ export function DelayAnomalyTab() {
           <div className="h-72 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <ScatterChart margin={{ top: 10, right: 20, left: -10, bottom: 10 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" opacity={0.6} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#10b981" opacity={0.15} />
                 <XAxis
                   type="number"
                   dataKey="x"
                   name="Mean Duration"
-                  stroke="#94a3b8"
+                  stroke="#059669"
                   fontSize={11}
                   unit="m"
                   domain={[30, 320]}
-                  label={{ value: "Route Mean (min)", position: "bottom", offset: 0, fill: "#94a3b8", fontSize: 10 }}
+                  label={{ value: "Route Mean (min)", position: "bottom", offset: 0, fill: "#059669", fontSize: 10 }}
                 />
                 <YAxis
                   type="number"
                   dataKey="y"
                   name="Actual Duration"
-                  stroke="#94a3b8"
+                  stroke="#059669"
                   fontSize={11}
                   unit="m"
                   domain={[30, 320]}
-                  label={{ value: "Actual Duration (min)", angle: -90, position: "insideLeft", fill: "#94a3b8", fontSize: 10 }}
+                  label={{ value: "Actual Duration (min)", angle: -90, position: "insideLeft", fill: "#059669", fontSize: 10 }}
                 />
-                <ZAxis range={[20, 80]} />
+                <ZAxis range={[30, 90]} />
                 <Tooltip
                   cursor={{ strokeDasharray: "3 3" }}
-                  contentStyle={{ backgroundColor: "#0f172a", borderColor: "#334155", borderRadius: "8px", fontSize: "12px" }}
-                  formatter={(val: any, name: any, item: any) => [
+                  contentStyle={tooltipStyle}
+                  formatter={(val: any, name: any) => [
                     `${val} min`,
                     name === "x" ? "Route Mean" : "Actual",
                   ]}
@@ -251,13 +258,13 @@ export function DelayAnomalyTab() {
                 <Scatter
                   name="Normal Flights (Sample)"
                   data={scatterData.normalFlights}
-                  fill="#38bdf8"
+                  fill="#10B981"
                   opacity={0.4}
                 />
                 <Scatter
                   name="Statistical Outlier (>2σ)"
                   data={scatterData.outlierFlights}
-                  fill="#f43f5e"
+                  fill="#F43F5E"
                   shape="circle"
                 />
               </ScatterChart>
@@ -271,7 +278,7 @@ export function DelayAnomalyTab() {
         <CardHeader>
           <div>
             <CardTitle>
-              <RiCloseCircleLine className="w-4 h-4 text-rose-400" />
+              <RiCloseCircleLine className="w-5 h-5 text-rose-500" />
               Route Cancellation Rate Risk Ranking (Top 10 High-Risk Sectors)
             </CardTitle>
             <CardDescription>
@@ -286,26 +293,23 @@ export function DelayAnomalyTab() {
               data={cancellationRiskData}
               margin={{ top: 5, right: 30, left: 10, bottom: 5 }}
             >
-              <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" opacity={0.6} />
-              <XAxis type="number" stroke="#94a3b8" fontSize={11} tickLine={false} unit="%" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#10b981" opacity={0.15} />
+              <XAxis type="number" stroke="#059669" fontSize={11} tickLine={false} unit="%" />
               <YAxis
                 dataKey="name"
                 type="category"
-                stroke="#94a3b8"
+                stroke="#059669"
                 fontSize={11}
                 tickLine={false}
                 width={80}
-                tick={{ fill: "#cbd5e1", fontFamily: "monospace" }}
+                tick={{ fill: "#065F46", fontFamily: "monospace", fontWeight: 700 }}
               />
-              <Tooltip
-                contentStyle={{ backgroundColor: "#0f172a", borderColor: "#334155", borderRadius: "8px", fontSize: "12px" }}
-                formatter={(val: any) => [`${val}%`, "Cancellation Rate"]}
-              />
-              <Bar dataKey="rate" fill="#f43f5e" radius={[0, 4, 4, 0]}>
+              <Tooltip contentStyle={tooltipStyle} formatter={(val: any) => [`${val}%`, "Cancellation Rate"]} />
+              <Bar dataKey="rate" fill="#FB7185" radius={[0, 8, 8, 0]}>
                 {cancellationRiskData.map((entry, index) => (
                   <Cell
                     key={`risk-cell-${index}`}
-                    fill={entry.rate > 35 ? "#f43f5e" : entry.rate > 28 ? "#f59e0b" : "#0284c7"}
+                    fill={entry.rate > 35 ? "#F43F5E" : entry.rate > 28 ? "#F59E0B" : "#10B981"}
                   />
                 ))}
               </Bar>

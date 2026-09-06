@@ -52,16 +52,16 @@ export function DashboardShell() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#070B14] text-slate-100 font-sans selection:bg-sky-500/30 selection:text-sky-200">
-      {/* Navbar Organism */}
+    <div className="min-h-screen flex flex-col transition-colors duration-300">
+      {/* Navbar Organism with Light/Dark Button Switch */}
       <Navbar />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
         {/* Executive KPI Overview Molecule */}
         <KpiStrip />
 
-        {/* Tab Navigation Molecule */}
-        <div className="border-b border-slate-800 flex overflow-x-auto no-scrollbar">
+        {/* Claymorphism Tab Navigation Container */}
+        <div className="p-1.5 rounded-3xl bg-emerald-100/60 dark:bg-emerald-950/60 border-2 border-emerald-200/80 dark:border-emerald-800/40 shadow-inner flex overflow-x-auto gap-1.5 no-scrollbar">
           {tabs.map((tab) => (
             <TabButton
               key={tab.id}
@@ -85,21 +85,23 @@ export function DashboardShell() {
         </div>
       </main>
 
-      {/* Executive Footer */}
-      <footer className="border-t border-slate-800/80 bg-slate-950/60 py-6 mt-16 text-xs text-slate-500">
+      {/* Executive Clay Footer */}
+      <footer className="border-t-2 border-emerald-100/80 dark:border-emerald-900/50 bg-white/60 dark:bg-emerald-950/60 backdrop-blur-md py-6 mt-16 text-xs text-emerald-800/70 dark:text-emerald-300/70">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <span className="font-semibold text-slate-400">ASG Airlines Ops Data Engineering</span>
+            <span className="font-extrabold text-emerald-950 dark:text-emerald-100">
+              ASG Airlines Ops Data Engineering
+            </span>
             <span>•</span>
-            <span>Next.js 16 + TypeScript + Tailwind CSS + Recharts</span>
+            <span className="font-medium">Next.js 16 + TypeScript + Claymorphism Emerald Theme</span>
           </div>
 
-          <div className="flex items-center gap-4">
-            <span className="text-emerald-400 font-mono">6/6 Tests Passing</span>
+          <div className="flex items-center gap-4 font-mono font-bold">
+            <span className="text-emerald-700 dark:text-emerald-400">6/6 Tests Passing</span>
             <span>•</span>
-            <span className="text-sky-400 font-mono">100% Referential Integrity</span>
+            <span className="text-teal-700 dark:text-teal-300">100% Referential Integrity</span>
             <span>•</span>
-            <span className="text-slate-400 font-mono">India DPDP Compliant</span>
+            <span className="text-emerald-800/70 dark:text-emerald-400/70">India DPDP Compliant</span>
           </div>
         </div>
       </footer>

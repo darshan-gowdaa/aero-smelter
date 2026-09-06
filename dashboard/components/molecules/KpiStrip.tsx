@@ -28,34 +28,34 @@ export function KpiStrip() {
       : 164.62;
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
       <MetricItem
         label="Total Flights"
         value={formatNumber(summary.total_flights_analyzed)}
         subValue="1,020 raw · 15 dropped"
-        badgeText="100% Clean"
+        badgeText="100% Valid"
         badgeVariant="success"
-        accentColor="sky"
+        accentColor="green"
         icon={<RiFlightTakeoffLine className="w-5 h-5" />}
       />
 
       <MetricItem
-        label="Avg Flight Duration"
+        label="Avg Duration"
         value={`${avgDuration.toFixed(1)} m`}
         subValue="2.74 hrs average fleet-wide"
         badgeText="Optimal"
         badgeVariant="info"
-        accentColor="indigo"
+        accentColor="emerald"
         icon={<RiTimerLine className="w-5 h-5" />}
       />
 
       <MetricItem
         label="Total Revenue"
         value={formatCurrency(totalRevenue)}
-        subValue="1,000 transactions recorded"
-        badgeText="Verified"
+        subValue="1,000 transactions verified"
+        badgeText="Audited"
         badgeVariant="success"
-        accentColor="emerald"
+        accentColor="green"
         icon={<RiMoneyDollarCircleLine className="w-5 h-5" />}
       />
 
@@ -63,7 +63,7 @@ export function KpiStrip() {
         label="Cancellation Rate"
         value={`${cancellationRate.toFixed(1)}%`}
         subValue="314 cancelled bookings"
-        badgeText="Industry Watch"
+        badgeText="Monitored"
         badgeVariant="danger"
         accentColor="rose"
         icon={<RiCloseCircleLine className="w-5 h-5" />}
