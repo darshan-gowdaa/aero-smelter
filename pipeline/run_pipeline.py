@@ -6,13 +6,12 @@ import pandas as pd
 # Add project root to Python path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from pipeline.config import BASE_DIR, LOGS_DIR
+from pipeline.config import BASE_DIR, LOGS_DIR, POWERBI_DIR
 from pipeline.logger import PipelineLogger
 from pipeline.ingestion import IngestionLayer
 from pipeline.cleaning import CleaningLayer
 from pipeline.modeling import ModelingLayer
 from pipeline.kpis import KPICalculator
-from pipeline.export_powerbi import PowerBIExporter
 
 def run_full_pipeline():
     start_time = time.time()
@@ -71,20 +70,18 @@ def run_full_pipeline():
     ml_pipe = FlightMLPipeline()
     ml_results = ml_pipe.run_all()
 
-    # Stage 6: Export datasets and DAX definitions for Power BI reporting
-    exporter = PowerBIExporter(logger=logger)
-    logger.info("Exporting datasets and DAX measures for Power BI")
-    exporter.export_tables(gold_tables)
-    exporter.export_tables(kpi_results)
-
-    # Export machine learning prediction tables
+    # Stage 6: Export CSV analytical feeds for Power BI reporting
+    logger.info("Exporting CSV analytical feeds for Power BI reporting")
+    POWERBI_DIR.mkdir(parents=True, exist_ok=True)
     ml_tables = {
         "ml_anomaly_scores": pd.read_parquet(BASE_DIR / "data" / "gold" / "ml_anomaly_scores.parquet"),
         "ml_cancellation_predictions": pd.read_parquet(BASE_DIR / "data" / "gold" / "ml_cancellation_predictions.parquet"),
         "ml_feature_importances": pd.read_parquet(BASE_DIR / "data" / "gold" / "ml_feature_importances.parquet"),
         "ml_model_metrics": pd.read_parquet(BASE_DIR / "data" / "gold" / "ml_model_metrics.parquet"),
     }
-    exporter.export_tables(ml_tables)
+    for table_name, df in {**gold_tables, **kpi_results, **ml_tables}.items():
+        df.to_csv(POWERBI_DIR / f"{table_name}.csv", index=False)
+    logger.info(f"Exported {len(gold_tables) + len(kpi_results) + len(ml_tables)} CSV tables to {POWERBI_DIR}")
 
     # Stage 7: Generate Azure templates and sync to storage if configured
     logger.info("Running Azure cloud integration (ADF, Databricks, Synapse)")

@@ -62,7 +62,7 @@ graph TD
     end
 
     subgraph S5["Consumption & Presentation Layer"]
-        PBI_EXP["pipeline/export_powerbi.py<br/>• Parquet & CSV Dual Export<br/>• DAX Measure Catalog"]
+        PBI_EXP["powerbi/data/*.csv<br/>• Curated Analytical Feeds<br/>• Star Schema Facts & KPIs"]
         PBI["powerbi/ASG_Airlines_Report.pbix<br/>4-Chapter Power BI Suite"]
         WEB["Next.js 15 Web Application<br/>Live at aero-smelter.vercel.app"]
         AZURE["azure/ Templates<br/>ADF • Databricks • Synapse"]
@@ -465,7 +465,6 @@ aero-smelter/
 │   ├── azure_integration.py                  # Azure Blob/ADLS Gen2 sync & cloud deployment generator
 │   ├── cleaning.py                           # Silver cleaning, overnight duration fix, PII masking
 │   ├── config.py                             # Centralized paths, regex rules, schemas & business thresholds
-│   ├── export_powerbi.py                     # Gold layer dual Parquet/CSV exporter & DAX generator
 │   ├── ingestion.py                          # Bronze raw ingestion and schema contract validator
 │   ├── kpis.py                               # Business KPI aggregations and duration anomaly metrics
 │   ├── logger.py                             # Structured pipeline logger with audit counts
