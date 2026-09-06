@@ -6,7 +6,7 @@ import pandas as pd
 # Add project root to Python path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from pipeline.config import BASE_DIR, LOGS_DIR, POWERBI_DIR
+from pipeline.config import BASE_DIR, LOGS_DIR, CLEANED_DIR
 from pipeline.logger import PipelineLogger
 from pipeline.ingestion import IngestionLayer
 from pipeline.cleaning import CleaningLayer
@@ -70,9 +70,9 @@ def run_full_pipeline():
     ml_pipe = FlightMLPipeline()
     ml_results = ml_pipe.run_all()
 
-    # Stage 6: Export CSV analytical feeds for Power BI reporting
-    logger.info("Exporting CSV analytical feeds for Power BI reporting")
-    POWERBI_DIR.mkdir(parents=True, exist_ok=True)
+    # Stage 6: Export cleaned datasets for reporting and visualization
+    logger.info("Exporting cleaned datasets ready for visualization")
+    CLEANED_DIR.mkdir(parents=True, exist_ok=True)
     ml_tables = {
         "ml_anomaly_scores": pd.read_parquet(BASE_DIR / "data" / "gold" / "ml_anomaly_scores.parquet"),
         "ml_cancellation_predictions": pd.read_parquet(BASE_DIR / "data" / "gold" / "ml_cancellation_predictions.parquet"),
@@ -80,8 +80,8 @@ def run_full_pipeline():
         "ml_model_metrics": pd.read_parquet(BASE_DIR / "data" / "gold" / "ml_model_metrics.parquet"),
     }
     for table_name, df in {**gold_tables, **kpi_results, **ml_tables}.items():
-        df.to_csv(POWERBI_DIR / f"{table_name}.csv", index=False)
-    logger.info(f"Exported {len(gold_tables) + len(kpi_results) + len(ml_tables)} CSV tables to {POWERBI_DIR}")
+        df.to_csv(CLEANED_DIR / f"{table_name}.csv", index=False)
+    logger.info(f"Exported {len(gold_tables) + len(kpi_results) + len(ml_tables)} cleaned tables to {CLEANED_DIR}")
 
     # Stage 7: Generate Azure templates and sync to storage if configured
     logger.info("Running Azure cloud integration (ADF, Databricks, Synapse)")

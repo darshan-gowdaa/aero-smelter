@@ -7,7 +7,6 @@
   "scripts": {
     "pipeline": "python pipeline/run_pipeline.py",
     "test": "python -m unittest discover tests",
-    "notebook": "python scripts/generate_rich_notebook.py",
     "dev": "npm --prefix dashboard run dev",
     "build": "npm --prefix dashboard run build",
     "start": "npm --prefix dashboard run start",

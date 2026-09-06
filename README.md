@@ -11,7 +11,8 @@
 > **Source Case Study Specification**: [`docs/specifications/Airlines_Pipeline_Requirements_Specification.docx`](docs/specifications/Airlines_Pipeline_Requirements_Specification.docx)  
 > **Executive Technical Word Report (4.07 MB)**: [`reports/ASG_Airlines_Pipeline_Documentation.docx`](reports/ASG_Airlines_Pipeline_Documentation.docx)  
 > **Jupyter Senior DE & MLOps Walkthrough**: [`notebooks/AeroSmelter_Pipeline_Walkthrough.ipynb`](notebooks/AeroSmelter_Pipeline_Walkthrough.ipynb)  
-> **Power BI Production Report (.pbix)**: [`powerbi/ASG_Airlines_Report.pbix`](powerbi/ASG_Airlines_Report.pbix) | [Template (.pbit)](powerbi/ASG_Airlines_Executive_Report.pbit)
+> **Power BI Production Report (.pbix)**: [`powerbi/ASG_Airlines_Report.pbix`](powerbi/ASG_Airlines_Report.pbix)  
+> **Cleaned Analytical Datasets**: [`data/cleaned/`](data/cleaned/)
 
 ---
 
@@ -62,7 +63,7 @@ graph TD
     end
 
     subgraph S5["Consumption & Presentation Layer"]
-        PBI_EXP["powerbi/data/*.csv<br/>• Curated Analytical Feeds<br/>• Star Schema Facts & KPIs"]
+        PBI_EXP["data/cleaned/*.csv<br/>• Cleaned Analytical Datasets<br/>• Star Schema Facts & KPIs"]
         PBI["powerbi/ASG_Airlines_Report.pbix<br/>4-Chapter Power BI Suite"]
         WEB["Next.js 15 Web Application<br/>Live at aero-smelter.vercel.app"]
         AZURE["azure/ Templates<br/>ADF • Databricks • Synapse"]
@@ -333,7 +334,7 @@ erDiagram
 
 ## 6. Core Business KPIs & Operational Analytics
 
-Calculated in [`pipeline/kpis.py`](pipeline/kpis.py) and exported as pre-aggregated marts in [`data/gold/`](data/gold/) and [`powerbi/data/`](powerbi/data/):
+Calculated in [`pipeline/kpis.py`](pipeline/kpis.py) and exported as pre-aggregated marts in [`data/gold/`](data/gold/) and [`data/cleaned/`](data/cleaned/):
 
 | Business KPI | Result Metric | Operational Business Interpretation |
 | :--- | :--- | :--- |
@@ -450,6 +451,7 @@ aero-smelter/
 │   └── lib/                                  # Data layer, TypeScript interfaces, Gemini AI copilot client
 ├── data/                                     # Medallion Lakehouse Storage Architecture
 │   ├── source/                               # Immutable raw source files (UseCase - Airlines.xlsx)
+│   ├── cleaned/                              # Cleaned analytical datasets ready for visualization (CSV)
 │   ├── bronze/                               # Raw immutable Parquet snapshots (pipeline generated, gitignored)
 │   ├── silver/                               # Cleaned, standardized, PII-masked Parquet tables (generated, gitignored)
 │   ├── gold/                                 # Star schema facts, dimensions & KPI marts (generated, gitignored)
@@ -471,21 +473,12 @@ aero-smelter/
 │   ├── ml_models.py                          # Isolation Forest anomaly detection & Random Forest classifier
 │   ├── modeling.py                           # Gold dimensional modeling (Kimball Star Schema)
 │   └── run_pipeline.py                       # Master pipeline execution orchestrator
-├── powerbi/                                  # Production Power BI Suite & Artifacts
+├── powerbi/                                  # Production Power BI Suite
 │   ├── ASG_Airlines_Report.pbix              # Production 4-chapter Power BI desktop report
-│   ├── ASG_Airlines_Executive_Report.pbit    # Power BI template with parameterized data source
-│   ├── powerbi_dax_measures.dax              # Production DAX measure catalog
-│   ├── ASG_Airlines_Theme.json               # Custom aviation corporate design theme
-│   ├── POWERBI_INTERACTIVE_GUIDE.md          # 4-chapter storytelling walkthrough & DAX dictionary
-│   ├── screenshots/                          # 300 DPI high-resolution Power BI dashboard captures
-│   └── data/                                 # Gold facts, dimensions, and KPI mart CSV/Parquet feeds
+│   └── screenshots/                          # 300 DPI high-resolution Power BI dashboard captures
 ├── reports/                                  # Technical reports & publication figures
 │   ├── ASG_Airlines_Pipeline_Documentation.docx  # Comprehensive technical Word document (4.07 MB)
 │   └── assets/                               # Architecture diagrams, data flows, and ERD models
-├── scripts/                                  # Developer automation & compilation utilities
-│   ├── generate_diagrams.py                  # Publication diagram rendering script
-│   ├── generate_docs.py                      # Technical Word documentation compiler
-│   └── generate_rich_notebook.py             # Senior-level executed walkthrough notebook generator
 ├── tests/                                    # CI/CD Quality Gates & Automated Unit Tests
 │   ├── __init__.py
 │   └── test_pipeline.py                      # Automated assertions covering Bronze, Silver, Gold, PII & Azure
@@ -529,13 +522,9 @@ python -m unittest discover tests
 npm test
 ```
 
-### 4. Regenerate Executed Walkthrough Notebook
-Regenerates and executes the 22-cell publication Jupyter Notebook:
-```bash
-python scripts/generate_rich_notebook.py
-# Or via npm script:
-npm run notebook
-```
+### 4. Interactive Engineering & MLOps Walkthrough Notebook
+The fully executed 22-cell data engineering and machine learning walkthrough notebook is located at:
+[`notebooks/AeroSmelter_Pipeline_Walkthrough.ipynb`](notebooks/AeroSmelter_Pipeline_Walkthrough.ipynb)
 
 ### 5. Launch Interactive Next.js Dashboard
 Starts the local development server:

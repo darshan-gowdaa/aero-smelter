@@ -89,6 +89,10 @@ data/secure/
 # Legacy powerbi directory — consolidated into root powerbi/
 data/powerbi/
 
+# Internal compilation & generation utilities
+scripts/
+dashboard/screenshots/
+
 # Dashboard generated data files — large, auto-generated from pipeline outputs
 dashboard/data.js
 dashboard/lib/data.json
