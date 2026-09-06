@@ -1,0 +1,84 @@
+{
+  "name": "ASG Airlines Aviation Theme",
+  "dataColors": [
+    "#0B2E4F",
+    "#F2A900",
+    "#1B98E0",
+    "#0E9C8C",
+    "#7A6FF0",
+    "#E74C3C",
+    "#3C5A78",
+    "#9BB6C9"
+  ],
+  "background": "#FFFFFF",
+  "foreground": "#0B2E4F",
+  "tableAccent": "#0B2E4F",
+  "good": "#2ECC71",
+  "bad": "#E74C3C",
+  "neutral": "#F2A900",
+  "maximum": "#0B2E4F",
+  "center": "#1B98E0",
+  "minimum": "#F4F7FA",
+  "textClasses": {
+    "callout": {
+      "fontSize": 28,
+      "fontFace": "Segoe UI Semibold",
+      "color": "#0B2E4F"
+    },
+    "title": {
+      "fontSize": 14,
+      "fontFace": "Segoe UI Semibold",
+      "color": "#0B2E4F"
+    },
+    "header": {
+      "fontSize": 12,
+      "fontFace": "Segoe UI Semibold",
+      "color": "#FFFFFF"
+    },
+    "label": {
+      "fontSize": 10,
+      "fontFace": "Segoe UI",
+      "color": "#5C6B7A"
+    }
+  },
+  "visualStyles": {
+    "*": {
+      "*": {
+        "background": [
+          {
+            "show": false
+          }
+        ],
+        "border": [
+          {
+            "show": false
+          }
+        ]
+      }
+    },
+    "card": {
+      "*": {
+        "labels": [
+          {
+            "color": {
+              "solid": {
+                "color": "#0B2E4F"
+              }
+            },
+            "fontSize": 28
+          }
+        ],
+        "categoryLabels": [
+          {
+            "color": {
+              "solid": {
+                "color": "#5C6B7A"
+              }
+            },
+            "fontSize": 11
+          }
+        ]
+      }
+    }
+  }
+}

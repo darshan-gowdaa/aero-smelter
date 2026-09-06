@@ -1,0 +1,798 @@
+{
+  "name": "ASG_Airlines_Model",
+  "compatibilityLevel": 1567,
+  "model": {
+    "culture": "en-US",
+    "defaultPowerBIDataSourceVersion": "powerBI_V3",
+    "sourceQueryCulture": "en-US",
+    "expressions": [
+      {
+        "name": "AeroSmelterDataFolder",
+        "kind": "m",
+        "expression": "\"C:\\ASG_Airlines\\data\\powerbi\\\" meta [IsParameterQuery=true, Type=\"Text\", IsParameterQueryRequired=true]",
+        "lineageTag": "param-datafolder"
+      }
+    ],
+    "tables": [
+      {
+        "name": "dim_airline",
+        "columns": [
+          {
+            "name": "airline_key",
+            "dataType": "int64",
+            "sourceColumn": "airline_key",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "airline_name",
+            "dataType": "string",
+            "sourceColumn": "airline_name",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "airline_code",
+            "dataType": "string",
+            "sourceColumn": "airline_code",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "country",
+            "dataType": "string",
+            "sourceColumn": "country",
+            "summarizeBy": "none"
+          }
+        ],
+        "measures": [],
+        "partitions": [
+          {
+            "name": "dim_airline-partition",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": "let\n    Source = Csv.Document(File.Contents(AeroSmelterDataFolder & \"dim_airline.csv\"),[Delimiter=\",\", Columns=4, Encoding=65001, QuoteStyle=QuoteStyle.Csv]),\n    Promoted = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),\n    Typed = Table.TransformColumnTypes(Promoted,{{\"airline_key\", Int64.Type}, {\"airline_name\", type text}, {\"airline_code\", type text}, {\"country\", type text}})\nin\n    Typed"
+            }
+          }
+        ]
+      },
+      {
+        "name": "dim_date",
+        "columns": [
+          {
+            "name": "date_key",
+            "dataType": "int64",
+            "sourceColumn": "date_key",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "full_date",
+            "dataType": "dateTime",
+            "sourceColumn": "full_date",
+            "summarizeBy": "none",
+            "formatString": "yyyy-mm-dd",
+            "isKey": false
+          },
+          {
+            "name": "year",
+            "dataType": "int64",
+            "sourceColumn": "year",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "month",
+            "dataType": "int64",
+            "sourceColumn": "month",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "month_name",
+            "dataType": "string",
+            "sourceColumn": "month_name",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "day",
+            "dataType": "int64",
+            "sourceColumn": "day",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "day_name",
+            "dataType": "string",
+            "sourceColumn": "day_name",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "is_weekend",
+            "dataType": "boolean",
+            "sourceColumn": "is_weekend",
+            "summarizeBy": "none"
+          }
+        ],
+        "measures": [],
+        "partitions": [
+          {
+            "name": "dim_date-partition",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": "let\n    Source = Csv.Document(File.Contents(AeroSmelterDataFolder & \"dim_date.csv\"),[Delimiter=\",\", Columns=8, Encoding=65001, QuoteStyle=QuoteStyle.Csv]),\n    Promoted = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),\n    Typed = Table.TransformColumnTypes(Promoted,{{\"date_key\", Int64.Type}, {\"full_date\", type datetime}, {\"year\", Int64.Type}, {\"month\", Int64.Type}, {\"month_name\", type text}, {\"day\", Int64.Type}, {\"day_name\", type text}, {\"is_weekend\", type logical}})\nin\n    Typed"
+            }
+          }
+        ],
+        "dataCategory": null,
+        "annotations": [
+          {
+            "name": "__PBI_TimeIntelligenceEnabled",
+            "value": "1"
+          }
+        ]
+      },
+      {
+        "name": "dim_route",
+        "columns": [
+          {
+            "name": "route_key",
+            "dataType": "int64",
+            "sourceColumn": "route_key",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "source",
+            "dataType": "string",
+            "sourceColumn": "source",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "source_city",
+            "dataType": "string",
+            "sourceColumn": "source_city",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "destination",
+            "dataType": "string",
+            "sourceColumn": "destination",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "dest_city",
+            "dataType": "string",
+            "sourceColumn": "dest_city",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "route_name",
+            "dataType": "string",
+            "sourceColumn": "route_name",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "route_full_name",
+            "dataType": "string",
+            "sourceColumn": "route_full_name",
+            "summarizeBy": "none"
+          }
+        ],
+        "measures": [],
+        "partitions": [
+          {
+            "name": "dim_route-partition",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": "let\n    Source = Csv.Document(File.Contents(AeroSmelterDataFolder & \"dim_route.csv\"),[Delimiter=\",\", Columns=7, Encoding=65001, QuoteStyle=QuoteStyle.Csv]),\n    Promoted = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),\n    Typed = Table.TransformColumnTypes(Promoted,{{\"route_key\", Int64.Type}, {\"source\", type text}, {\"source_city\", type text}, {\"destination\", type text}, {\"dest_city\", type text}, {\"route_name\", type text}, {\"route_full_name\", type text}})\nin\n    Typed"
+            }
+          }
+        ]
+      },
+      {
+        "name": "dim_passenger",
+        "columns": [
+          {
+            "name": "passenger_key",
+            "dataType": "int64",
+            "sourceColumn": "passenger_key",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "passenger_id",
+            "dataType": "string",
+            "sourceColumn": "passenger_id",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "gender",
+            "dataType": "string",
+            "sourceColumn": "gender",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "age",
+            "dataType": "int64",
+            "sourceColumn": "age",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "age_band",
+            "dataType": "string",
+            "sourceColumn": "age_band",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "email_masked",
+            "dataType": "string",
+            "sourceColumn": "email_masked",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "phone_masked",
+            "dataType": "string",
+            "sourceColumn": "phone_masked",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "aadhaar_masked",
+            "dataType": "string",
+            "sourceColumn": "aadhaar_masked",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "passenger_name_masked",
+            "dataType": "string",
+            "sourceColumn": "passenger_name_masked",
+            "summarizeBy": "none",
+            "isHidden": true
+          }
+        ],
+        "measures": [],
+        "partitions": [
+          {
+            "name": "dim_passenger-partition",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": "let\n    Source = Csv.Document(File.Contents(AeroSmelterDataFolder & \"dim_passenger.csv\"),[Delimiter=\",\", Columns=9, Encoding=65001, QuoteStyle=QuoteStyle.Csv]),\n    Promoted = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),\n    Typed = Table.TransformColumnTypes(Promoted,{{\"passenger_key\", Int64.Type}, {\"passenger_id\", type text}, {\"gender\", type text}, {\"age\", Int64.Type}, {\"age_band\", type text}, {\"email_masked\", type text}, {\"phone_masked\", type text}, {\"aadhaar_masked\", type text}, {\"passenger_name_masked\", type text}})\nin\n    Typed"
+            }
+          }
+        ]
+      },
+      {
+        "name": "fact_flights",
+        "columns": [
+          {
+            "name": "flight_instance_id",
+            "dataType": "int64",
+            "sourceColumn": "flight_instance_id",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "flight_id",
+            "dataType": "string",
+            "sourceColumn": "flight_id",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "airline_key",
+            "dataType": "int64",
+            "sourceColumn": "airline_key",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "route_key",
+            "dataType": "int64",
+            "sourceColumn": "route_key",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "departure_date_key",
+            "dataType": "int64",
+            "sourceColumn": "departure_date_key",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "departure_time",
+            "dataType": "dateTime",
+            "sourceColumn": "departure_time",
+            "summarizeBy": "none",
+            "formatString": "yyyy-mm-dd hh:mm"
+          },
+          {
+            "name": "arrival_time",
+            "dataType": "dateTime",
+            "sourceColumn": "arrival_time",
+            "summarizeBy": "none",
+            "formatString": "yyyy-mm-dd hh:mm"
+          },
+          {
+            "name": "departure_hour",
+            "dataType": "int64",
+            "sourceColumn": "departure_hour",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "duration_minutes",
+            "dataType": "double",
+            "sourceColumn": "duration_minutes",
+            "summarizeBy": "none",
+            "formatString": "#,##0.0"
+          },
+          {
+            "name": "route_mean_duration",
+            "dataType": "double",
+            "sourceColumn": "route_mean_duration",
+            "summarizeBy": "none",
+            "formatString": "#,##0.0"
+          },
+          {
+            "name": "route_std_duration",
+            "dataType": "double",
+            "sourceColumn": "route_std_duration",
+            "summarizeBy": "none",
+            "formatString": "#,##0.0"
+          },
+          {
+            "name": "is_overnight",
+            "dataType": "boolean",
+            "sourceColumn": "is_overnight",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "duration_anomaly_flag",
+            "dataType": "boolean",
+            "sourceColumn": "duration_anomaly_flag",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "is_duration_outlier",
+            "dataType": "boolean",
+            "sourceColumn": "is_duration_outlier",
+            "summarizeBy": "none"
+          }
+        ],
+        "measures": [
+          {
+            "name": "Total Flights",
+            "expression": "COUNTROWS('fact_flights')",
+            "formatString": "#,##0",
+            "displayFolder": "Duration KPIs"
+          },
+          {
+            "name": "Average Flight Duration",
+            "expression": "AVERAGE('fact_flights'[duration_minutes])",
+            "formatString": "#,##0.0",
+            "displayFolder": "Duration KPIs"
+          },
+          {
+            "name": "Min Flight Duration",
+            "expression": "MIN('fact_flights'[duration_minutes])",
+            "formatString": "#,##0.0",
+            "displayFolder": "Duration KPIs"
+          },
+          {
+            "name": "Max Flight Duration",
+            "expression": "MAX('fact_flights'[duration_minutes])",
+            "formatString": "#,##0.0",
+            "displayFolder": "Duration KPIs"
+          },
+          {
+            "name": "Overnight Flight Count",
+            "expression": "CALCULATE(COUNTROWS('fact_flights'), 'fact_flights'[is_overnight] = TRUE())",
+            "formatString": "#,##0",
+            "displayFolder": "Duration KPIs"
+          },
+          {
+            "name": "Overnight Flight %",
+            "expression": "DIVIDE([Overnight Flight Count], [Total Flights], 0)",
+            "formatString": "0.0%",
+            "displayFolder": "Duration KPIs"
+          },
+          {
+            "name": "Duration Outlier Count",
+            "expression": "CALCULATE(COUNTROWS('fact_flights'), 'fact_flights'[is_duration_outlier] = TRUE())",
+            "formatString": "#,##0",
+            "displayFolder": "Anomaly KPIs"
+          },
+          {
+            "name": "Duration Outlier %",
+            "expression": "DIVIDE([Duration Outlier Count], [Total Flights], 0)",
+            "formatString": "0.0%",
+            "displayFolder": "Anomaly KPIs"
+          },
+          {
+            "name": "Duration Anomaly Count",
+            "expression": "CALCULATE(COUNTROWS('fact_flights'), 'fact_flights'[duration_anomaly_flag] = TRUE())",
+            "formatString": "#,##0",
+            "displayFolder": "Anomaly KPIs"
+          },
+          {
+            "name": "Flight Share %",
+            "expression": "DIVIDE([Total Flights], CALCULATE([Total Flights], ALL('dim_airline')))",
+            "formatString": "0.0%",
+            "displayFolder": "Airline KPIs"
+          },
+          {
+            "name": "Average Route Mean Duration",
+            "expression": "AVERAGE('fact_flights'[route_mean_duration])",
+            "formatString": "#,##0.0",
+            "displayFolder": "Anomaly KPIs"
+          },
+          {
+            "name": "Average Route Std Duration",
+            "expression": "AVERAGE('fact_flights'[route_std_duration])",
+            "formatString": "#,##0.0",
+            "displayFolder": "Anomaly KPIs"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "fact_flights-partition",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": "let\n    Source = Csv.Document(File.Contents(AeroSmelterDataFolder & \"fact_flights.csv\"),[Delimiter=\",\", Columns=14, Encoding=65001, QuoteStyle=QuoteStyle.Csv]),\n    Promoted = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),\n    Typed = Table.TransformColumnTypes(Promoted,{{\"flight_instance_id\", Int64.Type}, {\"flight_id\", type text}, {\"airline_key\", Int64.Type}, {\"route_key\", Int64.Type}, {\"departure_date_key\", Int64.Type}, {\"departure_time\", type datetime}, {\"arrival_time\", type datetime}, {\"departure_hour\", Int64.Type}, {\"duration_minutes\", type number}, {\"route_mean_duration\", type number}, {\"route_std_duration\", type number}, {\"is_overnight\", type logical}, {\"duration_anomaly_flag\", type logical}, {\"is_duration_outlier\", type logical}})\nin\n    Typed"
+            }
+          }
+        ]
+      },
+      {
+        "name": "fact_bookings",
+        "columns": [
+          {
+            "name": "booking_id",
+            "dataType": "string",
+            "sourceColumn": "booking_id",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "passenger_key",
+            "dataType": "int64",
+            "sourceColumn": "passenger_key",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "flight_id",
+            "dataType": "string",
+            "sourceColumn": "flight_id",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "route_key",
+            "dataType": "int64",
+            "sourceColumn": "route_key",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "airline_key",
+            "dataType": "int64",
+            "sourceColumn": "airline_key",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "booking_date_key",
+            "dataType": "int64",
+            "sourceColumn": "booking_date_key",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "booking_date",
+            "dataType": "dateTime",
+            "sourceColumn": "booking_date",
+            "summarizeBy": "none",
+            "formatString": "yyyy-mm-dd"
+          },
+          {
+            "name": "status",
+            "dataType": "string",
+            "sourceColumn": "status",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "is_confirmed",
+            "dataType": "int64",
+            "sourceColumn": "is_confirmed",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "is_cancelled",
+            "dataType": "int64",
+            "sourceColumn": "is_cancelled",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "is_pending",
+            "dataType": "int64",
+            "sourceColumn": "is_pending",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "is_status_imputed",
+            "dataType": "boolean",
+            "sourceColumn": "is_status_imputed",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "seat_number",
+            "dataType": "string",
+            "sourceColumn": "seat_number",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "passport_masked",
+            "dataType": "string",
+            "sourceColumn": "passport_masked",
+            "summarizeBy": "none",
+            "isHidden": true
+          }
+        ],
+        "measures": [
+          {
+            "name": "Total Bookings",
+            "expression": "COUNTROWS('fact_bookings')",
+            "formatString": "#,##0",
+            "displayFolder": "Booking KPIs"
+          },
+          {
+            "name": "Confirmed Bookings",
+            "expression": "CALCULATE(COUNTROWS('fact_bookings'), 'fact_bookings'[is_confirmed] = 1)",
+            "formatString": "#,##0",
+            "displayFolder": "Booking KPIs"
+          },
+          {
+            "name": "Confirmation Rate %",
+            "expression": "DIVIDE([Confirmed Bookings], [Total Bookings], 0)",
+            "formatString": "0.0%",
+            "displayFolder": "Booking KPIs"
+          },
+          {
+            "name": "Cancelled Bookings",
+            "expression": "CALCULATE(COUNTROWS('fact_bookings'), 'fact_bookings'[is_cancelled] = 1)",
+            "formatString": "#,##0",
+            "displayFolder": "Booking KPIs"
+          },
+          {
+            "name": "Cancellation Rate %",
+            "expression": "DIVIDE([Cancelled Bookings], [Total Bookings], 0)",
+            "formatString": "0.0%",
+            "displayFolder": "Booking KPIs"
+          },
+          {
+            "name": "Pending Bookings",
+            "expression": "CALCULATE(COUNTROWS('fact_bookings'), 'fact_bookings'[is_pending] = 1)",
+            "formatString": "#,##0",
+            "displayFolder": "Booking KPIs"
+          },
+          {
+            "name": "Imputed Status Count",
+            "expression": "CALCULATE(COUNTROWS('fact_bookings'), 'fact_bookings'[is_status_imputed] = TRUE())",
+            "formatString": "#,##0",
+            "displayFolder": "Data Quality"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "fact_bookings-partition",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": "let\n    Source = Csv.Document(File.Contents(AeroSmelterDataFolder & \"fact_bookings.csv\"),[Delimiter=\",\", Columns=14, Encoding=65001, QuoteStyle=QuoteStyle.Csv]),\n    Promoted = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),\n    Typed = Table.TransformColumnTypes(Promoted,{{\"booking_id\", type text}, {\"passenger_key\", Int64.Type}, {\"flight_id\", type text}, {\"route_key\", Int64.Type}, {\"airline_key\", Int64.Type}, {\"booking_date_key\", Int64.Type}, {\"booking_date\", type datetime}, {\"status\", type text}, {\"is_confirmed\", Int64.Type}, {\"is_cancelled\", Int64.Type}, {\"is_pending\", Int64.Type}, {\"is_status_imputed\", type logical}, {\"seat_number\", type text}, {\"passport_masked\", type text}})\nin\n    Typed"
+            }
+          }
+        ]
+      },
+      {
+        "name": "fact_payments",
+        "columns": [
+          {
+            "name": "payment_id",
+            "dataType": "string",
+            "sourceColumn": "payment_id",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "booking_id",
+            "dataType": "string",
+            "sourceColumn": "booking_id",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "route_key",
+            "dataType": "int64",
+            "sourceColumn": "route_key",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "airline_key",
+            "dataType": "int64",
+            "sourceColumn": "airline_key",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "payment_method",
+            "dataType": "string",
+            "sourceColumn": "payment_method",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "amount",
+            "dataType": "double",
+            "sourceColumn": "amount",
+            "summarizeBy": "none",
+            "formatString": "\u20b9#,##0"
+          },
+          {
+            "name": "is_amount_imputed",
+            "dataType": "boolean",
+            "sourceColumn": "is_amount_imputed",
+            "summarizeBy": "none",
+            "isHidden": true
+          }
+        ],
+        "measures": [
+          {
+            "name": "Total Operational Revenue",
+            "expression": "SUM('fact_payments'[amount])",
+            "formatString": "\u20b9#,##0",
+            "displayFolder": "Revenue KPIs"
+          },
+          {
+            "name": "Average Fare Per Booking",
+            "expression": "AVERAGE('fact_payments'[amount])",
+            "formatString": "\u20b9#,##0",
+            "displayFolder": "Revenue KPIs"
+          },
+          {
+            "name": "Airline Revenue",
+            "expression": "SUM('fact_payments'[amount])",
+            "formatString": "\u20b9#,##0",
+            "displayFolder": "Revenue KPIs"
+          },
+          {
+            "name": "Airline Revenue Share %",
+            "expression": "DIVIDE([Airline Revenue], CALCULATE([Airline Revenue], ALL('dim_airline')))",
+            "formatString": "0.0%",
+            "displayFolder": "Revenue KPIs"
+          },
+          {
+            "name": "Imputed Payment Amount Count",
+            "expression": "CALCULATE(COUNTROWS('fact_payments'), 'fact_payments'[is_amount_imputed] = TRUE())",
+            "formatString": "#,##0",
+            "displayFolder": "Data Quality"
+          },
+          {
+            "name": "Total Active Routes",
+            "expression": "DISTINCTCOUNT('dim_route'[route_key])",
+            "formatString": "#,##0",
+            "displayFolder": "Route KPIs"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "fact_payments-partition",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": "let\n    Source = Csv.Document(File.Contents(AeroSmelterDataFolder & \"fact_payments.csv\"),[Delimiter=\",\", Columns=7, Encoding=65001, QuoteStyle=QuoteStyle.Csv]),\n    Promoted = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),\n    Typed = Table.TransformColumnTypes(Promoted,{{\"payment_id\", type text}, {\"booking_id\", type text}, {\"route_key\", Int64.Type}, {\"airline_key\", Int64.Type}, {\"payment_method\", type text}, {\"amount\", type number}, {\"is_amount_imputed\", type logical}})\nin\n    Typed"
+            }
+          }
+        ]
+      }
+    ],
+    "relationships": [
+      {
+        "name": "rel_flights_airline",
+        "fromTable": "fact_flights",
+        "fromColumn": "airline_key",
+        "toTable": "dim_airline",
+        "toColumn": "airline_key",
+        "crossFilteringBehavior": "bothDirections"
+      },
+      {
+        "name": "rel_flights_route",
+        "fromTable": "fact_flights",
+        "fromColumn": "route_key",
+        "toTable": "dim_route",
+        "toColumn": "route_key",
+        "crossFilteringBehavior": "bothDirections"
+      },
+      {
+        "name": "rel_flights_date",
+        "fromTable": "fact_flights",
+        "fromColumn": "departure_date_key",
+        "toTable": "dim_date",
+        "toColumn": "date_key",
+        "crossFilteringBehavior": "bothDirections"
+      },
+      {
+        "name": "rel_bookings_passenger",
+        "fromTable": "fact_bookings",
+        "fromColumn": "passenger_key",
+        "toTable": "dim_passenger",
+        "toColumn": "passenger_key",
+        "crossFilteringBehavior": "bothDirections"
+      },
+      {
+        "name": "rel_bookings_route",
+        "fromTable": "fact_bookings",
+        "fromColumn": "route_key",
+        "toTable": "dim_route",
+        "toColumn": "route_key",
+        "crossFilteringBehavior": "oneDirection"
+      },
+      {
+        "name": "rel_bookings_airline",
+        "fromTable": "fact_bookings",
+        "fromColumn": "airline_key",
+        "toTable": "dim_airline",
+        "toColumn": "airline_key",
+        "crossFilteringBehavior": "oneDirection"
+      },
+      {
+        "name": "rel_bookings_date",
+        "fromTable": "fact_bookings",
+        "fromColumn": "booking_date_key",
+        "toTable": "dim_date",
+        "toColumn": "date_key",
+        "crossFilteringBehavior": "oneDirection"
+      },
+      {
+        "name": "rel_payments_booking",
+        "fromTable": "fact_payments",
+        "fromColumn": "booking_id",
+        "toTable": "fact_bookings",
+        "toColumn": "booking_id",
+        "crossFilteringBehavior": "bothDirections"
+      },
+      {
+        "name": "rel_payments_route",
+        "fromTable": "fact_payments",
+        "fromColumn": "route_key",
+        "toTable": "dim_route",
+        "toColumn": "route_key",
+        "crossFilteringBehavior": "oneDirection"
+      },
+      {
+        "name": "rel_payments_airline",
+        "fromTable": "fact_payments",
+        "fromColumn": "airline_key",
+        "toTable": "dim_airline",
+        "toColumn": "airline_key",
+        "crossFilteringBehavior": "oneDirection"
+      }
+    ],
+    "annotations": [
+      {
+        "name": "PBI_QueryOrder",
+        "value": "[\"dim_airline\", \"dim_date\", \"dim_route\", \"dim_passenger\", \"fact_flights\", \"fact_bookings\", \"fact_payments\"]"
+      }
+    ]
+  }
+}

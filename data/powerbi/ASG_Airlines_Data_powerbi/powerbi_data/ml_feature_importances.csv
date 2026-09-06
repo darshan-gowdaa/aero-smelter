@@ -1,0 +1,5 @@
+feature,importance,percentage
+Booking Amount,0.4367,43.7
+Flight Route,0.3583,35.8
+Carrier Code,0.1166,11.7
+Payment Method,0.0884,8.8
