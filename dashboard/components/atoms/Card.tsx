@@ -14,10 +14,9 @@ export function Card({
   return (
     <div
       className={cn(
-        "rounded-2xl border border-slate-200/90 dark:border-slate-800/90 bg-white dark:bg-slate-900/95",
-        "shadow-[0_1px_3px_rgba(0,0,0,0.05),0_10px_20px_-5px_rgba(0,0,0,0.02)] dark:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.5)]",
+        "clay rounded-[var(--radius-xl)] bg-[var(--color-surface)] border border-[var(--color-surface-variant)]",
         "transition-all duration-200",
-        !noPadding && "p-6",
+        !noPadding && "p-6 sm:p-7",
         className
       )}
       {...props}
@@ -47,7 +46,7 @@ export function CardTitle({
   return (
     <h3
       className={cn(
-        "text-sm font-bold tracking-tight text-slate-900 dark:text-slate-100 uppercase flex items-center gap-2.5",
+        "text-base font-bold tracking-tight text-[var(--color-on-surface)] flex items-center gap-2.5",
         className
       )}
       {...props}
@@ -63,7 +62,7 @@ export function CardDescription({
   ...props
 }: React.HTMLAttributes<HTMLParagraphElement>) {
   return (
-    <p className={cn("text-xs text-slate-500 dark:text-slate-400 font-normal mt-0.5", className)} {...props}>
+    <p className={cn("text-xs text-[var(--color-on-surface-variant)] font-normal mt-0.5", className)} {...props}>
       {children}
     </p>
   );

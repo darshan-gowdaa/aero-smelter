@@ -35,24 +35,24 @@ export function KpiStrip() {
         subValue="1,020 raw · 15 dropped"
         badgeText="100% Valid"
         badgeVariant="success"
-        accentColor="sky"
+        accentColor="teal"
         icon={<RiFlightTakeoffLine className="w-4 h-4" />}
       />
 
       <MetricItem
         label="Avg Flight Duration"
         value={`${avgDuration.toFixed(1)} m`}
-        subValue="2.74 hrs average fleet-wide"
+        subValue="2.74 hrs fleet-wide avg"
         badgeText="Optimal"
         badgeVariant="info"
-        accentColor="indigo"
+        accentColor="teal"
         icon={<RiTimerLine className="w-4 h-4" />}
       />
 
       <MetricItem
         label="Total Revenue"
         value={formatCurrency(totalRevenue)}
-        subValue="1,000 transactions verified"
+        subValue="1,000 bookings verified"
         badgeText="Audited"
         badgeVariant="success"
         accentColor="emerald"

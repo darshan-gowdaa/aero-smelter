@@ -8,8 +8,8 @@ export interface MetricItemProps {
   badgeText?: string;
   badgeVariant?: "success" | "warning" | "danger" | "info" | "purple";
   icon?: React.ReactNode;
-  accentColor?: "sky" | "emerald" | "amber" | "rose" | "purple" | "indigo";
-  valueColor?: "emerald" | "amber" | "rose" | "sky" | "indigo" | "purple" | "default";
+  accentColor?: "sky" | "emerald" | "amber" | "rose" | "purple" | "indigo" | "teal";
+  valueColor?: "emerald" | "amber" | "rose" | "sky" | "indigo" | "purple" | "teal" | "default";
 }
 
 export function MetricItem({
@@ -19,43 +19,31 @@ export function MetricItem({
   badgeText,
   badgeVariant = "success",
   icon,
-  accentColor = "sky",
+  accentColor = "teal",
   valueColor,
 }: MetricItemProps) {
   const badgeStyles = {
-    success: "text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/80 border-emerald-200 dark:border-emerald-800",
-    warning: "text-amber-800 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/80 border-amber-200 dark:border-amber-800",
-    danger: "text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/80 border-rose-200 dark:border-rose-800",
-    info: "text-sky-700 dark:text-sky-300 bg-sky-50 dark:bg-sky-950/80 border-sky-200 dark:border-sky-800",
-    purple: "text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/80 border-purple-200 dark:border-purple-800",
+    success:
+      "text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 border-emerald-200 dark:border-emerald-800",
+    warning:
+      "text-amber-800 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 border-amber-200 dark:border-amber-800",
+    danger:
+      "text-[var(--color-error)] bg-[var(--color-error-container)] border-[var(--color-error)]/20",
+    info:
+      "text-[var(--color-on-secondary-container)] bg-[var(--color-secondary-container)] border-[var(--color-secondary)]/20",
+    purple:
+      "text-[var(--color-on-tertiary-container)] bg-[var(--color-tertiary-container)] border-[var(--color-tertiary)]/20",
   };
 
   const textColors = {
-    default: "text-slate-900 dark:text-white",
+    default: "text-[var(--color-on-surface)]",
+    teal: "text-[var(--color-primary)]",
     emerald: "text-emerald-600 dark:text-emerald-400",
     amber: "text-amber-600 dark:text-amber-400",
-    rose: "text-rose-600 dark:text-rose-400",
+    rose: "text-[var(--color-error)]",
     sky: "text-sky-600 dark:text-sky-400",
     indigo: "text-indigo-600 dark:text-indigo-400",
-    purple: "text-purple-600 dark:text-purple-400",
-  };
-
-  const accentBars = {
-    sky: "bg-sky-500",
-    emerald: "bg-emerald-500",
-    amber: "bg-amber-500",
-    rose: "bg-rose-500",
-    purple: "bg-purple-500",
-    indigo: "bg-indigo-500",
-  };
-
-  const iconContainers = {
-    sky: "bg-sky-50 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400 border border-sky-100 dark:border-sky-800/60",
-    emerald: "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800/60",
-    amber: "bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-800/60",
-    rose: "bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 border border-rose-100 dark:border-rose-800/60",
-    purple: "bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 border border-purple-100 dark:border-purple-800/60",
-    indigo: "bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800/60",
+    purple: "text-[var(--color-tertiary)]",
   };
 
   const resolvedValueColor = valueColor
@@ -66,38 +54,37 @@ export function MetricItem({
     ? textColors.rose
     : accentColor === "amber"
     ? textColors.amber
+    : accentColor === "teal"
+    ? textColors.teal
     : textColors.default;
 
   return (
     <div
       className={cn(
-        "relative rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900/95 p-5",
-        "shadow-xs hover:shadow-md transition-all duration-200 overflow-hidden flex flex-col justify-between"
+        "clay p-5 rounded-[var(--radius-xl)] bg-gradient-to-br from-[var(--color-surface)] to-[var(--color-surface-variant)]",
+        "flex flex-col justify-between transition-all duration-200 hover:-translate-y-1"
       )}
     >
-      {/* Top clean accent line */}
-      <div className={cn("absolute top-0 left-0 right-0 h-1", accentBars[accentColor])} />
-
       <div>
-        <div className="flex items-center justify-between gap-2 mb-3">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+        <div className="flex items-center justify-between gap-2 mb-2">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--color-on-surface-variant)] flex items-center gap-1.5">
             {label}
           </span>
           {icon && (
-            <div className={cn("w-8 h-8 rounded-xl flex items-center justify-center shadow-2xs", iconContainers[accentColor])}>
+            <div className="w-8 h-8 rounded-[var(--radius-md)] bg-[var(--color-primary-container)] text-[var(--color-on-primary-container)] flex items-center justify-center text-sm shadow-2xs">
               {icon}
             </div>
           )}
         </div>
 
-        <div className="flex items-baseline gap-2 flex-wrap">
-          <span className={cn("text-2xl lg:text-3xl font-extrabold tracking-tight font-mono", resolvedValueColor)}>
+        <div className="flex items-baseline gap-2 flex-wrap mt-1">
+          <span className={cn("text-2xl lg:text-3xl font-black tracking-tight", resolvedValueColor)}>
             {value}
           </span>
           {badgeText && (
             <span
               className={cn(
-                "text-[10px] font-bold px-2 py-0.5 rounded-full border shadow-2xs",
+                "text-[10px] font-bold px-2 py-0.5 rounded-[var(--radius-full)] border shadow-2xs",
                 badgeStyles[badgeVariant]
               )}
             >
@@ -108,7 +95,7 @@ export function MetricItem({
       </div>
 
       {subValue && (
-        <p className="mt-3 pt-2 text-xs text-slate-600 dark:text-slate-400 border-t border-slate-100 dark:border-slate-800/80 truncate">
+        <p className="mt-3 pt-2 text-xs text-[var(--color-on-surface-variant)] border-t border-[var(--color-surface-variant)] truncate">
           {subValue}
         </p>
       )}

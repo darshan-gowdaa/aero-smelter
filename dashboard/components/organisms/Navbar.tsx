@@ -2,19 +2,16 @@
 
 import React, { useState, useEffect } from "react";
 import { Badge } from "@/components/atoms/Badge";
-import { useTheme } from "@/lib/theme";
+import { ThemeToggle } from "@/components/atoms/ThemeToggle";
 import {
-  RiFlightTakeoffLine,
   RiCheckDoubleLine,
-  RiTimeLine,
   RiDatabase2Line,
-  RiSunLine,
-  RiMoonLine,
+  RiTimeLine,
+  RiCloudLine,
 } from "@remixicon/react";
 
 export function Navbar() {
   const [currentTime, setCurrentTime] = useState<string>("");
-  const { theme, isDark, toggleTheme } = useTheme();
 
   useEffect(() => {
     const updateTime = () => {
@@ -32,66 +29,52 @@ export function Navbar() {
   }, []);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md transition-colors duration-200">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap items-center justify-between gap-4">
+    <header className="sticky top-0 z-40 backdrop-blur-md bg-[color-mix(in_srgb,var(--color-surface)_85%,transparent)] border-b border-[var(--color-surface-variant)]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-3">
         {/* Brand identity */}
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-600 via-sky-500 to-cyan-400 flex items-center justify-center text-white shadow-sm">
-            <RiFlightTakeoffLine className="w-5 h-5" />
+        <div className="flex items-center gap-2.5 group shrink-0">
+          <div className="w-8 h-8 rounded-[var(--radius-sm)] bg-[var(--color-primary)] flex items-center justify-center text-[var(--color-on-primary)] font-bold text-lg leading-none select-none group-hover:scale-105 transition-transform shadow-sm">
+            ✈
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-base font-extrabold text-slate-900 dark:text-white tracking-tight">
-                ASG Airlines
-              </h1>
-              <span className="text-[10px] px-2 py-0.5 rounded-md bg-sky-100 dark:bg-sky-950 text-sky-800 dark:text-sky-300 font-mono font-bold tracking-wider uppercase">
-                Flight Operations
+              <span className="font-bold text-[var(--color-on-surface)] text-lg tracking-tight">
+                ASG<span className="text-[var(--color-primary)]">Airlines</span>
+              </span>
+              <span className="text-[10px] px-2 py-0.5 rounded-[var(--radius-full)] bg-[var(--color-primary-container)] text-[var(--color-on-primary-container)] font-mono font-bold tracking-wider uppercase">
+                Ops Lakehouse
               </span>
             </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 font-normal">
-              Executive Power BI & Medallion Star Schema Analytics Suite
-            </p>
           </div>
         </div>
 
         {/* Controls and Status */}
-        <div className="flex items-center gap-3">
-          {/* Light / Dark Mode Toggle Switch Button */}
-          <button
-            type="button"
-            onClick={toggleTheme}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all cursor-pointer select-none shadow-2xs"
-            title={`Switch to ${isDark ? "Light" : "Dark"} mode`}
-          >
-            {isDark ? (
-              <>
-                <RiSunLine className="w-4 h-4 text-amber-400" />
-                <span className="hidden sm:inline">Light Mode</span>
-              </>
-            ) : (
-              <>
-                <RiMoonLine className="w-4 h-4 text-slate-600" />
-                <span className="hidden sm:inline">Dark Mode</span>
-              </>
-            )}
-          </button>
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          <Badge variant="primary" size="sm" className="hidden md:inline-flex">
+            <RiCloudLine className="w-3.5 h-3.5" />
+            <span>Azure Medallion</span>
+          </Badge>
 
-          <Badge variant="success" size="md" className="hidden md:inline-flex">
-            <RiCheckDoubleLine className="w-4 h-4" />
+          <Badge variant="success" size="sm" className="hidden sm:inline-flex">
+            <RiCheckDoubleLine className="w-3.5 h-3.5" />
             <span>Pipeline: 1.02s</span>
           </Badge>
 
-          <Badge variant="info" size="md" className="hidden lg:inline-flex">
-            <RiDatabase2Line className="w-4 h-4" />
+          <Badge variant="purple" size="sm" className="hidden lg:inline-flex">
+            <RiDatabase2Line className="w-3.5 h-3.5" />
             <span>18 Gold Tables</span>
           </Badge>
 
           {currentTime && (
-            <div className="hidden sm:flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-300 font-mono bg-slate-50 dark:bg-slate-800/80 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700">
-              <RiTimeLine className="w-3.5 h-3.5 text-slate-400" />
+            <div className="hidden xl:flex items-center gap-1.5 text-xs text-[var(--color-on-surface-variant)] font-mono bg-[var(--color-surface-variant)]/40 px-3 py-1.5 rounded-[var(--radius-full)] border border-[var(--color-outline)]/20">
+              <RiTimeLine className="w-3.5 h-3.5 text-[var(--color-primary)]" />
               <span>{currentTime}</span>
             </div>
           )}
+
+          <div className="w-px h-6 bg-[var(--color-outline)] opacity-30 mx-1 hidden sm:block shrink-0"></div>
+
+          <ThemeToggle />
         </div>
       </div>
     </header>

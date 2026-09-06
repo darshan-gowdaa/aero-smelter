@@ -20,10 +20,10 @@ export function TabButton({
     <button
       type="button"
       className={cn(
-        "relative flex items-center gap-2 px-4 py-2.5 text-xs font-semibold tracking-wide rounded-xl transition-all duration-150 cursor-pointer whitespace-nowrap select-none",
+        "relative flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-[var(--radius-full)] text-xs sm:text-sm font-medium transition-all duration-200 cursor-pointer whitespace-nowrap select-none",
         active
-          ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xs border border-slate-200/90 dark:border-slate-700"
-          : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800/50",
+          ? "bg-[var(--color-primary-container)] text-[var(--color-on-primary-container)] font-semibold shadow-xs"
+          : "text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-variant)] hover:text-[var(--color-on-surface)]",
         className
       )}
       {...props}
@@ -33,10 +33,10 @@ export function TabButton({
       {typeof badgeCount === "number" && (
         <span
           className={cn(
-            "ml-1 text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold",
+            "ml-1 text-[10px] px-2 py-0.2 rounded-full font-mono font-bold",
             active
-              ? "bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-400"
-              : "bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-400"
+              ? "bg-[var(--color-primary)] text-[var(--color-on-primary)]"
+              : "bg-[var(--color-surface-variant)] text-[var(--color-on-surface-variant)]"
           )}
         >
           {badgeCount}

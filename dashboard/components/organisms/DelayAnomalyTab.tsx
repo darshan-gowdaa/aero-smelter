@@ -29,7 +29,6 @@ export function DelayAnomalyTab() {
   const { isDark } = useTheme();
 
   const routeVariabilityData = useMemo(() => {
-    // Calculate route std dev and mean duration
     const routeMap: Record<number, number[]> = {};
     asgData.fact_flights.forEach((f) => {
       if (!routeMap[f.route_key]) routeMap[f.route_key] = [];
@@ -55,7 +54,7 @@ export function DelayAnomalyTab() {
   const scatterData = useMemo(() => {
     const normalFlights = asgData.fact_flights
       .filter((f) => f.is_duration_outlier === 0)
-      .slice(0, 250) // Sample for responsive rendering
+      .slice(0, 250)
       .map((f) => ({
         x: Number(f.route_mean_duration.toFixed(1)),
         y: Number(f.duration_minutes.toFixed(1)),
@@ -90,15 +89,15 @@ export function DelayAnomalyTab() {
   const outliersList = asgData.kpi_duration_outliers;
 
   const chartTheme = {
-    grid: isDark ? "#334155" : "#E2E8F0",
-    text: isDark ? "#94A3B8" : "#475569",
+    grid: isDark ? "#3f484a" : "#dbe4e6",
+    text: isDark ? "#bfc8ca" : "#3f484a",
     tooltip: {
-      backgroundColor: isDark ? "#0F172A" : "#FFFFFF",
-      borderColor: isDark ? "#334155" : "#CBD5E1",
-      borderRadius: "12px",
-      boxShadow: "0 4px 14px rgba(0, 0, 0, 0.1)",
+      backgroundColor: isDark ? "#191c1d" : "#fbfdfd",
+      borderColor: isDark ? "#3f484a" : "#dbe4e6",
+      borderRadius: "14px",
+      boxShadow: "0 4px 20px rgba(0, 0, 0, 0.1)",
       fontSize: "12px",
-      color: isDark ? "#F8FAFC" : "#0F172A",
+      color: isDark ? "#e1e3e3" : "#191c1d",
     },
   };
 
@@ -112,7 +111,7 @@ export function DelayAnomalyTab() {
         <CardHeader>
           <div>
             <CardTitle>
-              <RiAlertLine className="w-5 h-5 text-rose-500" />
+              <RiAlertLine className="w-5 h-5 text-[var(--color-error)]" />
               Statistical Duration Outliers Identified (&gt;2σ Threshold)
             </CardTitle>
             <CardDescription>
@@ -121,9 +120,9 @@ export function DelayAnomalyTab() {
           </div>
         </CardHeader>
 
-        <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
+        <div className="overflow-x-auto rounded-[var(--radius-lg)] border border-[var(--color-surface-variant)]">
           <table className="w-full text-left text-xs border-collapse font-mono">
-            <thead className="bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 uppercase tracking-wider font-bold">
+            <thead className="bg-[var(--color-surface-variant)] border-b border-[var(--color-outline)]/20 text-[var(--color-on-surface)] uppercase tracking-wider font-bold">
               <tr>
                 <th className="py-3.5 px-4">Flight ID</th>
                 <th className="py-3.5 px-4 font-sans">Airline</th>
@@ -136,23 +135,23 @@ export function DelayAnomalyTab() {
                 <th className="py-3.5 px-4 text-right">Deviation</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+            <tbody className="divide-y divide-[var(--color-surface-variant)]">
               {outliersList.map((o, idx) => {
                 const dev = Math.abs(o.duration_minutes - o.route_mean_duration);
                 return (
-                  <tr key={idx} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors">
-                    <td className="py-3 px-4 font-bold text-rose-600 dark:text-rose-400">{o.flight_id}</td>
-                    <td className="py-3 px-4 font-sans font-medium text-slate-900 dark:text-slate-100">{o.airline_name}</td>
-                    <td className="py-3 px-4 font-bold text-sky-700 dark:text-sky-300">{o.route_name}</td>
-                    <td className="py-3 px-4 text-slate-500 dark:text-slate-400 text-[11px]">{o.departure_time || "-"}</td>
-                    <td className="py-3 px-4 text-slate-500 dark:text-slate-400 text-[11px]">{o.arrival_time || "-"}</td>
-                    <td className="py-3 px-4 text-right font-bold text-rose-600 dark:text-rose-400">
+                  <tr key={idx} className="hover:bg-[var(--color-surface-variant)]/40 transition-colors">
+                    <td className="py-3 px-4 font-bold text-[var(--color-error)]">{o.flight_id}</td>
+                    <td className="py-3 px-4 font-sans font-medium text-[var(--color-on-surface)]">{o.airline_name}</td>
+                    <td className="py-3 px-4 font-bold text-[var(--color-primary)]">{o.route_name}</td>
+                    <td className="py-3 px-4 text-[var(--color-on-surface-variant)] text-[11px]">{o.departure_time || "-"}</td>
+                    <td className="py-3 px-4 text-[var(--color-on-surface-variant)] text-[11px]">{o.arrival_time || "-"}</td>
+                    <td className="py-3 px-4 text-right font-bold text-[var(--color-error)]">
                       {o.duration_minutes} m
                     </td>
-                    <td className="py-3 px-4 text-right text-slate-700 dark:text-slate-300">
+                    <td className="py-3 px-4 text-right text-[var(--color-on-surface)]">
                       {o.route_mean_duration?.toFixed(1)} m
                     </td>
-                    <td className="py-3 px-4 text-right text-slate-500 dark:text-slate-400">
+                    <td className="py-3 px-4 text-right text-[var(--color-on-surface-variant)]">
                       ±{o.route_std_duration?.toFixed(1)} m
                     </td>
                     <td className="py-3 px-4 text-right font-bold text-amber-600 dark:text-amber-400">
@@ -200,11 +199,11 @@ export function DelayAnomalyTab() {
                   tick={{ fill: chartTheme.text, fontFamily: "monospace", fontWeight: 700 }}
                 />
                 <Tooltip contentStyle={chartTheme.tooltip} formatter={(val: any) => [`${val} min`, "Std Dev"]} />
-                <Bar dataKey="std" fill="#F59E0B" radius={[0, 6, 6, 0]}>
+                <Bar dataKey="std" fill="#f59e0b" radius={[0, 8, 8, 0]}>
                   {routeVariabilityData.map((entry, index) => (
                     <Cell
                       key={`var-cell-${index}`}
-                      fill={entry.std > 40 ? "#F43F5E" : entry.std > 25 ? "#F59E0B" : "#0284C7"}
+                      fill={entry.std > 40 ? (isDark ? "#ffb4ab" : "#ba1a1a") : entry.std > 25 ? "#f59e0b" : (isDark ? "#4fd8eb" : "#006874")}
                     />
                   ))}
                 </Bar>
@@ -218,7 +217,7 @@ export function DelayAnomalyTab() {
           <CardHeader>
             <div>
               <CardTitle>
-                <RiFocus2Line className="w-5 h-5 text-sky-600 dark:text-sky-400" />
+                <RiFocus2Line className="w-5 h-5 text-[var(--color-primary)]" />
                 Actual vs Route Mean Duration (Outlier Scatter)
               </CardTitle>
               <CardDescription>
@@ -263,13 +262,13 @@ export function DelayAnomalyTab() {
                 <Scatter
                   name="Normal Flights (Sample)"
                   data={scatterData.normalFlights}
-                  fill="#0284C7"
+                  fill={isDark ? "#4fd8eb" : "#006874"}
                   opacity={0.4}
                 />
                 <Scatter
                   name="Statistical Outlier (>2σ)"
                   data={scatterData.outlierFlights}
-                  fill="#F43F5E"
+                  fill={isDark ? "#ffb4ab" : "#ba1a1a"}
                   shape="circle"
                 />
               </ScatterChart>
@@ -283,7 +282,7 @@ export function DelayAnomalyTab() {
         <CardHeader>
           <div>
             <CardTitle>
-              <RiCloseCircleLine className="w-5 h-5 text-rose-500" />
+              <RiCloseCircleLine className="w-5 h-5 text-[var(--color-error)]" />
               Route Cancellation Rate Risk Ranking (Top 10 High-Risk Sectors)
             </CardTitle>
             <CardDescription>
@@ -310,11 +309,11 @@ export function DelayAnomalyTab() {
                 tick={{ fill: chartTheme.text, fontFamily: "monospace", fontWeight: 700 }}
               />
               <Tooltip contentStyle={chartTheme.tooltip} formatter={(val: any) => [`${val}%`, "Cancellation Rate"]} />
-              <Bar dataKey="rate" fill="#F43F5E" radius={[0, 6, 6, 0]}>
+              <Bar dataKey="rate" fill={isDark ? "#ffb4ab" : "#ba1a1a"} radius={[0, 8, 8, 0]}>
                 {cancellationRiskData.map((entry, index) => (
                   <Cell
                     key={`risk-cell-${index}`}
-                    fill={entry.rate > 35 ? "#F43F5E" : entry.rate > 28 ? "#F59E0B" : "#0284C7"}
+                    fill={entry.rate > 35 ? (isDark ? "#ffb4ab" : "#ba1a1a") : entry.rate > 28 ? "#f59e0b" : (isDark ? "#4fd8eb" : "#006874")}
                   />
                 ))}
               </Bar>

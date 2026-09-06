@@ -2,7 +2,7 @@ import React from "react";
 import { cn } from "@/lib/utils";
 
 export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
-  variant?: "default" | "success" | "warning" | "danger" | "info" | "purple";
+  variant?: "default" | "primary" | "success" | "warning" | "danger" | "info" | "purple";
   size?: "sm" | "md";
 }
 
@@ -15,17 +15,19 @@ export function Badge({
 }: BadgeProps) {
   const variantStyles = {
     default:
-      "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700",
+      "bg-[var(--color-surface-variant)] text-[var(--color-on-surface-variant)] border-[var(--color-outline)]/20",
+    primary:
+      "bg-[var(--color-primary-container)] text-[var(--color-on-primary-container)] border-[var(--color-primary)]/20",
     success:
-      "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/60",
+      "bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800",
     warning:
-      "bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-800/60",
+      "bg-amber-50 dark:bg-amber-950/50 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-800",
     danger:
-      "bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800/60",
+      "bg-[var(--color-error-container)] text-[var(--color-on-error-container)] border-[var(--color-error)]/20",
     info:
-      "bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 border-sky-200 dark:border-sky-800/60",
+      "bg-[var(--color-secondary-container)] text-[var(--color-on-secondary-container)] border-[var(--color-secondary)]/20",
     purple:
-      "bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800/60",
+      "bg-[var(--color-tertiary-container)] text-[var(--color-on-tertiary-container)] border-[var(--color-tertiary)]/20",
   };
 
   const sizeStyles = {
@@ -36,7 +38,7 @@ export function Badge({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 font-semibold rounded-full border shadow-2xs transition-colors",
+        "inline-flex items-center gap-1.5 font-semibold rounded-[var(--radius-full)] border shadow-xs transition-colors",
         variantStyles[variant],
         sizeStyles[size],
         className

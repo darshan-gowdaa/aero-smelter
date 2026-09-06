@@ -27,22 +27,22 @@ import {
 } from "@remixicon/react";
 
 const ROUTE_DISTINCT_COLORS = [
-  "#0284C7",
-  "#10B981",
-  "#F59E0B",
-  "#F43F5E",
-  "#8B5CF6",
-  "#06B6D4",
-  "#EC4899",
-  "#64748B",
+  "#006874",
+  "#4fd8eb",
+  "#4a6267",
+  "#97f0ff",
+  "#525e7d",
+  "#dae2ff",
+  "#f59e0b",
+  "#ba1a1a",
 ];
 
 const AGE_DISTINCT_COLORS: Record<string, string> = {
-  "Youth (<18)": "#06B6D4",
-  "Young Adult (18-35)": "#0284C7",
-  "Adult (36-50)": "#10B981",
-  "Senior (51-65)": "#F59E0B",
-  "Elderly (>65)": "#8B5CF6",
+  "Youth (<18)": "#4fd8eb",
+  "Young Adult (18-35)": "#006874",
+  "Adult (36-50)": "#10b981",
+  "Senior (51-65)": "#f59e0b",
+  "Elderly (>65)": "#525e7d",
 };
 
 export function RoutePerformanceTab() {
@@ -110,15 +110,15 @@ export function RoutePerformanceTab() {
   const maxRevenueVal = top10RevenueRoutes[0]?.totalRevenue || 1;
 
   const chartTheme = {
-    grid: isDark ? "#334155" : "#E2E8F0",
-    text: isDark ? "#94A3B8" : "#475569",
+    grid: isDark ? "#3f484a" : "#dbe4e6",
+    text: isDark ? "#bfc8ca" : "#3f484a",
     tooltip: {
-      backgroundColor: isDark ? "#0F172A" : "#FFFFFF",
-      borderColor: isDark ? "#334155" : "#CBD5E1",
-      borderRadius: "12px",
-      boxShadow: "0 4px 14px rgba(0, 0, 0, 0.1)",
+      backgroundColor: isDark ? "#191c1d" : "#fbfdfd",
+      borderColor: isDark ? "#3f484a" : "#dbe4e6",
+      borderRadius: "14px",
+      boxShadow: "0 4px 20px rgba(0, 0, 0, 0.1)",
       fontSize: "12px",
-      color: isDark ? "#F8FAFC" : "#0F172A",
+      color: isDark ? "#e1e3e3" : "#191c1d",
     },
   };
 
@@ -138,7 +138,7 @@ export function RoutePerformanceTab() {
                 Financial yield across high-demand domestic corridors
               </CardDescription>
             </div>
-            <span className="text-xs font-mono font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950 px-3 py-1 rounded-full border border-emerald-200 dark:border-emerald-800">
+            <span className="text-xs font-mono font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 px-3 py-1 rounded-[var(--radius-full)] border border-emerald-300 dark:border-emerald-800">
               Total: {formatCurrency(totalRevenue)}
             </span>
           </CardHeader>
@@ -164,11 +164,11 @@ export function RoutePerformanceTab() {
                   contentStyle={chartTheme.tooltip}
                   formatter={(val: any) => [`₹${(Number(val) * 1000).toLocaleString("en-IN")}`, "Revenue"]}
                 />
-                <Bar dataKey="revenueK" fill="#0284C7" radius={[0, 6, 6, 0]}>
+                <Bar dataKey="revenueK" fill={isDark ? "#4fd8eb" : "#006874"} radius={[0, 8, 8, 0]}>
                   {top10RevenueRoutes.map((_, index) => (
                     <Cell
                       key={`rev-cell-${index}`}
-                      fill={index === 0 ? "#10B981" : index < 3 ? "#0284C7" : "#0EA5E9"}
+                      fill={index === 0 ? "#10b981" : index < 3 ? (isDark ? "#4fd8eb" : "#006874") : (isDark ? "#004f58" : "#4a6267")}
                     />
                   ))}
                 </Bar>
@@ -182,7 +182,7 @@ export function RoutePerformanceTab() {
           <CardHeader>
             <div>
               <CardTitle>
-                <RiPieChart2Line className="w-5 h-5 text-sky-600 dark:text-sky-400" />
+                <RiPieChart2Line className="w-5 h-5 text-[var(--color-primary)]" />
                 Route Traffic Share
               </CardTitle>
               <CardDescription>
@@ -244,9 +244,9 @@ export function RoutePerformanceTab() {
                 <YAxis stroke={chartTheme.text} fontSize={11} tickLine={false} />
                 <Tooltip contentStyle={chartTheme.tooltip} />
                 <Legend wrapperStyle={{ fontSize: "12px", paddingTop: "4px" }} />
-                <Bar dataKey="Confirmed" stackId="a" fill="#10B981" />
-                <Bar dataKey="Cancelled" stackId="a" fill="#F43F5E" />
-                <Bar dataKey="Pending" stackId="a" fill="#F59E0B" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="Confirmed" stackId="a" fill="#10b981" />
+                <Bar dataKey="Cancelled" stackId="a" fill={isDark ? "#ffb4ab" : "#ba1a1a"} />
+                <Bar dataKey="Pending" stackId="a" fill="#f59e0b" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -257,7 +257,7 @@ export function RoutePerformanceTab() {
           <CardHeader>
             <div>
               <CardTitle>
-                <RiUserFollowLine className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                <RiUserFollowLine className="w-5 h-5 text-[var(--color-tertiary)]" />
                 Passenger Age Band Demographics (Top 5 Routes)
               </CardTitle>
               <CardDescription>
@@ -296,9 +296,9 @@ export function RoutePerformanceTab() {
           </div>
         </CardHeader>
 
-        <div className="overflow-x-auto max-h-80 overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-800">
+        <div className="overflow-x-auto max-h-80 overflow-y-auto rounded-[var(--radius-lg)] border border-[var(--color-surface-variant)]">
           <table className="w-full text-left text-xs border-collapse font-mono">
-            <thead className="sticky top-0 bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 uppercase tracking-wider font-bold">
+            <thead className="sticky top-0 bg-[var(--color-surface-variant)] border-b border-[var(--color-outline)]/20 text-[var(--color-on-surface)] uppercase tracking-wider font-bold">
               <tr>
                 <th className="py-3 px-4">#</th>
                 <th className="py-3 px-4">Route</th>
@@ -309,23 +309,23 @@ export function RoutePerformanceTab() {
                 <th className="py-3 px-4">Yield Weight</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+            <tbody className="divide-y divide-[var(--color-surface-variant)]">
               {top10RevenueRoutes.map((r, i) => {
                 const pct = (r.totalRevenue / maxRevenueVal) * 100;
                 return (
-                  <tr key={i} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors">
-                    <td className="py-3 px-4 text-slate-400">{i + 1}</td>
-                    <td className="py-3 px-4 font-bold text-sky-700 dark:text-sky-300">{r.name}</td>
-                    <td className="py-3 px-4 font-sans text-slate-900 dark:text-slate-100 font-medium">{r.fullName}</td>
-                    <td className="py-3 px-4 text-right text-slate-700 dark:text-slate-300">{r.transactions}</td>
+                  <tr key={i} className="hover:bg-[var(--color-surface-variant)]/40 transition-colors">
+                    <td className="py-3 px-4 text-[var(--color-on-surface-variant)]">{i + 1}</td>
+                    <td className="py-3 px-4 font-bold text-[var(--color-primary)]">{r.name}</td>
+                    <td className="py-3 px-4 font-sans text-[var(--color-on-surface)] font-medium">{r.fullName}</td>
+                    <td className="py-3 px-4 text-right text-[var(--color-on-surface-variant)]">{r.transactions}</td>
                     <td className="py-3 px-4 text-right font-bold text-emerald-600 dark:text-emerald-400">
                       {formatCurrency(r.totalRevenue)}
                     </td>
-                    <td className="py-3 px-4 text-right text-slate-700 dark:text-slate-300">
+                    <td className="py-3 px-4 text-right text-[var(--color-on-surface-variant)]">
                       {formatCurrency(r.avgFare)}
                     </td>
                     <td className="py-3 px-4 w-44">
-                      <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2.5 overflow-hidden">
+                      <div className="w-full bg-[var(--color-surface-variant)] rounded-full h-2.5 overflow-hidden">
                         <div
                           className="bg-emerald-500 h-2.5 rounded-full"
                           style={{ width: `${pct}%` }}

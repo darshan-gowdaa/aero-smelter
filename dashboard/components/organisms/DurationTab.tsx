@@ -88,15 +88,15 @@ export function DurationTab() {
   const maxHourlyFlights = Math.max(...hourlyData.map((d) => d.flights));
 
   const chartTheme = {
-    grid: isDark ? "#334155" : "#E2E8F0",
-    text: isDark ? "#94A3B8" : "#475569",
+    grid: isDark ? "#3f484a" : "#dbe4e6",
+    text: isDark ? "#bfc8ca" : "#3f484a",
     tooltip: {
-      backgroundColor: isDark ? "#0F172A" : "#FFFFFF",
-      borderColor: isDark ? "#334155" : "#CBD5E1",
-      borderRadius: "12px",
-      boxShadow: "0 4px 14px rgba(0, 0, 0, 0.1)",
+      backgroundColor: isDark ? "#191c1d" : "#fbfdfd",
+      borderColor: isDark ? "#3f484a" : "#dbe4e6",
+      borderRadius: "14px",
+      boxShadow: "0 4px 20px rgba(0, 0, 0, 0.1)",
       fontSize: "12px",
-      color: isDark ? "#F8FAFC" : "#0F172A",
+      color: isDark ? "#e1e3e3" : "#191c1d",
     },
   };
 
@@ -109,7 +109,7 @@ export function DurationTab() {
           <CardHeader>
             <div>
               <CardTitle>
-                <RiBarChartGroupedLine className="w-5 h-5 text-sky-600 dark:text-sky-400" />
+                <RiBarChartGroupedLine className="w-5 h-5 text-[var(--color-primary)]" />
                 Airline Duration Profile (Min / Avg / Max)
               </CardTitle>
               <CardDescription>
@@ -125,9 +125,9 @@ export function DurationTab() {
                 <YAxis stroke={chartTheme.text} fontSize={12} tickLine={false} unit="m" />
                 <Tooltip contentStyle={chartTheme.tooltip} />
                 <Legend wrapperStyle={{ fontSize: "12px", paddingTop: "8px" }} />
-                <Bar dataKey="Min" fill="#0284C7" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="Avg" fill="#38BDF8" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="Max" fill="#F43F5E" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="Min" fill={isDark ? "#4fd8eb" : "#006874"} radius={[6, 6, 0, 0]} />
+                <Bar dataKey="Avg" fill={isDark ? "#97f0ff" : "#4a6267"} radius={[6, 6, 0, 0]} />
+                <Bar dataKey="Max" fill={isDark ? "#ffb4ab" : "#ba1a1a"} radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -138,7 +138,7 @@ export function DurationTab() {
           <CardHeader>
             <div>
               <CardTitle>
-                <RiTimerLine className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                <RiTimerLine className="w-5 h-5 text-[var(--color-primary)]" />
                 Top 10 Routes by Average Flight Duration
               </CardTitle>
               <CardDescription>
@@ -165,11 +165,11 @@ export function DurationTab() {
                   tick={{ fill: chartTheme.text, fontFamily: "monospace", fontWeight: 700 }}
                 />
                 <Tooltip contentStyle={chartTheme.tooltip} formatter={(val: any) => [`${val} min`, "Avg Duration"]} />
-                <Bar dataKey="avgDuration" fill="#10B981" radius={[0, 6, 6, 0]}>
+                <Bar dataKey="avgDuration" fill={isDark ? "#4fd8eb" : "#006874"} radius={[0, 8, 8, 0]}>
                   {topRoutesByDuration.map((_, index) => (
                     <Cell
                       key={`cell-${index}`}
-                      fill={index === 0 ? "#F59E0B" : "#10B981"}
+                      fill={index === 0 ? "#f59e0b" : isDark ? "#4fd8eb" : "#006874"}
                     />
                   ))}
                 </Bar>
@@ -186,7 +186,7 @@ export function DurationTab() {
           <CardHeader>
             <div>
               <CardTitle>
-                <RiTimeLine className="w-5 h-5 text-sky-600 dark:text-sky-400" />
+                <RiTimeLine className="w-5 h-5 text-[var(--color-primary)]" />
                 24-Hour Flight Departure Traffic Pattern
               </CardTitle>
               <CardDescription>
@@ -201,15 +201,15 @@ export function DurationTab() {
                 <XAxis dataKey="hour" stroke={chartTheme.text} fontSize={11} tickLine={false} />
                 <YAxis stroke={chartTheme.text} fontSize={12} tickLine={false} />
                 <Tooltip contentStyle={chartTheme.tooltip} formatter={(val: any) => [`${val} flights`, "Volume"]} />
-                <Bar dataKey="flights" radius={[4, 4, 0, 0]}>
+                <Bar dataKey="flights" radius={[6, 6, 0, 0]}>
                   {hourlyData.map((entry, index) => {
                     const intensity = entry.flights / maxHourlyFlights;
                     const fill =
                       intensity > 0.85
-                        ? "#F59E0B"
+                        ? "#f59e0b"
                         : intensity > 0.5
-                        ? "#0284C7"
-                        : "#38BDF8";
+                        ? isDark ? "#4fd8eb" : "#006874"
+                        : isDark ? "#334b4f" : "#cde7ec";
                     return <Cell key={`cell-hour-${index}`} fill={fill} />;
                   })}
                 </Bar>
@@ -223,7 +223,7 @@ export function DurationTab() {
           <CardHeader>
             <div>
               <CardTitle>
-                <RiTimerLine className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                <RiTimerLine className="w-5 h-5 text-[var(--color-tertiary)]" />
                 Duration Frequency (Histogram)
               </CardTitle>
               <CardDescription>
@@ -238,7 +238,7 @@ export function DurationTab() {
                 <XAxis dataKey="range" stroke={chartTheme.text} fontSize={10} tickLine={false} angle={-25} textAnchor="end" height={40} />
                 <YAxis stroke={chartTheme.text} fontSize={11} tickLine={false} />
                 <Tooltip contentStyle={chartTheme.tooltip} />
-                <Bar dataKey="flights" fill="#8B5CF6" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="flights" fill={isDark ? "#bbc6ea" : "#525e7d"} radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -250,7 +250,7 @@ export function DurationTab() {
         <CardHeader>
           <div>
             <CardTitle>
-              <RiTableLine className="w-5 h-5 text-sky-600 dark:text-sky-400" />
+              <RiTableLine className="w-5 h-5 text-[var(--color-primary)]" />
               Comprehensive Route Flight Duration Master (All 30 Routes)
             </CardTitle>
             <CardDescription>
@@ -264,9 +264,9 @@ export function DurationTab() {
           />
         </CardHeader>
 
-        <div className="overflow-x-auto max-h-96 overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-800">
+        <div className="overflow-x-auto max-h-96 overflow-y-auto rounded-[var(--radius-lg)] border border-[var(--color-surface-variant)]">
           <table className="w-full text-left text-xs border-collapse">
-            <thead className="sticky top-0 bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 uppercase tracking-wider font-bold">
+            <thead className="sticky top-0 bg-[var(--color-surface-variant)] border-b border-[var(--color-outline)]/20 text-[var(--color-on-surface)] uppercase tracking-wider font-bold">
               <tr>
                 <th className="py-3.5 px-4">Route</th>
                 <th className="py-3.5 px-4 font-sans">Full Route Name</th>
@@ -277,27 +277,27 @@ export function DurationTab() {
                 <th className="py-3.5 px-4 text-right">Spread</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-mono">
+            <tbody className="divide-y divide-[var(--color-surface-variant)] font-mono">
               {filteredRoutes.map((r, i) => {
                 const spread = r.max_duration_min - r.min_duration_min;
                 return (
-                  <tr key={i} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors">
-                    <td className="py-3 px-4 font-bold text-sky-700 dark:text-sky-300">{r.route_name}</td>
-                    <td className="py-3 px-4 font-sans font-medium text-slate-900 dark:text-slate-100">{r.route_full_name}</td>
-                    <td className="py-3 px-4 text-right text-slate-700 dark:text-slate-300">{r.flight_count}</td>
+                  <tr key={i} className="hover:bg-[var(--color-surface-variant)]/40 transition-colors">
+                    <td className="py-3 px-4 font-bold text-[var(--color-primary)]">{r.route_name}</td>
+                    <td className="py-3 px-4 font-sans font-medium text-[var(--color-on-surface)]">{r.route_full_name}</td>
+                    <td className="py-3 px-4 text-right text-[var(--color-on-surface-variant)]">{r.flight_count}</td>
                     <td className="py-3 px-4 text-right text-emerald-600 dark:text-emerald-400 font-bold">
                       {r.avg_duration_min.toFixed(1)} m
                     </td>
-                    <td className="py-3 px-4 text-right text-slate-600 dark:text-slate-400">{r.min_duration_min} m</td>
-                    <td className="py-3 px-4 text-right text-slate-600 dark:text-slate-400">{r.max_duration_min} m</td>
+                    <td className="py-3 px-4 text-right text-[var(--color-on-surface-variant)]">{r.min_duration_min} m</td>
+                    <td className="py-3 px-4 text-right text-[var(--color-on-surface-variant)]">{r.max_duration_min} m</td>
                     <td className="py-3 px-4 text-right">
                       <span
-                        className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
+                        className={`px-2.5 py-0.5 rounded-[var(--radius-full)] text-[11px] font-bold ${
                           spread > 150
-                            ? "bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300 border border-rose-200 dark:border-rose-800"
+                            ? "bg-[var(--color-error-container)] text-[var(--color-on-error-container)] border border-[var(--color-error)]/20"
                             : spread > 80
-                            ? "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border border-amber-200 dark:border-amber-800"
-                            : "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800"
+                            ? "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border border-amber-300"
+                            : "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300"
                         }`}
                       >
                         {spread} m
