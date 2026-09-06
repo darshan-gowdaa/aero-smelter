@@ -448,42 +448,56 @@ def build_documentation():
     doc.add_paragraph().paragraph_format.space_after = Pt(8)
 
     # 9. Power BI Dashboard Architecture
-    h9 = doc.add_heading("9. Power BI Dashboard Specification & Navigation Walkthrough", level=1)
+    h9 = doc.add_heading("9. Power BI Dashboard Specification & Visual Walkthrough", level=1)
     h9.runs[0].font.color.rgb = RGBColor(15, 23, 42)
 
     p_pbi = doc.add_paragraph(
-        "The Power BI dashboard was architected as a modular 4-page analytical application. Each page contains top-level KPI cards, "
-        "interactive slicers (Airline, Route, Date Range), and cross-filtering analytical visuals:"
+        "The Power BI report was architected as a production-grade 4-page analytical suite. Each page contains executive KPI cards, "
+        "interactive slicers (Airline, Route, Date Range), and cross-filtering analytical visuals. The dataset is exported in dual Parquet "
+        "and CSV formats (`data/powerbi/`) accompanied by a standardized Power BI template (`dashboard/ASG_Airlines_Report.pbit`) and "
+        "pre-calculated DAX measures (`data/powerbi/powerbi_dax_measures.dax`)."
     )
     p_pbi.runs[0].font.size = Pt(10)
 
-    pages = [
-        ("Page 1: Duration Analysis", [
-            "KPI Cards: Overall Avg Duration (164.6 min), Min Duration (30 min), Max Duration (300 min), Overnight Flight Count (1).",
+    # Embed 4 Dashboard Screenshots
+    dash_screens_dir = Path(__file__).resolve().parent.parent / "dashboard" / "screenshots"
+    pages_meta = [
+        ("page1_duration_analysis.png", "Figure 4: Power BI Page 1 — Flight Duration & Sector Analysis", [
+            "KPI Cards: Overall Avg Duration (164.6 min), Min Duration (30.0 min), Max Duration (300.0 min), Overnight Repaired (1).",
             "Slicers: Airline Name dropdown, Route Name multiselect, Flight Date slider.",
-            "Visuals: Horizontal bar chart comparing average flight duration by route; Line chart tracking daily duration trends; Bar chart comparing duration by airline carrier."
+            "Visuals: Top 8 Routes by Average Duration horizontal bar chart; Average Flight Duration by Airline carrier bar chart."
         ]),
-        ("Page 2: Route Performance", [
-            "KPI Cards: Total Active Routes (30), Total Bookings (1,000), Cancellation Rate (31.4%), Total Operational Revenue (INR 8.05M).",
+        ("page2_route_performance.png", "Figure 5: Power BI Page 2 — Route Traffic & Operational Revenue", [
+            "KPI Cards: Active Domestic Routes (30), Total Bookings (1,000), Cancellation Rate (31.40%), Total Operational Revenue (INR 8.05M).",
             "Slicers: Source City, Destination City, Route Name.",
-            "Visuals: Route Traffic Volume bar chart (Top 10 corridors); Route Revenue ranking; Stacked bar chart showing booking status breakdown (Confirmed, Cancelled, Pending) by route."
+            "Visuals: Top 8 Busiest Routes flight instance volume; Top 8 Revenue Corridors in INR."
         ]),
-        ("Page 3: Airline Trends", [
-            "KPI Cards: Total Flights (1,005), Leading Airline Market Share (26.8% IndiGo), Average Ticket Fare (INR 8,054), Revenue Captured.",
+        ("page3_airline_trends.png", "Figure 6: Power BI Page 3 — Airline Market Share & Payment Trends", [
+            "KPI Cards: Total Flights Operated (1,005), Leading Airline Market Share (26.77% IndiGo), Repaired Carriers (72), Top Payment Channel (UPI 35.8%).",
             "Slicers: Airline selector, Payment Method filter.",
-            "Visuals: Donut chart showing flight distribution by airline; Clustered bar chart of airline operational revenue; Payment method distribution (UPI 35.8%, Card 32.9%, NetBanking 31.3%)."
+            "Visuals: Flight Share distribution donut chart by carrier; Payment Channel distribution by transaction volume (UPI, Card, NetBanking)."
         ]),
-        ("Page 4: Delay & Anomaly Insights", [
-            "KPI Cards: Duration Outliers Detected (1), Repaired Overnight Flights (1), Repaired Airline Codes (72), Imputed Fares (78).",
+        ("page4_delay_anomaly_insights.png", "Figure 7: Power BI Page 4 — Delay, Anomaly & Quality Audit", [
+            "KPI Cards: Duration Outliers Detected (1), Negative Durations (0), Imputed Fare Values (78), Referential Integrity Loss (0.00%).",
             "Slicers: Outlier Severity, Anomaly Type, Time of Day.",
-            "Visuals: Hourly Departure Flight Volume histogram (identifying peak departure traffic bands); Statistical Outlier Flight details table with route mean and standard deviation comparison; Audit breakdown of imputed vs confirmed transaction records."
+            "Visuals: Diurnal Flight Traffic curve across 24-hour departure hours; Statistical Outlier Flight Audit table for Flight SJ192 with root cause analysis."
         ])
     ]
-    for page_title, page_items in pages:
-        doc.add_heading(page_title, level=2)
-        for item in page_items:
-            bp = doc.add_paragraph(item, style='List Bullet')
+
+    for img_filename, fig_caption, bullets in pages_meta:
+        img_p = dash_screens_dir / img_filename
+        if img_p.exists():
+            doc.add_picture(str(img_p), width=Inches(6.4))
+            p_cap = doc.add_paragraph(fig_caption)
+            p_cap.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            p_cap.runs[0].font.size = Pt(8.5)
+            p_cap.runs[0].font.italic = True
+            p_cap.runs[0].font.color.rgb = RGBColor(100, 116, 139)
+
+        for b in bullets:
+            bp = doc.add_paragraph(b, style='List Bullet')
             bp.runs[0].font.size = Pt(9.5)
+        doc.add_paragraph().paragraph_format.space_after = Pt(6)
 
     # 10. Verification & Reproducibility
     h10 = doc.add_heading("10. Pipeline Verification & Reproducibility Instructions", level=1)

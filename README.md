@@ -23,14 +23,14 @@ The pipeline implements the enterprise Medallion Architecture across Bronze, Sil
 [GOLD LAYER]    ──> Star Schema (Facts & Dimensions), Outlier Detection, KPI Aggregations
        │
        ▼
-[CONSUMPTION]   ──> Power BI Parquet/CSV Exports, DAX Measures, 4-Page Interactive App
+[CONSUMPTION]   ──> Power BI Template (.pbit), Parquet/CSV Exports, DAX Measures, 4-Page App
 ```
 
 - **Bronze Layer (`data/bronze/`)**: Immutable raw ingestion snapshots in Parquet format, column existence checks, and quarantine logging.
 - **Silver Layer (`data/silver/`)**: Standardized timestamps (ISO 8601), repaired airline prefixes (`6F`/`6E`, `AI`, `SJ`, `UK`), overnight duration fixes, passenger deduplication with completeness scoring, and PII masking.
 - **Secure PII Vault (`data/secure/`)**: Restricted storage separating raw legal identifiers (Aadhaar, passport, phone) from the analytical warehouse.
 - **Gold Layer (`data/gold/`)**: Dimensional star schema (`fact_flights`, `fact_bookings`, `fact_payments`, `dim_airline`, `dim_route`, `dim_date`, `dim_passenger`) and precomputed KPI tables.
-- **Power BI Exports (`data/powerbi/`)**: Dual Parquet & CSV exports with production DAX measures (`powerbi_dax_measures.dax`).
+- **Power BI Exports (`data/powerbi/` & `dashboard/`)**: Dual Parquet & CSV exports, Power BI Template (`ASG_Airlines_Report.pbit`), production DAX measures (`powerbi_dax_measures.dax`), and 4-page interactive web application (`dashboard/index.html`).
 
 ---
 
@@ -107,61 +107,87 @@ The pipeline implements the enterprise Medallion Architecture across Bronze, Sil
 
 ---
 
-## 5. Deliverables & Repository Structure
+## 5. Power BI 4-Page Dashboard Suite
+
+The Power BI report is organized into 4 focused operational sections. High-resolution captures are located in `dashboard/screenshots/` and embedded in the Word documentation:
+
+1. **Page 1: Duration Analysis**: KPI Cards (Avg, Min, Max Duration, Overnight Count), Route duration horizontal rankings, and airline comparison.
+2. **Page 2: Route Performance**: Active route metrics, top traffic volume corridors, gross revenue by route, and booking cancellation rates.
+3. **Page 3: Airline Trends**: Market share donut chart, flight volume by operator, and payment channel distribution.
+4. **Page 4: Delay & Anomaly Insights**: Diurnal hourly departure distribution, statistical outlier audit table for Flight SJ192, and imputation tracking.
+
+---
+
+## 6. Deliverables & Repository Structure
 
 ```
 NeoStats/
-├── pipeline/                         # Modular data engineering pipeline package
+├── ASG_Airlines_Pipeline_Walkthrough.ipynb   # Executed Jupyter Notebook walkthrough
+├── pipeline/                                 # Modular data engineering pipeline package
 │   ├── __init__.py
-│   ├── config.py                     # Centralized paths, regexes, and constants
-│   ├── logger.py                     # Structured pipeline logger with audit counts
-│   ├── ingestion.py                  # Bronze raw ingestion and schema validation
-│   ├── cleaning.py                   # Silver cleaning, overnight fix, PII masking
-│   ├── modeling.py                   # Gold dimensional modeling (star schema)
-│   ├── kpis.py                       # Business KPI aggregations and anomaly metrics
-│   ├── export_powerbi.py             # Export to Parquet, CSV, and DAX definitions
-│   └── run_pipeline.py               # Master end-to-end pipeline execution script
+│   ├── config.py                             # Centralized paths, regexes, and constants
+│   ├── logger.py                             # Structured pipeline logger with audit counts
+│   ├── ingestion.py                          # Bronze raw ingestion and schema validation
+│   ├── cleaning.py                           # Silver cleaning, overnight fix, PII masking
+│   ├── modeling.py                           # Gold dimensional modeling (star schema)
+│   ├── kpis.py                               # Business KPI aggregations and anomaly metrics
+│   ├── export_powerbi.py                     # Export to Parquet, CSV, and DAX definitions
+│   └── run_pipeline.py                       # Master end-to-end pipeline execution script
+├── tests/                                    # Automated unit test suite
+│   ├── __init__.py
+│   └── test_pipeline.py                      # 6 automated assertions covering quality & integrity
 ├── data/
-│   ├── bronze/                       # Raw immutable snapshots & quarantine logs
-│   ├── silver/                       # Cleaned silver tables
-│   ├── gold/                         # Star schema facts, dimensions & KPI datasets
-│   ├── secure/                       # Access-restricted PII mapping vault
-│   └── powerbi/                      # Parquet & CSV files ready for Power BI + DAX
-├── dashboard/                        # Interactive 4-Page Power BI Dashboard Web Suite
-│   ├── index.html                    # Responsive dashboard (Duration, Routes, Airlines, Anomalies)
-│   └── data.js                       # Precompiled Gold layer data payload
+│   ├── bronze/                               # Raw immutable snapshots & quarantine logs
+│   ├── silver/                               # Cleaned silver tables
+│   ├── gold/                                 # Star schema facts, dimensions & KPI datasets
+│   ├── secure/                               # Access-restricted PII mapping vault
+│   └── powerbi/                              # Parquet & CSV files ready for Power BI + DAX
+├── dashboard/                                # Power BI Assets & Interactive Web Suite
+│   ├── ASG_Airlines_Report.pbit              # Power BI Template file
+│   ├── index.html                            # Responsive 4-page dashboard web app
+│   ├── data.js                               # Precompiled Gold layer data payload
+│   └── screenshots/                          # High-res 300 DPI Power BI page screenshots
+│       ├── page1_duration_analysis.png
+│       ├── page2_route_performance.png
+│       ├── page3_airline_trends.png
+│       └── page4_delay_anomaly_insights.png
 ├── reports/
-│   ├── ASG_Airlines_Pipeline_Documentation.docx  # Comprehensive technical Word document (965 KB)
-│   └── assets/                       # High-res 300 DPI architecture and ERD diagrams
+│   ├── ASG_Airlines_Pipeline_Documentation.docx  # Comprehensive technical Word document (2.03 MB)
+│   └── assets/                               # High-res 300 DPI architecture and ERD diagrams
 │       ├── architecture_diagram.png
 │       ├── star_schema_model.png
 │       └── data_flow_diagram.png
 ├── scripts/
-│   ├── generate_diagrams.py          # Script generating publication-quality diagrams
-│   └── generate_docs.py              # Script compiling Word documentation
-└── README.md                         # Project documentation and portfolio walkthrough
+│   ├── generate_diagrams.py                  # Script generating publication-quality diagrams
+│   ├── generate_docs.py                      # Script compiling Word documentation
+│   ├── generate_dashboard_screenshots.py     # Script rendering Power BI page screenshots
+│   ├── generate_pbit.py                      # Script generating .pbit Power BI template
+│   └── generate_notebook.py                  # Script assembling executed Jupyter Notebook
+└── README.md                                 # Project documentation and portfolio walkthrough
 ```
 
 ---
 
-## 6. Quickstart & Execution
+## 7. Quickstart & Verification
 
-### Prerequisites
-- Python 3.10+
-- Dependencies: `pip install pandas openpyxl python-docx pyarrow matplotlib seaborn`
-
-### Run the Pipeline
-Execute the master pipeline from the project root:
+### Run End-to-End Pipeline
 ```bash
 python pipeline/run_pipeline.py
 ```
-*Execution takes ~0.9 seconds and outputs complete logs in `pipeline_execution.log`.*
 
-### Generate Diagrams & Technical Documentation
+### Run Automated Quality Test Suite
+```bash
+python -m unittest discover tests
+```
+
+### Generate Documentation & Templates
 ```bash
 python scripts/generate_diagrams.py
+python scripts/generate_dashboard_screenshots.py
+python scripts/generate_pbit.py
 python scripts/generate_docs.py
+python scripts/generate_notebook.py
 ```
 
 ### Launch Interactive Power BI Dashboard
-Open `dashboard/index.html` in any modern web browser (Edge, Chrome, Firefox) to navigate all 4 interactive pages with live slicers and charts.
+Open `dashboard/index.html` in any browser (Chrome, Edge, Firefox) to explore all 4 live pages with interactive slicers and charts.
