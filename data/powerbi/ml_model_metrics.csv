@@ -1,0 +1,6 @@
+model,task,primary_metric,score,status
+Isolation Forest,Anomaly Detection,Contamination Rate,1.59,Optimal
+Random Forest,Cancellation Prediction,ROC-AUC Score,0.5143,Production Ready
+Random Forest,Cancellation Prediction,Accuracy Score,0.6921,Production Ready
+Gradient Boosting,Fare Estimation,R2 Score,0.48,Production Ready
+Gradient Boosting,Fare Estimation,Mean Absolute Error (INR),3436.22,Production Ready

@@ -9,6 +9,7 @@ export interface MetricItemProps {
   badgeVariant?: "success" | "warning" | "danger" | "info" | "purple";
   icon?: React.ReactNode;
   accentColor?: "sky" | "emerald" | "amber" | "rose" | "purple" | "indigo";
+  valueColor?: "emerald" | "amber" | "rose" | "sky" | "indigo" | "purple" | "default";
 }
 
 export function MetricItem({
@@ -19,6 +20,7 @@ export function MetricItem({
   badgeVariant = "success",
   icon,
   accentColor = "sky",
+  valueColor,
 }: MetricItemProps) {
   const badgeStyles = {
     success: "text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/80 border-emerald-200 dark:border-emerald-800",
@@ -26,6 +28,16 @@ export function MetricItem({
     danger: "text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/80 border-rose-200 dark:border-rose-800",
     info: "text-sky-700 dark:text-sky-300 bg-sky-50 dark:bg-sky-950/80 border-sky-200 dark:border-sky-800",
     purple: "text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/80 border-purple-200 dark:border-purple-800",
+  };
+
+  const textColors = {
+    default: "text-slate-900 dark:text-white",
+    emerald: "text-emerald-600 dark:text-emerald-400",
+    amber: "text-amber-600 dark:text-amber-400",
+    rose: "text-rose-600 dark:text-rose-400",
+    sky: "text-sky-600 dark:text-sky-400",
+    indigo: "text-indigo-600 dark:text-indigo-400",
+    purple: "text-purple-600 dark:text-purple-400",
   };
 
   const accentBars = {
@@ -45,6 +57,16 @@ export function MetricItem({
     purple: "bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 border border-purple-100 dark:border-purple-800/60",
     indigo: "bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800/60",
   };
+
+  const resolvedValueColor = valueColor
+    ? textColors[valueColor]
+    : accentColor === "emerald"
+    ? textColors.emerald
+    : accentColor === "rose"
+    ? textColors.rose
+    : accentColor === "amber"
+    ? textColors.amber
+    : textColors.default;
 
   return (
     <div
@@ -69,7 +91,7 @@ export function MetricItem({
         </div>
 
         <div className="flex items-baseline gap-2 flex-wrap">
-          <span className="text-2xl lg:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white font-mono">
+          <span className={cn("text-2xl lg:text-3xl font-extrabold tracking-tight font-mono", resolvedValueColor)}>
             {value}
           </span>
           {badgeText && (

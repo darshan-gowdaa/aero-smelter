@@ -100,5 +100,24 @@ class TestASGAirlinesPipeline(unittest.TestCase):
         route_traffic = pd.read_parquet(self.gold_dir / "kpi_route_traffic.parquet")
         self.assertEqual(len(route_traffic), 30, "Route traffic should cover 30 distinct route pairs")
 
+    def test_07_ml_models_gold_tables(self):
+        # Test that all 4 ML output tables exist in Gold layer
+        anomalies = pd.read_parquet(self.gold_dir / "ml_anomaly_scores.parquet")
+        self.assertGreater(len(anomalies), 1000)
+        self.assertIn("ml_anomaly_score", anomalies.columns)
+        self.assertIn("ml_is_anomaly", anomalies.columns)
+
+        predictions = pd.read_parquet(self.gold_dir / "ml_cancellation_predictions.parquet")
+        self.assertGreater(len(predictions), 1000)
+        self.assertIn("cancellation_risk_score", predictions.columns)
+        self.assertIn("risk_tier", predictions.columns)
+
+        features = pd.read_parquet(self.gold_dir / "ml_feature_importances.parquet")
+        self.assertGreater(len(features), 0)
+
+        metrics = pd.read_parquet(self.gold_dir / "ml_model_metrics.parquet")
+        self.assertGreater(len(metrics), 0)
+
 if __name__ == "__main__":
     unittest.main()
+

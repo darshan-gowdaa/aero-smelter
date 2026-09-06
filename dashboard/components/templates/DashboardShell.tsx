@@ -9,15 +9,17 @@ import { RoutePerformanceTab } from "@/components/organisms/RoutePerformanceTab"
 import { AirlineTrendsTab } from "@/components/organisms/AirlineTrendsTab";
 import { DelayAnomalyTab } from "@/components/organisms/DelayAnomalyTab";
 import { DataQualityTab } from "@/components/organisms/DataQualityTab";
+import { AiCopilotTab } from "@/components/organisms/AiCopilotTab";
 import {
   RiTimerLine,
   RiRouteLine,
   RiFlightLandLine,
   RiAlertLine,
   RiShieldCheckLine,
+  RiSparkling2Fill,
 } from "@remixicon/react";
 
-type TabId = "duration" | "routes" | "airlines" | "anomalies" | "quality";
+type TabId = "duration" | "copilot" | "routes" | "airlines" | "anomalies" | "quality";
 
 export function DashboardShell() {
   const [activeTab, setActiveTab] = useState<TabId>("duration");
@@ -27,6 +29,12 @@ export function DashboardShell() {
       id: "duration" as TabId,
       label: "Duration Analysis",
       icon: <RiTimerLine className="w-4 h-4" />,
+    },
+    {
+      id: "copilot" as TabId,
+      label: "AI Copilot & ML",
+      icon: <RiSparkling2Fill className="w-4 h-4 text-amber-500" />,
+      badgeCount: 3,
     },
     {
       id: "routes" as TabId,
@@ -78,6 +86,7 @@ export function DashboardShell() {
         {/* Tab Content Panels (Organisms) */}
         <div className="pt-2">
           {activeTab === "duration" && <DurationTab />}
+          {activeTab === "copilot" && <AiCopilotTab />}
           {activeTab === "routes" && <RoutePerformanceTab />}
           {activeTab === "airlines" && <AirlineTrendsTab />}
           {activeTab === "anomalies" && <DelayAnomalyTab />}
@@ -97,7 +106,7 @@ export function DashboardShell() {
           </div>
 
           <div className="flex items-center gap-4 font-mono font-semibold">
-            <span className="text-emerald-600 dark:text-emerald-400">6/6 Tests Passing</span>
+            <span className="text-emerald-600 dark:text-emerald-400">7/7 Tests Passing</span>
             <span>•</span>
             <span className="text-sky-600 dark:text-sky-400">100% Referential Integrity</span>
             <span>•</span>

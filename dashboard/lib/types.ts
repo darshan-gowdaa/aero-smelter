@@ -1,4 +1,4 @@
-// TypeScript interfaces for ASG Airlines Flight Operations Analytics
+// TypeScript interfaces for ASG Airlines Flight Operations & MLOps Analytics
 
 export interface DimAirline {
   airline_key: number;
@@ -151,6 +151,45 @@ export interface FactPaymentItem {
   is_amount_imputed: number;
 }
 
+export interface MlAnomalyScore {
+  flight_id: string;
+  airline_code: string;
+  airline_name: string;
+  route_name: string;
+  departure_time: string;
+  arrival_time: string;
+  duration_minutes: number;
+  route_mean_duration: number;
+  ml_is_anomaly: number;
+  ml_anomaly_score: number;
+}
+
+export interface MlCancellationPrediction {
+  booking_id: string;
+  flight_id: string;
+  airline_code: string;
+  route_name: string;
+  payment_method: string;
+  amount_clean: number;
+  is_cancelled: number;
+  cancellation_risk_score: number;
+  risk_tier: string;
+}
+
+export interface MlFeatureImportance {
+  feature: string;
+  importance: number;
+  percentage: number;
+}
+
+export interface MlModelMetric {
+  model: string;
+  task: string;
+  primary_metric: string;
+  score: number;
+  status: string;
+}
+
 export interface AsgDataset {
   kpi_overall_summary: KpiOverallSummary[];
   kpi_airline_distribution: KpiAirlineDistribution[];
@@ -168,4 +207,8 @@ export interface AsgDataset {
   fact_flights: FactFlightItem[];
   fact_bookings: FactBookingItem[];
   fact_payments: FactPaymentItem[];
+  ml_anomaly_scores: MlAnomalyScore[];
+  ml_cancellation_predictions: MlCancellationPrediction[];
+  ml_feature_importances: MlFeatureImportance[];
+  ml_model_metrics: MlModelMetric[];
 }

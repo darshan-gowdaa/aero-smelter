@@ -1,6 +1,7 @@
 import sys
 import time
 from pathlib import Path
+import pandas as pd
 
 # Add project root to Python path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -73,15 +74,32 @@ def run_full_pipeline():
     kpi_results = kpi_calc.compute_all_kpis(gold_tables)
 
     # ==========================================
-    # STAGE 5: POWER BI EXPORT
+    # STAGE 5: MACHINE LEARNING & PREDICTIVE MLOPS
+    # ==========================================
+    from pipeline.ml_models import FlightMLPipeline
+    logger.info("--- Training ML Models (Anomaly Detection, Cancellation, Pricing) ---")
+    ml_pipe = FlightMLPipeline()
+    ml_results = ml_pipe.run_all()
+
+    # ==========================================
+    # STAGE 6: POWER BI & CONSUMPTION EXPORT
     # ==========================================
     exporter = PowerBIExporter(logger=logger)
     logger.info("--- Exporting Datasets & DAX for Power BI ---")
     exporter.export_tables(gold_tables)
     exporter.export_tables(kpi_results)
 
+    # Also export ML tables
+    ml_tables = {
+        "ml_anomaly_scores": pd.read_parquet(BASE_DIR / "data" / "gold" / "ml_anomaly_scores.parquet"),
+        "ml_cancellation_predictions": pd.read_parquet(BASE_DIR / "data" / "gold" / "ml_cancellation_predictions.parquet"),
+        "ml_feature_importances": pd.read_parquet(BASE_DIR / "data" / "gold" / "ml_feature_importances.parquet"),
+        "ml_model_metrics": pd.read_parquet(BASE_DIR / "data" / "gold" / "ml_model_metrics.parquet"),
+    }
+    exporter.export_tables(ml_tables)
+
     elapsed = round(time.time() - start_time, 2)
-    logger.info(f"ASG Airlines Pipeline completed successfully in {elapsed} seconds.")
+    logger.info(f"ASG Airlines Pipeline with ML completed successfully in {elapsed} seconds.")
     logger.print_audit_summary()
 
     return {
