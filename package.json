@@ -2,6 +2,7 @@
   "name": "aero-smelter",
   "version": "1.0.0",
   "description": "AeroSmelter: Aviation Medallion Lakehouse & Predictive Analytics Platform",
+  "author": "Darshan-gowdaa (https://github.com/darshan-gowdaa)",
   "private": true,
   "scripts": {
     "pipeline": "python pipeline/run_pipeline.py",

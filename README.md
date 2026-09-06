@@ -5,7 +5,7 @@
 [![Architecture](https://img.shields.io/badge/Architecture-Medallion%20Lakehouse-blue?style=for-the-badge&logo=databricks)](https://github.com/darshan-gowdaa/aero-smelter)
 [![Azure Ready](https://img.shields.io/badge/Cloud-Azure%20ADF%20%7C%20Databricks%20%7C%20Synapse-0078D4?style=for-the-badge&logo=microsoft-azure)](azure/)
 [![Tests Passing](https://img.shields.io/badge/CI%2FCD%20Tests-8%2F8%20Passing-brightgreen?style=for-the-badge&logo=pytest)](tests/test_pipeline.py)
-[![License](https://img.shields.io/badge/Compliance-India%20DPDP%20Act%20(Zero--Trust%20PII)-purple?style=for-the-badge&logo=shield)](data/secure/)
+[![License](https://img.shields.io/badge/Compliance-India%20DPDP%20Act%20(Zero--Trust%20PII)-purple?style=for-the-badge&logo=shield)](pipeline/cleaning.py)
 
 > **Live Web Application**: [https://aero-smelter.vercel.app](https://aero-smelter.vercel.app)  
 > **Source Case Study Specification**: [`docs/specifications/Airlines_Pipeline_Requirements_Specification.docx`](docs/specifications/Airlines_Pipeline_Requirements_Specification.docx)  
@@ -386,22 +386,22 @@ AeroSmelter provides two production consumption interfaces: an official 4-chapte
 ### Chapter 1: Duration Analysis
 *Fleet duration distributions, airline min/avg/max duration profiles, hourly schedule traffic, and full route duration catalog.*
 
-![Page 1: Duration Analysis](dashboard/screenshots/page1_duration_analysis.png)
+![Page 1: Duration Analysis](dashboard/screenshots/page1_duration_analysis.png?raw=true&v=2)
 
 ### Chapter 2: Route Performance & Revenue Matrix
 *Corridor traffic volume, top revenue routes, commercial load factors, and sector-level cancellation exposure.*
 
-![Page 2: Route Performance](dashboard/screenshots/page2_route_performance.png)
+![Page 2: Route Performance](dashboard/screenshots/page2_route_performance.png?raw=true&v=2)
 
 ### Chapter 3: Airline Fleet Trends & Passenger Demographics
 *Carrier flight shares, age cohort distributions across routes, payment method transaction shares, and passenger loyalty metrics.*
 
-![Page 3: Airline Trends](dashboard/screenshots/page3_airline_trends.png)
+![Page 3: Airline Trends](dashboard/screenshots/page3_airline_trends.png?raw=true&v=2)
 
 ### Chapter 4: Delay, Anomaly & PII Governance Watchdog
 *Isolation Forest anomaly score histograms, Random Forest cancellation drivers, overnight flight repair audit, and PII vault status.*
 
-![Page 4: Delay and Anomaly Insights](dashboard/screenshots/page4_delay_anomaly_insights.png)
+![Page 4: Delay and Anomaly Insights](dashboard/screenshots/page4_delay_anomaly_insights.png?raw=true&v=2)
 
 ---
 
@@ -453,11 +453,11 @@ aero-smelter/
 │   └── screenshots/                          # 300 DPI high-resolution Power BI dashboard captures
 ├── data/                                     # Medallion Lakehouse Storage Architecture
 │   ├── source/                               # Immutable raw source files (UseCase - Airlines.xlsx)
-│   ├── bronze/                               # Raw immutable Parquet snapshots & schema audit logs
-│   ├── silver/                               # Cleaned, standardized, and PII-masked Parquet tables
-│   ├── gold/                                 # Star schema facts, dimensions & precomputed analytical marts
-│   ├── secure/                               # Air-gapped salted SHA-256 PII cryptographic mapping vault
-│   └── powerbi/                              # Parquet & CSV exports, schema definitions & DAX measures
+│   ├── bronze/                               # Raw immutable Parquet snapshots (pipeline generated, gitignored)
+│   ├── silver/                               # Cleaned, standardized, PII-masked Parquet tables (generated, gitignored)
+│   ├── gold/                                 # Star schema facts, dimensions & KPI marts (generated, gitignored)
+│   ├── secure/                               # Air-gapped salted SHA-256 PII vault (zero-trust compliance, gitignored)
+│   └── powerbi/                              # Curated CSV & DAX exports, schema definitions & PBIX reports
 ├── docs/                                     # Project documentation, specifications & architecture
 │   └── specifications/                       # Case study requirements & client problem statements
 ├── logs/                                     # Execution logs & run traces (gitignored)
@@ -559,7 +559,7 @@ Open [http://localhost:3000](http://localhost:3000) to view the live dashboard.
 
 ## 14. License & Authorship
 
-- **Author**: Lead Data Engineer & Solutions Architect ([@darshan-gowdaa](https://github.com/darshan-gowdaa))
+- **Author**: [Darshan-gowdaa](https://github.com/darshan-gowdaa)
 - **Live Application**: [https://aero-smelter.vercel.app](https://aero-smelter.vercel.app)
 - **Repository**: [https://github.com/darshan-gowdaa/aero-smelter](https://github.com/darshan-gowdaa/aero-smelter)
 - **License**: MIT License. Open for academic and portfolio demonstration.

@@ -9,7 +9,7 @@ description = "Production Aviation Medallion Lakehouse & Predictive Analytics Pl
 readme = "README.md"
 requires-python = ">=3.10"
 authors = [
-    { name = "Data Engineering Team" }
+    { name = "Darshan-gowdaa", url = "https://github.com/darshan-gowdaa" }
 ]
 keywords = [
     "data-engineering",
