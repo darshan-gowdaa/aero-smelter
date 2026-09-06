@@ -38,11 +38,6 @@ import {
 export function AiCopilotTab() {
   const { isDark } = useTheme();
 
-  // Gemini API Key state with localStorage persistence
-  const [apiKey, setApiKey] = useState<string>("");
-  const [showKey, setShowKey] = useState<boolean>(false);
-  const [isSaved, setIsSaved] = useState<boolean>(false);
-
   // AI Prompt & Response State
   const [prompt, setPrompt] = useState<string>("");
   const [response, setResponse] = useState<string>(PRECOMPUTED_INSIGHTS.sj192);
@@ -52,42 +47,37 @@ export function AiCopilotTab() {
   const [apiError, setApiError] = useState<string | null>(null);
   const [copied, setCopied] = useState<boolean>(false);
 
-  // Table search & filter state
-  const [searchQuery, setSearchQuery] = useState<string>("");
-  const [filterMode, setFilterMode] = useState<"all" | "anomalies" | "highRisk">("anomalies");
+  // Gemini API Key & Security State
+  const [apiKey, setApiKey] = useState<string>("");
+  const [isSaved, setIsSaved] = useState<boolean>(false);
+  const [showKey, setShowKey] = useState<boolean>(false);
 
-  // Load saved key on client mount
+  // Flight Anomaly Table Filter & Search State
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [filterMode, setFilterMode] = useState<"all" | "anomalies" | "highRisk">("all");
+
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem("asg_gemini_key");
+    if (typeof window !== "undefined") {
+      const saved = sessionStorage.getItem("asg_gemini_key");
       if (saved) {
         setApiKey(saved);
         setIsSaved(true);
       }
-    } catch {
-      // Ignore localStorage restrictions
     }
   }, []);
 
   const handleSaveKey = () => {
-    if (apiKey.trim()) {
-      try {
-        localStorage.setItem("asg_gemini_key", apiKey.trim());
-        setIsSaved(true);
-        setApiError(null);
-      } catch {
-        // Ignore
-      }
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("asg_gemini_key", apiKey.trim());
+      setIsSaved(true);
     }
   };
 
   const handleClearKey = () => {
-    setApiKey("");
-    setIsSaved(false);
-    try {
-      localStorage.removeItem("asg_gemini_key");
-    } catch {
-      // Ignore
+    if (typeof window !== "undefined") {
+      sessionStorage.removeItem("asg_gemini_key");
+      setApiKey("");
+      setIsSaved(false);
     }
   };
 

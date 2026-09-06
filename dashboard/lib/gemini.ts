@@ -120,110 +120,35 @@ export const PRECOMPUTED_INSIGHTS: Record<string, string> = {
 - **Executive Recommendation**: [GREEN] Implement real-time departure calendar boundary validation at airport gates, deploy dynamic overbooking thresholds on DEL-BOM, and automate payment retries on Net Banking to capture pending revenue.`
 };
 
-// Calls Google Gemini API with strict grounding, 8192 token headroom, and full part extraction
-export async function callGeminiApi(userPrompt: string, apiKey: string): Promise<string> {
-  const cleanKey = apiKey.trim();
-  if (!cleanKey) {
-    throw new Error("Gemini API key is required. Enter your API key in the configuration bar.");
+// Calls server-side /api/copilot endpoint powered by GEMINI_API_KEY (.env / Vercel) or client-supplied key
+export async function callGeminiApi(userPrompt: string, apiKey?: string): Promise<string> {
+  const cleanPrompt = userPrompt.trim();
+  if (!cleanPrompt) {
+    throw new Error("Prompt is required.");
   }
 
-  const context = buildGroundedContext();
+  const response = await fetch("/api/copilot", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(apiKey?.trim() ? { "x-gemini-key": apiKey.trim() } : {}),
+    },
+    body: JSON.stringify({ prompt: cleanPrompt, apiKey: apiKey?.trim() }),
+  });
 
-  const systemInstruction = `You are the Lead Flight Operations & Business Intelligence Advisor for ASG Airlines.
-You provide clear, human-friendly, executive-ready operational insights to leadership, airline managers, and stakeholders.
+  const data = await response.json().catch(() => ({}));
 
-COMMUNICATION GUIDELINES:
-1. Speak in human-friendly, plain English. Avoid overly dense data engineering jargon (explain what numbers mean in practical flight and business terms).
-2. Ground your answers 100% in the verified flight, booking, and revenue figures provided. Never invent data.
-3. Structure answers cleanly with Markdown:
-   - NEVER start with conversational pleasantries like "Here is your executive assessment...". Begin IMMEDIATELY with the first section header: '### [COLOR] Section Title'.
-   - Use '### [COLOR] Header Title' for section titles, where [COLOR] is [RED], [YELLOW], or [GREEN].
-   - Use '- **Bold Topic**: explanation' for clear bullet points.
-   - Use '*italic*' for subtle operational context and \`code\` for flight IDs or airport codes.
-   - Tag high-risk issues, severe delays, or high cancellations with [RED].
-   - Tag operational notices, pending funds, or schedule adjustments with [YELLOW].
-   - Tag healthy financials, verified solutions, and successful operations with [GREEN].
-4. Always conclude with a dedicated section: '### [GREEN] Executive Recommendation & Action Plan' with 2-3 clear action items.
-5. Provide a complete, fully finished response. Do not stop midway.`;
-
-  const payload = {
-    contents: [
-      {
-        role: "user",
-        parts: [
-          {
-            text: `${systemInstruction}\n\n=== VERIFIED GROUND TRUTH DATA ===\n${context}\n\n=== EXECUTIVE QUESTION ===\n${userPrompt}\n\nBegin your comprehensive executive assessment now:`
-          }
-        ]
-      }
-    ],
-    generationConfig: {
-      temperature: 0.2,
-      maxOutputTokens: 8192,
-    }
-  };
-
-  // Try gemini-2.5-flash with latency config, fallback to standard gemini-2.5-flash, then gemini-1.5-flash
-  const modelAttempts = [
-    { name: "gemini-2.5-flash", disableThinking: true },
-    { name: "gemini-2.5-flash", disableThinking: false },
-    { name: "gemini-1.5-flash", disableThinking: false },
-  ];
-  let lastError: Error | null = null;
-
-  for (const item of modelAttempts) {
-    try {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${item.name}:generateContent?key=${cleanKey}`;
-      
-      const requestPayload: any = {
-        ...payload,
-        generationConfig: {
-          ...payload.generationConfig,
-          ...(item.disableThinking ? { thinkingConfig: { thinkingBudget: 0 } } : {})
-        }
-      };
-
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(requestPayload),
-      });
-
-      if (!response.ok) {
-        const errJson = await response.json().catch(() => ({}));
-        const errMsg = errJson?.error?.message || `HTTP ${response.status}: ${response.statusText}`;
-        // If thinkingConfig is rejected as unknown field, try next attempt
-        if (errMsg.includes("thinkingConfig") || errMsg.includes("unknown field")) {
-          continue;
-        }
-        throw new Error(`Gemini API Error (${item.name}): ${errMsg}`);
-      }
-
-      const resData = await response.json();
-      const candidate = resData?.candidates?.[0];
-      const parts = candidate?.content?.parts || [];
-      
-      // Filter out thought chunks and concatenate all text parts
-      const textParts = parts
-        .filter((p: any) => typeof p.text === "string" && !p.thought)
-        .map((p: any) => p.text)
-        .join("")
-        .trim();
-
-      if (!textParts) {
-        throw new Error("No text content returned by Gemini API.");
-      }
-
-      return textParts;
-    } catch (err: any) {
-      lastError = err;
-      if (err.message?.includes("API_KEY_INVALID") || err.message?.includes("403")) {
-        throw err;
-      }
-    }
+  if (!response.ok) {
+    const errorMsg = data?.error || `Server error (HTTP ${response.status})`;
+    const code = data?.code || "API_ERROR";
+    const err: any = new Error(errorMsg);
+    err.code = code;
+    throw err;
   }
 
-  throw lastError || new Error("Failed to contact Gemini API.");
+  if (!data?.text) {
+    throw new Error("No response text returned by server.");
+  }
+
+  return data.text;
 }
