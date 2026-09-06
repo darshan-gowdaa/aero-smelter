@@ -78,6 +78,7 @@ secrets/
 # Agent Skills & Workspace Cache
 .agents/
 .vercel/
-scripts/
 
-
+# Archives & Distribution Bundles
+*.zip
+*.tar.gz
