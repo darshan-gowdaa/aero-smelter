@@ -75,6 +75,15 @@ class FlightMLPipeline:
             "fare_metrics": fare_metrics,
         }
 
+    def train_and_evaluate(self, gold_tables=None):
+        self.run_all()
+        return {
+            "ml_anomaly_scores": pd.read_parquet(self.gold_dir / "ml_anomaly_scores.parquet"),
+            "ml_cancellation_predictions": pd.read_parquet(self.gold_dir / "ml_cancellation_predictions.parquet"),
+            "ml_feature_importances": pd.read_parquet(self.gold_dir / "ml_feature_importances.parquet"),
+            "ml_model_metrics": pd.read_parquet(self.gold_dir / "ml_model_metrics.parquet"),
+        }
+
     def train_isolation_forest(self, flights: pd.DataFrame, routes: pd.DataFrame, airlines: pd.DataFrame):
         logger.info("Training Isolation Forest on 1,005 flight instances...")
         df = flights.merge(routes[["route_key", "route_name"]], on="route_key", how="left")
@@ -188,6 +197,10 @@ class FlightMLPipeline:
         }).sort_values("importance", ascending=False)
 
         return {"mae": round(mae, 2), "r2_score": round(max(r2, 0.48), 4)}, importances_df
+
+
+# Alias for backwards compatibility
+MLPipeline = FlightMLPipeline
 
 
 if __name__ == "__main__":
